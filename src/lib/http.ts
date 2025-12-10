@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
-import { removeRefreshTokenCookie } from '@/lib/refresh-token-client'
+import { removeRefreshTokenCookie, persistRefreshTokenCookie } from '@/lib/refresh-token-client'
 import { getAccessToken, setAccessToken, useAuthStore } from '@/store/auth'
 
 export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -30,9 +30,27 @@ const processQueue = (token: string | null) => {
 export const refreshAccessToken = async () => {
   isRefreshing = true
   try {
-    const res = await refreshClient.post<{ data?: { accessToken: string } }>('/auth/refresh')
+    const res = await refreshClient.post<{
+      data?: { accessToken?: string; refreshToken?: string }
+    }>('/auth/refresh')
+
     const newToken = res.data?.data?.accessToken ?? null
+    const newRefreshToken = res.data?.data?.refreshToken ?? null
+
+    // store access token in memory
     setAccessToken(newToken ?? undefined)
+
+    // if backend returned a refresh token, persist it to cookie via client helper
+    if (newRefreshToken) {
+      // best-effort: don't block on failures
+      try {
+        await persistRefreshTokenCookie(newRefreshToken)
+      } catch (err) {
+        // ignore cookie persist errors; token in memory is available
+        console.warn('[http] failed to persist refresh token cookie', err)
+      }
+    }
+
     return newToken
   } catch (error) {
     setAccessToken(undefined)
@@ -53,7 +71,7 @@ http.interceptors.request.use((config) => {
       config.headers = {
         ...headers,
         Authorization: `Bearer ${token}`,
-      }
+      } as any
     }
   }
 
@@ -77,7 +95,7 @@ http.interceptors.response.use(
               originalRequest.headers = {
                 ...originalRequest.headers,
                 Authorization: `Bearer ${token}`,
-              }
+              } as any
               resolve(http(originalRequest))
             } else {
               reject(error)
@@ -93,7 +111,7 @@ http.interceptors.response.use(
         originalRequest.headers = {
           ...originalRequest.headers,
           Authorization: `Bearer ${newToken}`,
-        }
+        } as any
         return http(originalRequest)
       }
 

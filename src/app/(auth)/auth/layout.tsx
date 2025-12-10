@@ -1,7 +1,7 @@
 export default function AuthInnerLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-  return <section className="w-full">{children}</section>;
+  return <section className='w-full'>{children}</section>
 }

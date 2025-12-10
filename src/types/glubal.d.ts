@@ -1,10 +1,10 @@
 declare global {
   interface IBackendRes<T> {
-    statusCode: string;
-    message: string;
-    success: boolean;
-    data?: T;
+    statusCode: string
+    message: string
+    success: boolean
+    data?: T
   }
 }
 
-export type { IBackendRes };
+export type { IBackendRes }

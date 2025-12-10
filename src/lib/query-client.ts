@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { QueryClient, type QueryClientConfig } from "@tanstack/react-query";
+import { QueryClient, type QueryClientConfig } from '@tanstack/react-query'
 
 const queryConfig: QueryClientConfig = {
   defaultOptions: {
@@ -13,10 +13,10 @@ const queryConfig: QueryClientConfig = {
       retry: 0,
     },
   },
-};
-
-export function createQueryClient() {
-  return new QueryClient(queryConfig);
 }
 
-export type { QueryClientConfig };
+export function createQueryClient() {
+  return new QueryClient(queryConfig)
+}
+
+export type { QueryClientConfig }
