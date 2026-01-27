@@ -1,7 +1,13 @@
+import { GuestGuard } from '@/components/auth/guest-guard'
+
 export default function AuthLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-  return <div className="min-h-screen">{children}</div>;
+  return (
+    <GuestGuard>
+      <div className='min-h-screen'>{children}</div>
+    </GuestGuard>
+  )
 }
