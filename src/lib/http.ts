@@ -2,6 +2,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 import { removeRefreshTokenCookie, persistRefreshTokenCookie } from '@/lib/refresh-token-client'
 import { getAccessToken, setAccessToken, useAuthStore } from '@/store/auth'
+import { useLoadingStore } from '@/store/loading'
 
 export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -60,27 +61,41 @@ export const refreshAccessToken = async () => {
   }
 }
 
-http.interceptors.request.use((config) => {
-  const token = getAccessToken()
+http.interceptors.request.use(
+  (config) => {
+    // Start loading (except specifically ignored calls if needed, but for now apply all)
+    useLoadingStore.getState().startLoading()
 
-  if (token) {
-    const headers = config.headers ?? {}
-    if (typeof (headers as any).set === 'function') {
-      ;(headers as any).set('Authorization', `Bearer ${token}`)
-    } else {
-      config.headers = {
-        ...headers,
-        Authorization: `Bearer ${token}`,
-      } as any
+    const token = getAccessToken()
+
+    if (token) {
+      const headers = config.headers ?? {}
+      if (typeof (headers as any).set === 'function') {
+        ;(headers as any).set('Authorization', `Bearer ${token}`)
+      } else {
+        config.headers = {
+          ...headers,
+          Authorization: `Bearer ${token}`,
+        } as any
+      }
     }
-  }
 
-  return config
-})
+    return config
+  },
+  (error) => {
+    useLoadingStore.getState().stopLoading()
+    return Promise.reject(error)
+  },
+)
 
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    useLoadingStore.getState().stopLoading()
+    return response
+  },
   async (error: AxiosError) => {
+    useLoadingStore.getState().stopLoading()
+
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean
     }
