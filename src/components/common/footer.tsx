@@ -1,140 +1,119 @@
 import Link from 'next/link'
-import { Facebook, Github, Instagram, Linkedin } from 'lucide-react'
+import { Facebook, Github, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
 
 export function Footer() {
   return (
-    <footer className='bg-primary text-primary-foreground mt-auto'>
-      <div className='max-w-7xl mx-auto px-4 py-12'>
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-8'>
-          {/* Company Info */}
-          <div>
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='w-10 h-10 bg-white rounded flex items-center justify-center text-primary font-bold'>
-                AN
+    <footer className='bg-zinc-950 text-zinc-200 pt-16 pb-8 border-t border-zinc-800'>
+      <div className='container max-w-7xl mx-auto px-4'>
+        {/* Main Footer Content: 4 Columns */}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12'>
+          {/* Column 1: Brand */}
+          <div className='space-y-4'>
+            <Link href='/' className='flex items-center gap-2 mb-4'>
+              <div className='w-9 h-9 bg-white rounded-lg flex items-center justify-center text-zinc-950 font-bold text-sm'>
+                ZF
               </div>
-              <span className='font-bold text-lg'>ZYNA FASHION</span>
-            </div>
-
-            <p className='text-sm opacity-90 mb-4 leading-[1.8]'>
-              Nơi thời trang và phong cách gặp nhau. Chúng tôi mang đến những thiết kế mới nhất,
-              chất lượng cao và giá cả hợp lý dành cho mọi khách hàng yêu thích thời trang.
+              <span className='font-bold text-xl tracking-tight text-white'>ZYNA FASHION</span>
+            </Link>
+            <p className='text-sm text-zinc-400 leading-relaxed font-medium'>
+              Thương hiệu thời trang mang đến phong cách hiện đại và sự tự tin cho bạn.
             </p>
-
-            <div className='text-sm'>
-              <p className='font-semibold mb-1'>Hotline: 0902 123 456</p>
-              <p className='opacity-90'>Thủ Đức, TP. Hồ Chí Minh, Việt Nam</p>
-              <p className='opacity-90'>zyna.fashion@gmail.com</p>
+            <div className='flex items-center gap-4 pt-2'>
+              {[Facebook, Instagram, Github, Linkedin].map((Icon, i) => (
+                <Link
+                  key={i}
+                  href='#'
+                  className='w-9 h-9 flex items-center justify-center rounded-full bg-zinc-800 text-zinc-300 hover:bg-white hover:text-zinc-950 transition-all duration-300'
+                >
+                  <Icon className='h-5 w-5' />
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* Top Category */}
-          <div>
-            <h3 className='font-semibold mb-4'>DANH MỤC NỔI BẬT</h3>
-            <ul className='space-y-2 text-sm opacity-90'>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Thời trang nữ
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Thời trang nam
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Phụ kiện thời trang
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Giày & Túi xách
-                </Link>
-              </li>
+          {/* Column 2: Mua sắm */}
+          <div className='space-y-5'>
+            <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Mua sắm</h4>
+            <ul className='space-y-3 text-sm text-zinc-300'>
+              {[
+                'Thời trang nữ',
+                'Thời trang nam',
+                'Phụ kiện nổi bật',
+                'Sale Off',
+                'Bộ sưu tập mới',
+              ].map((item) => (
+                <li key={item}>
+                  <Link
+                    href='#'
+                    className='hover:text-white hover:translate-x-1 transition-all duration-200 inline-block font-medium'
+                  >
+                    {item}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className='font-semibold mb-4'>LIÊN KẾT NHANH</h3>
-            <ul className='space-y-2 text-sm opacity-90'>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Sản phẩm
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Giỏ hàng
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Yêu thích
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  So sánh sản phẩm
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Theo dõi đơn hàng
-                </Link>
-              </li>
+          {/* Column 3: Hỗ trợ */}
+          <div className='space-y-5'>
+            <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Hỗ trợ</h4>
+            <ul className='space-y-3 text-sm text-zinc-300'>
+              {[
+                'Hướng dẫn mua hàng',
+                'Chính sách đổi trả',
+                'Vận chuyển & Giao nhận',
+                'Bảo mật thông tin',
+                'Câu hỏi thường gặp',
+              ].map((item) => (
+                <li key={item}>
+                  <Link
+                    href='#'
+                    className='hover:text-white hover:translate-x-1 transition-all duration-200 inline-block font-medium'
+                  >
+                    {item}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Customer Support (REPLACEMENT FOR DOWNLOAD APP) */}
-          <div>
-            <h3 className='font-semibold mb-4'>HỖ TRỢ KHÁCH HÀNG</h3>
-            <p className='text-sm opacity-90 mb-4 leading-[1.8]'>
-              Đội ngũ CSKH của ZYNA FASHION luôn sẵn sàng hỗ trợ bạn 24/7 về mọi vấn đề mua hàng,
-              đổi trả và tư vấn sản phẩm.
-            </p>
-
-            <ul className='space-y-2 text-sm opacity-90'>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Hướng dẫn mua hàng
-                </Link>
+          {/* Column 4: Liên hệ */}
+          <div className='space-y-5'>
+            <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Liên hệ</h4>
+            <ul className='space-y-4 text-sm text-zinc-300 font-medium'>
+              <li className='flex items-start gap-3'>
+                <MapPin className='h-5 w-5 text-white shrink-0' />
+                <span>123 Đường Fashion, Quận 1, TP. Hồ Chí Minh</span>
               </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Chính sách đổi trả
-                </Link>
+              <li className='flex items-center gap-3'>
+                <Phone className='h-5 w-5 text-white shrink-0' />
+                <span>1900 1234 - (028) 3838 3838</span>
               </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Chính sách giao hàng
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Điều khoản & dịch vụ
-                </Link>
-              </li>
-              <li>
-                <Link href='#' className='hover:opacity-100 transition'>
-                  Câu hỏi thường gặp (FAQ)
-                </Link>
+              <li className='flex items-center gap-3'>
+                <Mail className='h-5 w-5 text-white shrink-0' />
+                <span>support@zynafashion.com</span>
               </li>
             </ul>
-
-            {/* Socials */}
-            <div className='flex items-center gap-4 mt-6 text-sm opacity-90'>
-              <Facebook className='w-5 h-5 cursor-pointer hover:opacity-100' />
-              <Github className='w-5 h-5 cursor-pointer hover:opacity-100' />
-              <Instagram className='w-5 h-5 cursor-pointer hover:opacity-100' />
-              <Linkedin className='w-5 h-5 cursor-pointer hover:opacity-100' />
-            </div>
           </div>
         </div>
 
-        {/* Bottom Footer */}
-        <div className='border-t border-white/10 pt-6 text-center text-sm opacity-90'>
-          <p>&copy; 2025 ZYNA FASHION. Tất cả quyền được bảo lưu.</p>
+        <Separator className='mb-8 bg-zinc-800' />
+
+        {/* Bottom */}
+        <div className='flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-400 font-medium'>
+          <p>© 2026 ZYNA FASHION. All rights reserved.</p>
+          <div className='flex gap-6'>
+            <Link href='#' className='hover:text-white transition-colors'>
+              Điều khoản
+            </Link>
+            <Link href='#' className='hover:text-white transition-colors'>
+              Bảo mật
+            </Link>
+            <Link href='#' className='hover:text-white transition-colors'>
+              Cookie
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

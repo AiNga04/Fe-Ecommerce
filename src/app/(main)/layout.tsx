@@ -8,10 +8,12 @@ export default function MainLayout({
   children: React.ReactNode
 }>) {
   return (
-    <main className='min-h-screen'>
+    <div className='flex min-h-screen flex-col'>
       <Header />
-      <AuthGuard>{children}</AuthGuard>
+      <main className='flex-1'>
+        <AuthGuard>{children}</AuthGuard>
+      </main>
       <Footer />
-    </main>
+    </div>
   )
 }
