@@ -1,4 +1,6 @@
 import { AuthGuard } from '@/components/auth/auth-guard'
+import { Header } from '@/components/common/header'
+import { Footer } from '@/components/common/footer'
 
 export default function MainLayout({
   children,
@@ -7,7 +9,9 @@ export default function MainLayout({
 }>) {
   return (
     <main className='min-h-screen'>
+      <Header />
       <AuthGuard>{children}</AuthGuard>
+      <Footer />
     </main>
   )
 }
