@@ -119,8 +119,10 @@ export function Header() {
                 <Heart className='h-5 w-5' />
               </Button>
 
-              <Button variant='ghost' size='icon' className='hover:text-primary'>
-                <User className='h-5 w-5' />
+              <Button variant='ghost' size='icon' className='hover:text-primary' asChild>
+                <Link href='/profile'>
+                  <User className='h-5 w-5' />
+                </Link>
               </Button>
 
               <Button variant='ghost' size='icon' className='relative hover:text-primary'>
