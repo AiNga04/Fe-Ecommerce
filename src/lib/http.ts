@@ -23,12 +23,21 @@ const refreshClient = axios.create({
 let isRefreshing = false
 let pendingQueue: Array<(token: string | null) => void> = []
 
+let isLoggingOut = false
+
+export const setIsLoggingOut = (value: boolean) => {
+  isLoggingOut = value
+}
+
 const processQueue = (token: string | null) => {
   pendingQueue.forEach((callback) => callback(token))
   pendingQueue = []
 }
 
 export const refreshAccessToken = async () => {
+  // If we are logging out, don't attempt to refresh
+  if (isLoggingOut) return null
+
   isRefreshing = true
   try {
     const res = await refreshClient.post<{
@@ -95,6 +104,11 @@ http.interceptors.response.use(
   },
   async (error: AxiosError) => {
     useLoadingStore.getState().stopLoading()
+
+    // If logging out, ignore 401s to prevent refresh attempts
+    if (isLoggingOut) {
+      return Promise.reject(error)
+    }
 
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean

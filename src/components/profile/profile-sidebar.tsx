@@ -3,10 +3,21 @@
 import React, { useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Camera, MapPin, Package, User as UserIcon, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { User } from '@/types/user'
 import { cn } from '@/lib/utils'
+import { authService } from '@/services/auth'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'
 
 interface ProfileSidebarProps {
   user: User | null
@@ -21,7 +32,24 @@ export function ProfileSidebar({
   onAvatarUpload,
   isUploading,
 }: ProfileSidebarProps) {
+  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false)
+
+  const handleLogout = () => {
+    setShowLogoutDialog(true)
+  }
+
+  const confirmLogout = async () => {
+    try {
+      await authService.logout()
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Even if API fails, we should probably redirect (logic already in authService to clear state)
+      router.push('/auth/login')
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -110,6 +138,26 @@ export function ProfileSidebar({
           const isActive = activeTab === item.id
           const Icon = item.icon
 
+          if (item.id === 'logout') {
+            return (
+              <button
+                key={item.id}
+                onClick={handleLogout}
+                className={cn(
+                  'flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md aspect-square text-center gap-3',
+                  `border-transparent ${item.bgColor} hover:border-gray-200`,
+                )}
+              >
+                <div className={cn('p-3 rounded-full bg-white shadow-sm', item.color)}>
+                  <Icon className='w-6 h-6' />
+                </div>
+                <span className='text-xs font-bold tracking-wider text-gray-700 uppercase'>
+                  {item.label}
+                </span>
+              </button>
+            )
+          }
+
           return (
             <Link
               key={item.id}
@@ -131,6 +179,26 @@ export function ProfileSidebar({
           )
         })}
       </div>
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Đăng xuất</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className='gap-2'>
+            <DialogClose asChild>
+              <Button type='button' variant='outline'>
+                Hủy
+              </Button>
+            </DialogClose>
+            <Button type='button' variant='destructive' onClick={confirmLogout}>
+              Đăng xuất
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
