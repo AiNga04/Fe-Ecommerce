@@ -11,7 +11,20 @@ export interface Product {
   reviewCount: number | null
   createdAt: string
   updatedAt: string
-  gallery: string[] | null
+  gallery: { id: number; url: string }[] | null
+  sizeGuide: {
+    id: number
+    name: string
+    description: string
+    imageUrl: string
+  } | null
+  variants: {
+    id: number
+    sizeId: number
+    sizeName: string
+    sizeCode: string
+    quantity: number
+  }[]
 }
 
 export interface ProductSearchParams {
