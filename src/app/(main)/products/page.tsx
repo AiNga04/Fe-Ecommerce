@@ -9,10 +9,11 @@ export const metadata = {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const page = Number(searchParams?.page) || 0
-  const size = Number(searchParams?.size) || 12
+  const resolvedParams = await searchParams
+  const page = Number(resolvedParams?.page) || 0
+  const size = Number(resolvedParams?.size) || 12
 
   // Server-side fetch
   let initialData = undefined
