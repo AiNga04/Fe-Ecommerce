@@ -3,9 +3,9 @@
 import { useLoadingStore } from '@/store/loading'
 import { Spinner } from '@/components/ui/spinner'
 
-export function LoadingOverlay() {
+export function LoadingOverlay({ visible }: { visible?: boolean }) {
   const requestCount = useLoadingStore((state) => state.requestCount)
-  const isLoading = requestCount > 0
+  const isLoading = visible || requestCount > 0
 
   if (!isLoading) return null
 

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { toast } from 'sonner'
 import { orderService } from '@/services/order'
 import { userService } from '@/services/user'
+import { paymentService } from '@/services/payment'
 import { Order } from '@/types/order'
 import { User } from '@/types/user'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
@@ -236,6 +237,33 @@ export default function OrderHistoryPage() {
                           </span>
                           <span className='text-primary'>{formatCurrency(order.totalPrice)}</span>
                         </div>
+
+                        {/* Retry Payment Button */}
+                        {order.paymentMethod === 'ONLINE' &&
+                          order.paymentStatus !== 'PAID' &&
+                          order.status !== 'CANCELED' && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  setIsLoading(true)
+                                  const pRes = await paymentService.createVnPayUrl(order.id)
+                                  if (pRes.data.success && pRes.data.data) {
+                                    window.location.href = pRes.data.data
+                                    // Keep loading true while redirecting
+                                  } else {
+                                    toast.error('Không thể tạo link thanh toán')
+                                    setIsLoading(false)
+                                  }
+                                } catch (err) {
+                                  toast.error('Lỗi kết nối thanh toán')
+                                  setIsLoading(false)
+                                }
+                              }}
+                              className='mt-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2'
+                            >
+                              Thanh toán ngay
+                            </button>
+                          )}
                       </div>
                     </div>
                   </div>

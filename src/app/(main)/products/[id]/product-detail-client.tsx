@@ -61,9 +61,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       return
     }
 
-    // For now, Buy Now acts like Add to Cart then redirect?
-    // Or maybe just show a message. The user request was about cart.
-    // Let's implement it as Add to Cart -> Redirect to Cart Page
     try {
       const response = await cartService.addToCart({
         productId: product.id,
@@ -71,9 +68,16 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         sizeId: selectedVariant!.sizeId,
       })
 
-      if (response.data.success) {
-        // Redirect to cart
-        window.location.href = '/carts'
+      if (response.data.success && response.data.data) {
+        // Redirect to checkout with the specific item
+        const itemId = response.data.data.id
+        // We use window.location because useRouter might not push instantly if we want a full nav or clean state,
+        // but router.push is better for SPA. Using router from prop or hook?
+        // Need to import useRouter if not present. It is present in 'use client' file usually?
+        // Checks imports... 'use client' is at top.
+        // Component doesn't have router hook called?
+        // Ah, ProductDetailClient does NOT have useRouter. I need to add it.
+        window.location.href = `/checkout?items=${itemId}`
       } else {
         toast.error(response.data.message || 'Thêm vào giỏ hàng thất bại')
       }
