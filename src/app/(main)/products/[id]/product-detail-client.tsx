@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { formatCurrency, getImageUrl } from '@/lib/utils'
 import { ShoppingCart, Heart, Minus, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner' // Assuming sonner is installed, or use plain alert for now
+import { toast } from 'sonner'
+import { cartService } from '@/services/cart'
+import { useCartStore } from '@/store/cart'
 
 interface ProductDetailClientProps {
   product: Product
@@ -18,29 +20,70 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(product.imageUrl)
   const [selectedVariant, setSelectedVariant] = useState<Product['variants'][0] | null>(null)
   const [quantity, setQuantity] = useState(1)
+  const fetchCartCount = useCartStore((state) => state.fetchCount)
 
   // Ensure gallery includes the main image if not present
   const allImages = [{ id: 0, url: product.imageUrl }, ...(product.gallery || [])]
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!selectedVariant && product.variants && product.variants.length > 0) {
-      alert('Vui lòng chọn phân loại hàng (Size)')
+      toast.error('Vui lòng chọn phân loại hàng (Size)')
       return
     }
-    console.log('Adding to cart:', {
-      productId: product.id,
-      variantId: selectedVariant?.id,
-      quantity,
-    })
-    alert('Đã thêm vào giỏ hàng!')
+
+    try {
+      const response = await cartService.addToCart({
+        productId: product.id,
+        quantity,
+        sizeId: selectedVariant!.sizeId,
+      })
+
+      if (response.data.success) {
+        toast.success(response.data.message || 'Đã thêm vào giỏ hàng thành công')
+        // TODO: Update global cart count
+      } else {
+        toast.error(response.data.message || 'Thêm vào giỏ hàng thất bại')
+      }
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast.error('Vui lòng đăng nhập để mua hàng')
+        // Optionally redirect to login
+      } else {
+        console.error('Add to cart error:', error)
+        toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng')
+      }
+    }
   }
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!selectedVariant && product.variants && product.variants.length > 0) {
-      alert('Vui lòng chọn phân loại hàng (Size)')
+      toast.error('Vui lòng chọn phân loại hàng (Size)')
       return
     }
-    alert('Chức năng mua ngay đang phát triển!')
+
+    // For now, Buy Now acts like Add to Cart then redirect?
+    // Or maybe just show a message. The user request was about cart.
+    // Let's implement it as Add to Cart -> Redirect to Cart Page
+    try {
+      const response = await cartService.addToCart({
+        productId: product.id,
+        quantity,
+        sizeId: selectedVariant!.sizeId,
+      })
+
+      if (response.data.success) {
+        // Redirect to cart
+        window.location.href = '/carts'
+      } else {
+        toast.error(response.data.message || 'Thêm vào giỏ hàng thất bại')
+      }
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast.error('Vui lòng đăng nhập để mua hàng')
+      } else {
+        toast.error(error.response?.data?.message || 'Có lỗi xảy ra')
+      }
+    }
   }
 
   const maxStock = selectedVariant ? selectedVariant.quantity : product.stock

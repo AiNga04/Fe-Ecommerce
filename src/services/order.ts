@@ -3,8 +3,24 @@ import { Order, OrderSearchParams } from '@/types/order'
 
 const ORDER_PATH = '/orders'
 
+export interface CheckoutCartRequest {
+  cartItemIds: number[]
+  shippingName?: string
+  shippingPhone?: string
+  shippingAddress?: string
+  shippingAddressId?: number
+  paymentMethod: 'CASH_ON_DELIVERY' | 'ONLINE'
+  voucherCode?: string
+  shippingVoucherCode?: string
+}
+
 export const orderService = {
+  // ... existing methods
+  checkoutCart: (data: CheckoutCartRequest) => {
+    return http.post<IBackendRes<any>>(`${ORDER_PATH}/checkout/carts`, data)
+  },
   getMyOrders: (params?: OrderSearchParams) => {
+    // ...
     return http.get<IBackendRes<Order[]>>(`${ORDER_PATH}/my`, {
       params,
     })

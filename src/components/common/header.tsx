@@ -5,10 +5,17 @@ import { ShoppingCart, User, Search, Menu, Heart, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useCartStore } from '@/store/cart'
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const cartCount = useCartStore((state) => state.count)
+  const fetchCartCount = useCartStore((state) => state.fetchCount)
+
+  useEffect(() => {
+    fetchCartCount()
+  }, [])
 
   const navItems = [
     'Thời trang nữ',
@@ -125,11 +132,15 @@ export function Header() {
                 </Link>
               </Button>
 
-              <Button variant='ghost' size='icon' className='relative hover:text-primary'>
-                <ShoppingCart className='h-5 w-5' />
-                <Badge className='absolute -top-1 -right-1 h-4 w-4 lg:h-5 lg:w-5 p-0 flex items-center justify-center rounded-full text-[10px] lg:text-xs bg-primary text-primary-foreground border-2 border-background'>
-                  2
-                </Badge>
+              <Button variant='ghost' size='icon' className='relative hover:text-primary' asChild>
+                <Link href='/carts'>
+                  <ShoppingCart className='h-5 w-5' />
+                  {cartCount > 0 && (
+                    <Badge className='absolute -top-1 -right-1 h-4 w-4 lg:h-5 lg:w-5 p-0 flex items-center justify-center rounded-full text-[10px] lg:text-xs bg-primary text-primary-foreground border-2 border-background'>
+                      {cartCount}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
             </div>
           </div>
