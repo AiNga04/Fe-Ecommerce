@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { cartService } from '@/services/cart'
 import { useCartStore } from '@/store/cart'
+import { LoadingOverlay } from '@/components/common/loading-overlay'
 
 interface ProductDetailClientProps {
   product: Product
@@ -20,6 +21,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(product.imageUrl)
   const [selectedVariant, setSelectedVariant] = useState<Product['variants'][0] | null>(null)
   const [quantity, setQuantity] = useState(1)
+  const [isBuyingNow, setIsBuyingNow] = useState(false)
   const fetchCartCount = useCartStore((state) => state.fetchCount)
 
   // Ensure gallery includes the main image if not present
@@ -40,7 +42,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
       if (response.data.success) {
         toast.success(response.data.message || 'Đã thêm vào giỏ hàng thành công')
-        // TODO: Update global cart count
+        fetchCartCount()
       } else {
         toast.error(response.data.message || 'Thêm vào giỏ hàng thất bại')
       }
@@ -62,6 +64,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     }
 
     try {
+      setIsBuyingNow(true)
       const response = await cartService.addToCart({
         productId: product.id,
         quantity,
@@ -71,17 +74,16 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       if (response.data.success && response.data.data) {
         // Redirect to checkout with the specific item
         const itemId = response.data.data.id
-        // We use window.location because useRouter might not push instantly if we want a full nav or clean state,
-        // but router.push is better for SPA. Using router from prop or hook?
-        // Need to import useRouter if not present. It is present in 'use client' file usually?
-        // Checks imports... 'use client' is at top.
-        // Component doesn't have router hook called?
-        // Ah, ProductDetailClient does NOT have useRouter. I need to add it.
+        fetchCartCount()
+
         window.location.href = `/checkout?items=${itemId}`
+        // Keep loading true while redirecting...
       } else {
         toast.error(response.data.message || 'Thêm vào giỏ hàng thất bại')
+        setIsBuyingNow(false)
       }
     } catch (error: any) {
+      setIsBuyingNow(false)
       if (error.response?.status === 401) {
         toast.error('Vui lòng đăng nhập để mua hàng')
       } else {
@@ -94,6 +96,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 gap-12'>
+      <LoadingOverlay visible={isBuyingNow} />
       {/* Left: Product Images */}
       <div className='space-y-4'>
         <div className='relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border shadow-sm'>

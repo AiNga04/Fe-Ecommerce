@@ -17,7 +17,8 @@ import { Calendar, Package, CreditCard, MapPin } from 'lucide-react'
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
   const fetchData = async () => {
@@ -38,7 +39,7 @@ export default function OrderHistoryPage() {
       console.error('Fetch data error:', error)
       toast.error('Có lỗi xảy ra khi tải dữ liệu')
     } finally {
-      setIsLoading(false)
+      setIsPageLoading(false)
     }
   }
 
@@ -109,12 +110,14 @@ export default function OrderHistoryPage() {
     )
   }
 
-  if (isLoading) {
+  if (isPageLoading) {
     return <LoadingOverlay />
   }
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8 md:py-12'>
+    <div className='container max-w-7xl mx-auto px-4 py-8 md:py-12 relative'>
+      <LoadingOverlay visible={isProcessing} />
+
       <div className='grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8'>
         {/* Left Sidebar */}
         <div className='md:col-span-4 lg:col-span-3'>
@@ -245,18 +248,18 @@ export default function OrderHistoryPage() {
                             <button
                               onClick={async () => {
                                 try {
-                                  setIsLoading(true)
+                                  setIsProcessing(true)
                                   const pRes = await paymentService.createVnPayUrl(order.id)
                                   if (pRes.data.success && pRes.data.data) {
                                     window.location.href = pRes.data.data
                                     // Keep loading true while redirecting
                                   } else {
                                     toast.error('Không thể tạo link thanh toán')
-                                    setIsLoading(false)
+                                    setIsProcessing(false)
                                   }
                                 } catch (err) {
                                   toast.error('Lỗi kết nối thanh toán')
-                                  setIsLoading(false)
+                                  setIsProcessing(false)
                                 }
                               }}
                               className='mt-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2'
