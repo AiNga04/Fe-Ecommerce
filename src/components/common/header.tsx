@@ -1,17 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, User, Search, Menu, Heart, X } from 'lucide-react'
+import { ShoppingCart, User, Search, Menu, Heart, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
+import { useAuthSession } from '@/hooks/use-auth-session'
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cartCount = useCartStore((state) => state.count)
   const fetchCartCount = useCartStore((state) => state.fetchCount)
+  const { isAuthenticated } = useAuthSession()
 
   useEffect(() => {
     fetchCartCount()
@@ -52,21 +54,99 @@ export function Header() {
                     <span className='sr-only'>Menu</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side='left' className='w-[300px] sm:w-[400px]'>
-                  <SheetHeader>
-                    <SheetTitle className='text-left font-bold text-xl'>DANH MỤC</SheetTitle>
+                <SheetContent side='left' className='w-[300px] sm:w-[400px] p-0 flex flex-col'>
+                  <SheetHeader className='p-6 border-b text-left'>
+                    <SheetTitle className='sr-only'>Menu</SheetTitle>
+                    <Link
+                      href='/'
+                      className='flex items-center gap-3 w-fit'
+                      onClick={() => setIsSearchOpen(false)}
+                    >
+                      <div className='w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-black text-lg tracking-tighter shadow-md'>
+                        ZF
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className='font-bold text-xl leading-none tracking-tight'>ZYNA</span>
+                        <span className='text-[10px] text-muted-foreground tracking-[0.2em] font-medium'>
+                          FASHION
+                        </span>
+                      </div>
+                    </Link>
                   </SheetHeader>
-                  <nav className='flex flex-col gap-4 mt-8 px-4'>
-                    {navItems.map((item) => (
-                      <Link
-                        key={item}
-                        href='#'
-                        className='text-lg font-medium hover:text-primary transition-colors'
-                      >
-                        {item}
-                      </Link>
-                    ))}
-                  </nav>
+
+                  <div className='flex-1 overflow-y-auto py-6 px-6'>
+                    <span className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 block'>
+                      Danh Mục Sản Phẩm
+                    </span>
+                    <nav className='flex flex-col space-y-1'>
+                      {navItems.map((item) => (
+                        <Link
+                          key={item}
+                          href='#'
+                          className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                        >
+                          {item}
+                          <ArrowRight className='w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary' />
+                        </Link>
+                      ))}
+                    </nav>
+
+                    <div className='mt-8 pt-8 border-t space-y-6'>
+                      {/* Account Section in Mobile Menu */}
+                      <div>
+                        <span className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 block'>
+                          Tài Khoản
+                        </span>
+                        {isAuthenticated ? (
+                          <Link
+                            href='/profile'
+                            className='flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50'
+                          >
+                            <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary'>
+                              <User className='w-4 h-4' />
+                            </div>
+                            <div className='flex flex-col'>
+                              <span className='font-medium text-sm'>Thông tin tài khoản</span>
+                              <span className='text-xs text-muted-foreground'>
+                                Quản lý đơn hàng & hồ sơ
+                              </span>
+                            </div>
+                          </Link>
+                        ) : (
+                          <Link
+                            href='/auth/login'
+                            className='flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50'
+                          >
+                            <div className='w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground'>
+                              <User className='w-4 h-4' />
+                            </div>
+                            <div className='flex flex-col'>
+                              <span className='font-medium text-sm'>Đăng nhập / Đăng ký</span>
+                              <span className='text-xs text-muted-foreground'>
+                                Nhận ưu đãi thành viên
+                              </span>
+                            </div>
+                          </Link>
+                        )}
+                      </div>
+
+                      {/* Contact Section */}
+                      <div>
+                        <span className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 block'>
+                          Hỗ Trợ
+                        </span>
+                        <div className='flex flex-col gap-3 text-sm text-muted-foreground px-2'>
+                          <span className='flex items-center gap-2'>
+                            Hotline: <span className='text-foreground font-medium'>1900 1234</span>
+                          </span>
+                          <span className='flex items-center gap-2'>
+                            Email:{' '}
+                            <span className='text-foreground font-medium'>support@zyna.com</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </SheetContent>
               </Sheet>
 
@@ -126,11 +206,25 @@ export function Header() {
                 <Heart className='h-5 w-5' />
               </Button>
 
-              <Button variant='ghost' size='icon' className='hover:text-primary' asChild>
-                <Link href='/profile'>
-                  <User className='h-5 w-5' />
-                </Link>
-              </Button>
+              {isAuthenticated ? (
+                <Button variant='ghost' size='icon' className='hover:text-primary' asChild>
+                  <Link href='/profile'>
+                    <User className='h-5 w-5' />
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='hover:text-primary font-medium gap-2'
+                  asChild
+                >
+                  <Link href='/auth/login'>
+                    <User className='h-5 w-5' />
+                    <span className='hidden md:inline'>Đăng nhập / Đăng ký</span>
+                  </Link>
+                </Button>
+              )}
 
               <Button variant='ghost' size='icon' className='relative hover:text-primary' asChild>
                 <Link href='/carts'>

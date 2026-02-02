@@ -1,4 +1,4 @@
-import { AuthGuard } from '@/components/auth/auth-guard'
+import { AuthInitializer } from '@/components/auth/auth-initializer'
 import { Header } from '@/components/common/header'
 import { Footer } from '@/components/common/footer'
 
@@ -11,7 +11,7 @@ export default function MainLayout({
     <div className='flex min-h-screen flex-col'>
       <Header />
       <main className='flex-1'>
-        <AuthGuard>{children}</AuthGuard>
+        <AuthInitializer>{children}</AuthInitializer>
       </main>
       <Footer />
     </div>

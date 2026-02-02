@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { Product } from '@/types/product'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +13,18 @@ import { toast } from 'sonner'
 import { cartService } from '@/services/cart'
 import { useCartStore } from '@/store/cart'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useAuthSession } from '@/hooks/use-auth-session'
+import Routers from '@/constants/routers'
 
 interface ProductDetailClientProps {
   product: Product
@@ -27,7 +40,22 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   // Ensure gallery includes the main image if not present
   const allImages = [{ id: 0, url: product.imageUrl }, ...(product.gallery || [])]
 
+  const { isAuthenticated } = useAuthSession()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const handleLoginConfirm = () => {
+    router.push(`${Routers.LOGIN}?redirect=${encodeURIComponent(pathname)}`)
+  }
+
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false)
+
   const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      setIsLoginDialogOpen(true)
+      return
+    }
+
     if (!selectedVariant && product.variants && product.variants.length > 0) {
       toast.error('Vui lòng chọn phân loại hàng (Size)')
       return
@@ -48,8 +76,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       }
     } catch (error: any) {
       if (error.response?.status === 401) {
-        toast.error('Vui lòng đăng nhập để mua hàng')
-        // Optionally redirect to login
+        setIsLoginDialogOpen(true)
       } else {
         console.error('Add to cart error:', error)
         toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng')
@@ -58,6 +85,11 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   }
 
   const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      setIsLoginDialogOpen(true)
+      return
+    }
+
     if (!selectedVariant && product.variants && product.variants.length > 0) {
       toast.error('Vui lòng chọn phân loại hàng (Size)')
       return
@@ -85,7 +117,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     } catch (error: any) {
       setIsBuyingNow(false)
       if (error.response?.status === 401) {
-        toast.error('Vui lòng đăng nhập để mua hàng')
+        setIsLoginDialogOpen(true)
       } else {
         toast.error(error.response?.data?.message || 'Có lỗi xảy ra')
       }
@@ -97,6 +129,22 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 gap-12'>
       <LoadingOverlay visible={isBuyingNow} />
+
+      <AlertDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn chưa đăng nhập</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vui lòng đăng nhập để tiếp tục mua sắm và thanh toán.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLoginConfirm}>Đăng nhập ngay</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Left: Product Images */}
       <div className='space-y-4'>
         <div className='relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border shadow-sm'>
