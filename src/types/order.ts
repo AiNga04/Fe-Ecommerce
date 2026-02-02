@@ -36,4 +36,7 @@ export interface Order {
 export interface OrderSearchParams {
   page?: number
   size?: number
+  status?: string
+  paymentStatus?: string
+  shipmentStatus?: string
 }
