@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { ReadonlyURLSearchParams } from 'next/navigation'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -22,4 +23,13 @@ export function getImageUrl(path: string | null | undefined) {
 
   const host = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:8080'
   return `${host}${cleanPath}`
+}
+
+export function getValidRedirectUrl(searchParams: ReadonlyURLSearchParams | null) {
+  const redirectUrl = searchParams?.get('redirectUrl')
+  // Basic validation: ensure it's a relative path to avoid open redirects
+  if (redirectUrl && redirectUrl.startsWith('/')) {
+    return redirectUrl
+  }
+  return null
 }

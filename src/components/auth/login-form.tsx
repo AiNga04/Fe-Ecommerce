@@ -18,7 +18,7 @@ import { persistRefreshTokenCookie } from '@/lib/refresh-token-client'
 import { authService } from '@/services/auth'
 import { useAuthStore } from '@/store/auth'
 import type { LoginResponse } from '@/schemas/auth/login'
-import { cn } from '@/lib/utils'
+import { cn, getValidRedirectUrl } from '@/lib/utils'
 import { Role } from '@/constants/enum/role'
 
 const loginSchema = z.object({
@@ -63,29 +63,33 @@ export function LoginForm() {
       await persistRefreshTokenCookie(payload.refreshToken)
       setAccessToken(payload.accessToken)
       queryClient.setQueryData(AUTH_ME_QUERY_KEY, payload.user)
+
       toast.success(data.message || 'Đăng nhập thành công')
 
-      // Check for redirect param
-      const redirectUrl = searchParams.get('redirect')
+      // ✅ Ưu tiên 1: redirectUrl (nếu hợp lệ)
+      const redirectUrl = getValidRedirectUrl(searchParams)
+
       if (redirectUrl) {
-        router.push(decodeURIComponent(redirectUrl))
+        window.location.href = redirectUrl
         return
       }
 
-      // Role-based redirection
-      const roles = payload.user.roles || []
+      // ✅ Ưu tiên 2: role-based redirect
+      const roles = payload.user.roles ?? []
+
       if (roles.includes(Role.ADMIN)) {
-        router.push(Routers.ADMIN)
+        window.location.href = Routers.ADMIN
       } else if (roles.includes(Role.STAFF)) {
-        router.push(Routers.STAFF)
+        window.location.href = Routers.STAFF
       } else if (roles.includes(Role.SHIPPER)) {
-        router.push(Routers.SHIPPER)
+        window.location.href = Routers.SHIPPER
       } else {
-        router.push(Routers.HOME)
+        window.location.href = Routers.HOME
       }
     } catch (error: any) {
       const message =
         error?.response?.data?.message || error?.message || 'Đăng nhập thất bại, thử lại'
+
       toast.error(message)
     }
   }
