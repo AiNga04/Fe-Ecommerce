@@ -5,6 +5,12 @@ const Routers = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   FORGOT_PASSWORD: '/auth/forgot-password',
+
+  // Dashboard
+  ADMIN: '/admin',
+  STAFF: '/staff',
+  SHIPPER: '/shipper',
+  FORBIDDEN: '/forbidden',
 }
 
 export default Routers

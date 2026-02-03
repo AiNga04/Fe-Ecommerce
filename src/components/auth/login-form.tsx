@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Eye, EyeOff, Facebook, Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -19,6 +19,7 @@ import { authService } from '@/services/auth'
 import { useAuthStore } from '@/store/auth'
 import type { LoginResponse } from '@/schemas/auth/login'
 import { cn } from '@/lib/utils'
+import { Role } from '@/constants/enum/role'
 
 const loginSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -50,6 +51,7 @@ export function LoginForm() {
   })
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
   const setAccessToken = useAuthStore((state) => state.setAccessToken)
 
@@ -62,7 +64,25 @@ export function LoginForm() {
       setAccessToken(payload.accessToken)
       queryClient.setQueryData(AUTH_ME_QUERY_KEY, payload.user)
       toast.success(data.message || 'Đăng nhập thành công')
-      router.push('/')
+
+      // Check for redirect param
+      const redirectUrl = searchParams.get('redirect')
+      if (redirectUrl) {
+        router.push(decodeURIComponent(redirectUrl))
+        return
+      }
+
+      // Role-based redirection
+      const roles = payload.user.roles || []
+      if (roles.includes(Role.ADMIN)) {
+        router.push(Routers.ADMIN)
+      } else if (roles.includes(Role.STAFF)) {
+        router.push(Routers.STAFF)
+      } else if (roles.includes(Role.SHIPPER)) {
+        router.push(Routers.SHIPPER)
+      } else {
+        router.push(Routers.HOME)
+      }
     } catch (error: any) {
       const message =
         error?.response?.data?.message || error?.message || 'Đăng nhập thất bại, thử lại'
