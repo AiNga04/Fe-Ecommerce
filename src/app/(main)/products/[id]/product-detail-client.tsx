@@ -285,8 +285,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         {/* Actions */}
         <div className='flex flex-col sm:flex-row gap-4 pt-4'>
           <Button
-            size='lg'
-            className='flex-1 h-12 text-base font-semibold'
+            className='flex-1 h-10 text-base font-semibold'
             onClick={handleAddToCart}
             disabled={maxStock === 0}
           >
@@ -294,9 +293,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             Thêm vào giỏ
           </Button>
           <Button
-            size='lg'
             variant='destructive' // or a custom 'buy' variant
-            className='flex-1 h-12 text-base font-semibold bg-orange-600 hover:bg-orange-700 text-white'
+            className='flex-1 h-10 text-base font-semibold bg-orange-600 hover:bg-orange-700 text-white'
             onClick={handleBuyNow}
             disabled={maxStock === 0}
           >
