@@ -12,4 +12,7 @@ export const productService = {
   getProductById: (id: number | string) => {
     return http.get<IBackendRes<Product>>(`${PRODUCT_PATH}/${id}`)
   },
+  createProduct: (data: any) => {
+    return http.post<IBackendRes<Product>>(`${PRODUCT_PATH}`, data)
+  },
 }

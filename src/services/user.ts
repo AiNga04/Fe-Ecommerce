@@ -24,4 +24,7 @@ export const userService = {
   updateMyInfo: (data: UserUpdateRequest) => {
     return http.patch<IBackendRes<User>>(`${USER_PATH}/me/info`, data)
   },
+  getUsers: (params?: any) => {
+    return http.get<IBackendRes<User[]>>(`${USER_PATH}`, { params })
+  },
 }
