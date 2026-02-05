@@ -66,8 +66,18 @@ export default function UsersPage() {
 
   const { data: usersData, isLoading } = useQuery({
     queryKey: ['admin-users', viewDeleted, criteria],
-    queryFn: () =>
-      viewDeleted ? userService.getDeletedUsers(criteria) : userService.searchUsers(criteria),
+    queryFn: async () => {
+      const response = viewDeleted
+        ? await userService.getDeletedUsers(criteria)
+        : await userService.searchUsers(criteria)
+
+      // Fallback: Client-side filtering if backend returns mismatched statuses
+      if (!viewDeleted && criteria.status && response.data?.data) {
+        response.data.data = response.data.data.filter((u) => u.status === criteria.status)
+      }
+
+      return response
+    },
   })
 
   const users = usersData?.data?.data || []
@@ -177,6 +187,7 @@ export default function UsersPage() {
               <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
               <SelectItem value={UserStatus.ACTIVE}>Hoạt động</SelectItem>
               <SelectItem value={UserStatus.PENDING}>Chờ duyệt</SelectItem>
+              <SelectItem value={UserStatus.INACTIVE}>Không hoạt động</SelectItem>
               <SelectItem value={UserStatus.LOCKED}>Đã khóa</SelectItem>
             </SelectContent>
           </Select>
