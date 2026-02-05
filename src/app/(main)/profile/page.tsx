@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { userService } from '@/services/user'
-import { User, UserUpdateRequest } from '@/types/user'
+import { User, UserUpdateRequest, UserUpdateProfileRequest } from '@/types/user'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
 import { ProfileForm } from '@/components/profile/profile-form'
 import { ChangePasswordForm } from '@/components/profile/change-password-form'
@@ -42,7 +42,17 @@ export default function ProfilePage() {
 
     setIsUpdating(true)
     try {
-      const response = await userService.updateMyInfo(data)
+      const payload: UserUpdateProfileRequest = {
+        firstName: data.firstName || user.firstName || '',
+        lastName: data.lastName || user.lastName || '',
+        phone: data.phone,
+        address: data.address,
+        city: data.city as string, // Ensure compatibility
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender ? data.gender.toString() : undefined, // Ensure enum to string if needed or type matches
+      }
+
+      const response = await userService.updateMyInfo(payload)
       if (response.data.success && response.data.data) {
         toast.success(response.data.message || 'Profile updated successfully')
         setUser(response.data.data)

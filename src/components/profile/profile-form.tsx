@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { User, UserUpdateRequest } from '@/types/user'
+import { User, UserUpdateRequest, Gender } from '@/types/user'
 import { Edit2, Save, X } from 'lucide-react'
 import {
   Select,
@@ -76,7 +76,7 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
       address: values.address,
       city: values.city,
       dateOfBirth: values.dateOfBirth,
-      gender: values.gender,
+      gender: values.gender as Gender,
     }
 
     const result = await onSubmit(updateData)
