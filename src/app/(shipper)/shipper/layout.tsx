@@ -3,7 +3,7 @@ import { RoleGuard } from '@/components/auth/role-guard'
 
 export default function ShipperLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={[Role.SHIPPER, Role.ADMIN]}>
+    <RoleGuard allowedRoles={[Role.SHIPPER]}>
       <div className='min-h-screen bg-orange-50'>
         <nav className='bg-orange-700 text-white p-4'>
           <div className='container mx-auto flex justify-between items-center'>

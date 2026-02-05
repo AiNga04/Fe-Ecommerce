@@ -3,7 +3,7 @@ import { RoleGuard } from '@/components/auth/role-guard'
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={[Role.STAFF, Role.ADMIN]}>
+    <RoleGuard allowedRoles={[Role.STAFF]}>
       <div className='min-h-screen bg-blue-50'>
         <nav className='bg-blue-800 text-white p-4'>
           <div className='container mx-auto flex justify-between items-center'>

@@ -10,6 +10,7 @@ const Routers = {
   ADMIN: '/admin',
   STAFF: '/staff',
   SHIPPER: '/shipper',
+  PROFILE: '/profile',
   FORBIDDEN: '/forbidden',
 }
 

@@ -1,8 +1,13 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ShieldAlert } from 'lucide-react'
+import { useAuthSession } from '@/hooks/use-auth-session'
 
 export default function ForbiddenPage() {
+  const { logout } = useAuthSession()
+
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-slate-50 text-center px-4'>
       <div className='bg-red-100 p-4 rounded-full mb-6'>
@@ -20,9 +25,7 @@ export default function ForbiddenPage() {
         <Button asChild variant='outline'>
           <Link href='/'>Về Trang chủ</Link>
         </Button>
-        <Button asChild>
-          <Link href='/auth/login'>Đăng nhập tài khoản khác</Link>
-        </Button>
+        <Button onClick={() => logout()}>Đăng nhập tài khoản khác</Button>
       </div>
     </div>
   )

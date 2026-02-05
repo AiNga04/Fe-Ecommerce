@@ -8,12 +8,22 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/co
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
 import { useAuthSession } from '@/hooks/use-auth-session'
+import { Role } from '@/constants/enum/role'
+import Routers from '@/constants/routers'
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cartCount = useCartStore((state) => state.count)
   const fetchCartCount = useCartStore((state) => state.fetchCount)
-  const { isAuthenticated } = useAuthSession()
+  const { isAuthenticated, user } = useAuthSession()
+
+  const getProfileLink = () => {
+    const roles = user?.roles || []
+    if (roles.includes(Role.ADMIN)) return Routers.ADMIN
+    if (roles.includes(Role.STAFF)) return Routers.STAFF
+    if (roles.includes(Role.SHIPPER)) return Routers.SHIPPER
+    return Routers.PROFILE
+  }
 
   useEffect(() => {
     fetchCartCount()
@@ -99,7 +109,7 @@ export function Header() {
                         </span>
                         {isAuthenticated ? (
                           <Link
-                            href='/profile'
+                            href={getProfileLink()}
                             className='flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50'
                           >
                             <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary'>
@@ -208,7 +218,7 @@ export function Header() {
 
               {isAuthenticated ? (
                 <Button variant='ghost' size='icon' className='hover:text-primary' asChild>
-                  <Link href='/profile'>
+                  <Link href={getProfileLink()}>
                     <User className='h-5 w-5' />
                   </Link>
                 </Button>
