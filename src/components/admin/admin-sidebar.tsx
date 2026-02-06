@@ -33,6 +33,20 @@ const sidebarItems = [
   },
 ]
 
+import { useRouter } from 'next/navigation'
+import { authService } from '@/services/auth'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+
 interface AdminSidebarProps {
   className?: string
   onNavigate?: () => void
@@ -40,6 +54,18 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ className, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout()
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Logout failed', error)
+      // Force redirect even if API fails
+      router.push('/auth/login')
+    }
+  }
 
   return (
     <div className={cn('flex flex-col h-full border-r bg-slate-900 text-slate-100', className)}>
@@ -69,10 +95,28 @@ export function AdminSidebar({ className, onNavigate }: AdminSidebarProps) {
         })}
       </nav>
       <div className='p-4 border-t border-slate-800'>
-        <button className='flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-red-400 transition-colors w-full'>
-          <LogOut className='h-5 w-5' />
-          Đăng xuất
-        </button>
+        <div className='p-4 border-t border-slate-800'>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className='flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-red-400 transition-colors w-full text-left'>
+                <LogOut className='h-5 w-5' />
+                Đăng xuất
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Bạn có chắc chắn muốn đăng xuất?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Bạn sẽ cần đăng nhập lại để truy cập vào hệ thống quản trị.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Hủy</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout}>Đăng xuất</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </div>
   )

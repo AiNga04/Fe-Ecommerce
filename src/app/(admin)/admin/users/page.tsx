@@ -53,6 +53,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { UserSearchCriteria, Role, UserStatus, Gender } from '@/types/user'
 
 export default function UsersPage() {
@@ -329,16 +340,34 @@ export default function UsersPage() {
                                 <Edit className='mr-2 h-4 w-4' /> Sửa
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className='text-red-600 focus:text-red-600 cursor-pointer'
-                              onClick={() => {
-                                if (confirm('Bạn có chắc muốn xóa tạm thời người dùng này?')) {
-                                  softDeleteMutation.mutate(user.id)
-                                }
-                              }}
-                            >
-                              <Trash2 className='mr-2 h-4 w-4' /> Xóa
-                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                  className='text-red-600 focus:text-red-600 cursor-pointer'
+                                  onSelect={(e) => e.preventDefault()}
+                                >
+                                  <Trash2 className='mr-2 h-4 w-4' /> Xóa
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Xác nhận xóa tạm thời?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Người dùng này sẽ được chuyển vào thùng rác và có thể khôi phục
+                                    sau.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => softDeleteMutation.mutate(user.id)}
+                                    className='bg-red-600 hover:bg-red-700'
+                                  >
+                                    Xóa
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </>
                         ) : (
                           <>
@@ -348,18 +377,36 @@ export default function UsersPage() {
                             >
                               <RefreshCw className='mr-2 h-4 w-4' /> Khôi phục
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className='text-red-600 focus:text-red-600 cursor-pointer'
-                              onClick={() => {
-                                if (
-                                  confirm('Hành động này không thể hoàn tác. Bạn có chắc chắn?')
-                                ) {
-                                  hardDeleteMutation.mutate(user.id)
-                                }
-                              }}
-                            >
-                              <Trash2 className='mr-2 h-4 w-4' /> Xóa vĩnh viễn
-                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                  className='text-red-600 focus:text-red-600 cursor-pointer'
+                                  onSelect={(e) => e.preventDefault()}
+                                >
+                                  <Trash2 className='mr-2 h-4 w-4' /> Xóa vĩnh viễn
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Cảnh báo: Hành động không thể hoàn tác!
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Người dùng này sẽ bị xóa vĩnh viễn khỏi hệ thống. Bạn có chắc
+                                    chắn muốn tiếp tục?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => hardDeleteMutation.mutate(user.id)}
+                                    className='bg-red-600 hover:bg-red-700'
+                                  >
+                                    Xóa vĩnh viễn
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </>
                         )}
                       </DropdownMenuContent>

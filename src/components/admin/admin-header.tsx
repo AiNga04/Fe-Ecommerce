@@ -7,9 +7,20 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Menu } from 'lucide-react'
 import { AdminSidebar } from './admin-sidebar'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { authService } from '@/services/auth'
+import { getImageUrl } from '@/lib/utils'
 
 export function AdminHeader() {
   const [open, setOpen] = useState(false)
+
+  const { data: userResponse } = useQuery({
+    queryKey: ['me'],
+    queryFn: authService.me,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  })
+
+  const user = userResponse?.data?.data
 
   return (
     <header className='h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-10'>
@@ -33,14 +44,24 @@ export function AdminHeader() {
       </div>
 
       <div className='flex items-center gap-4'>
-        <div className='text-right hidden md:block'>
-          <p className='text-sm font-medium'>Admin User</p>
-          <p className='text-xs text-muted-foreground'>admin@example.com</p>
-        </div>
-        <Avatar>
-          <AvatarImage src='https://github.com/shadcn.png' alt='@shadcn' />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
+        {user ? (
+          <>
+            <div className='text-right hidden md:block'>
+              <p className='text-sm font-medium'>
+                {user.lastName} {user.firstName}
+              </p>
+              <p className='text-xs text-muted-foreground'>{user.email}</p>
+            </div>
+            <Avatar>
+              <AvatarImage src={getImageUrl(user.avatarUrl)} alt={user.firstName} />
+              <AvatarFallback>
+                {user.firstName ? user.firstName.substring(0, 2).toUpperCase() : 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </>
+        ) : (
+          <div className='h-8 w-8 rounded-full bg-slate-100 animate-pulse' />
+        )}
       </div>
     </header>
   )
