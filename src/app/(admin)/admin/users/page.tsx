@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Archive,
   Filter,
+  Eye,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { userService } from '@/services/user'
@@ -43,6 +44,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { UserSearchCriteria, Role, UserStatus, Gender } from '@/types/user'
 
 export default function UsersPage() {
@@ -117,7 +127,7 @@ export default function UsersPage() {
 
   return (
     <div className='flex flex-col gap-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div>
           <h1 className='text-3xl font-bold tracking-tight'>
             {viewDeleted ? 'Thùng rác' : 'Người dùng'}
@@ -165,9 +175,9 @@ export default function UsersPage() {
           />
         </form>
 
-        <div className='flex gap-2'>
+        <div className='flex gap-2 w-full md:w-auto'>
           <Select value={filterRole} onValueChange={setFilterRole}>
-            <SelectTrigger className='w-[140px]'>
+            <SelectTrigger className='w-full md:w-[140px]'>
               <SelectValue placeholder='Vai trò' />
             </SelectTrigger>
             <SelectContent>
@@ -180,7 +190,7 @@ export default function UsersPage() {
           </Select>
 
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className='w-[140px]'>
+            <SelectTrigger className='w-full md:w-[140px]'>
               <SelectValue placeholder='Trạng thái' />
             </SelectTrigger>
             <SelectContent>
@@ -311,7 +321,12 @@ export default function UsersPage() {
                           <>
                             <DropdownMenuItem asChild>
                               <Link href={`/admin/users/${user.id}`} className='cursor-pointer'>
-                                <Edit className='mr-2 h-4 w-4' /> Chỉnh sửa
+                                <Eye className='mr-2 h-4 w-4' /> Xem
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/users/${user.id}`} className='cursor-pointer'>
+                                <Edit className='mr-2 h-4 w-4' /> Sửa
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem
@@ -322,7 +337,7 @@ export default function UsersPage() {
                                 }
                               }}
                             >
-                              <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm thời
+                              <Trash2 className='mr-2 h-4 w-4' /> Xóa
                             </DropdownMenuItem>
                           </>
                         ) : (
@@ -356,7 +371,51 @@ export default function UsersPage() {
           </TableBody>
         </Table>
       </div>
-      {/* Pagination controls can go here */}
+
+      {usersData?.data?.pagination && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href='#'
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (page > 0) setPage(page - 1)
+                }}
+                className={page === 0 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            {Array.from({ length: usersData?.data?.pagination?.totalPages || 0 }).map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  href='#'
+                  isActive={page === i}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setPage(i)
+                  }}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href='#'
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (page < (usersData.data?.pagination?.totalPages || 1) - 1) setPage(page + 1)
+                }}
+                className={
+                  page >= (usersData.data?.pagination?.totalPages || 1) - 1
+                    ? 'pointer-events-none opacity-50'
+                    : ''
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   )
 }

@@ -33,11 +33,16 @@ const sidebarItems = [
   },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  className?: string
+  onNavigate?: () => void
+}
+
+export function AdminSidebar({ className, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className='flex flex-col h-full border-r bg-slate-900 text-slate-100 w-64'>
+    <div className={cn('flex flex-col h-full border-r bg-slate-900 text-slate-100', className)}>
       <div className='p-6'>
         <h1 className='text-2xl font-bold tracking-tight text-white'>ZYNA ADMIN</h1>
       </div>
@@ -49,6 +54,7 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
                 isActive
