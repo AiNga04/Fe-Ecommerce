@@ -429,7 +429,7 @@ function CheckoutContent() {
                 value={selectedVoucherId ? String(selectedVoucherId) : 'none'}
                 onValueChange={(v) => setSelectedVoucherId(v === 'none' ? null : Number(v))}
               >
-                <SelectTrigger>
+                <SelectTrigger className='w-full'>
                   <SelectValue placeholder='Chọn mã giảm giá' />
                 </SelectTrigger>
                 <SelectContent>
@@ -454,7 +454,7 @@ function CheckoutContent() {
                 value={selectedShippingVoucherId ? String(selectedShippingVoucherId) : 'none'}
                 onValueChange={(v) => setSelectedShippingVoucherId(v === 'none' ? null : Number(v))}
               >
-                <SelectTrigger>
+                <SelectTrigger className='w-full'>
                   <SelectValue placeholder='Chọn mã miễn phí vận chuyển' />
                 </SelectTrigger>
                 <SelectContent>
