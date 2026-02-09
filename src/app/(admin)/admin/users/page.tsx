@@ -306,16 +306,28 @@ export default function UsersPage() {
                   </DialogHeader>
                   <div className='grid gap-4 py-4'>
                     <div className='space-y-2'>
+                      <div className='rounded-md bg-slate-50 p-3 text-xs text-slate-500 border border-slate-100'>
+                        <p className='font-medium text-slate-700 mb-1'>Mẫu dữ liệu (JSON):</p>
+                        <pre className='overflow-x-auto whitespace-pre-wrap'>
+                          {`[
+  {
+    "firstName": "Hương",
+    "lastName": "Phạm Lan",
+    "email": "huong.pham@example.com",
+    "password": "password123",
+    "phone": "0987654321",
+    "gender": "FEMALE",
+    "roles": ["USER"]
+  }
+]`}
+                        </pre>
+                      </div>
                       <Textarea
-                        placeholder='[{ "firstName": "Nguyen", "lastName": "Van A", "email": "a@test.com", "password": "123" }, ...]'
-                        className='font-mono h-[300px]'
+                        placeholder='Dán danh sách JSON vào đây...'
+                        className='font-mono h-[200px] text-sm'
                         value={batchJson}
                         onChange={(e) => setBatchJson(e.target.value)}
                       />
-                      <p className='text-xs text-muted-foreground'>
-                        Hỗ trợ các trường: firstName, lastName, email, password, phone, address,
-                        gender (MALE/FEMALE), roles (["USER", "ADMIN"])
-                      </p>
                     </div>
                   </div>
                   <DialogFooter>

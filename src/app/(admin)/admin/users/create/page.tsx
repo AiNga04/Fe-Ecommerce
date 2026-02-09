@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, Loader2, CalendarIcon } from 'lucide-react'
+import { ChevronLeft, Loader2, CalendarIcon, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { userService } from '@/services/user'
@@ -65,53 +65,72 @@ export default function CreateUserPage() {
   }
 
   return (
-    <div className='max-w-4xl mx-auto'>
-      <div className='flex items-center gap-4 mb-6'>
-        <Button variant='outline' size='icon' asChild>
+    <div className='pb-10'>
+      <div className='flex items-center gap-4 mb-8'>
+        <Button
+          variant='outline'
+          size='icon'
+          asChild
+          className='h-10 w-10 rounded-full border-slate-200 bg-white hover:bg-slate-50'
+        >
           <Link href='/admin/users'>
-            <ChevronLeft className='h-4 w-4' />
+            <ChevronLeft className='h-5 w-5 text-slate-600' />
           </Link>
         </Button>
-        <h1 className='text-3xl font-bold tracking-tight'>Thêm người dùng mới</h1>
+        <div>
+          <h1 className='text-3xl font-extrabold tracking-tight text-slate-900'>
+            Thêm người dùng mới
+          </h1>
+          <p className='text-slate-500 font-medium'>Tạo tài khoản khách hàng hoặc nhân viên mới</p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='grid gap-6'>
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin tài khoản</CardTitle>
-              <CardDescription>Thông tin đăng nhập và định danh cơ bản</CardDescription>
+        <div className='grid gap-8'>
+          {/* Account Info */}
+          <Card className='border-none shadow-md overflow-hidden'>
+            <div className='h-1.5 bg-blue-500' />
+            <CardHeader className='pb-4'>
+              <CardTitle className='text-xl flex items-center gap-2'>
+                <div className='p-2 rounded-lg bg-blue-50 text-blue-600'>
+                  <Loader2 className='h-5 w-5' />
+                </div>
+                Thông tin tài khoản
+              </CardTitle>
+              <CardDescription>Thiết lập thông tin đăng nhập và định danh cơ bản.</CardDescription>
             </CardHeader>
-            <CardContent className='grid gap-4 md:grid-cols-2'>
+            <CardContent className='grid gap-6 md:grid-cols-2 pt-2'>
               <div className='space-y-2'>
-                <Label htmlFor='lastName'>
+                <Label htmlFor='lastName' className='text-slate-700'>
                   Họ & Tên đệm <span className='text-red-500'>*</span>
                 </Label>
                 <Input
                   id='lastName'
-                  placeholder='Nguyễn Văn'
+                  placeholder='Ví dụ: Nguyễn Văn'
                   {...register('lastName', { required: 'Vui lòng nhập họ' })}
+                  className='border-slate-200 focus-visible:ring-blue-500'
                 />
                 {errors.lastName && (
-                  <p className='text-xs text-red-500'>{errors.lastName.message}</p>
+                  <p className='text-xs text-red-500 font-medium'>{errors.lastName.message}</p>
                 )}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='firstName'>
+                <Label htmlFor='firstName' className='text-slate-700'>
                   Tên <span className='text-red-500'>*</span>
                 </Label>
                 <Input
                   id='firstName'
-                  placeholder='A'
+                  placeholder='Ví dụ: A'
                   {...register('firstName', { required: 'Vui lòng nhập tên' })}
+                  className='border-slate-200 focus-visible:ring-blue-500'
                 />
                 {errors.firstName && (
-                  <p className='text-xs text-red-500'>{errors.firstName.message}</p>
+                  <p className='text-xs text-red-500 font-medium'>{errors.firstName.message}</p>
                 )}
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='email'>
+                <Label htmlFor='email' className='text-slate-700'>
                   Email <span className='text-red-500'>*</span>
                 </Label>
                 <Input
@@ -119,41 +138,54 @@ export default function CreateUserPage() {
                   id='email'
                   placeholder='example@mail.com'
                   {...register('email', { required: 'Vui lòng nhập email' })}
+                  className='border-slate-200 focus-visible:ring-blue-500'
                 />
-                {errors.email && <p className='text-xs text-red-500'>{errors.email.message}</p>}
+                {errors.email && (
+                  <p className='text-xs text-red-500 font-medium'>{errors.email.message}</p>
+                )}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='password'>
+                <Label htmlFor='password' className='text-slate-700'>
                   Mật khẩu <span className='text-red-500'>*</span>
                 </Label>
                 <Input
                   type='password'
                   id='password'
+                  placeholder='••••••'
                   {...register('password', {
                     required: 'Vui lòng nhập mật khẩu',
                     minLength: { value: 6, message: 'Tối thiểu 6 ký tự' },
                   })}
+                  className='border-slate-200 focus-visible:ring-blue-500'
                 />
                 {errors.password && (
-                  <p className='text-xs text-red-500'>{errors.password.message}</p>
+                  <p className='text-xs text-red-500 font-medium'>{errors.password.message}</p>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin cá nhân & Liên hệ</CardTitle>
+          {/* Personal & Contact */}
+          <Card className='border-none shadow-md overflow-hidden'>
+            <div className='h-1.5 bg-green-500' />
+            <CardHeader className='pb-4'>
+              <CardTitle className='text-xl flex items-center gap-2'>
+                <div className='p-2 rounded-lg bg-green-50 text-green-600'>
+                  <CalendarIcon className='h-5 w-5' />
+                </div>
+                Cá nhân & Liên hệ
+              </CardTitle>
+              <CardDescription>Thông tin chi tiết và địa chỉ giao hàng.</CardDescription>
             </CardHeader>
-            <CardContent className='grid gap-4 md:grid-cols-2'>
+            <CardContent className='grid gap-6 md:grid-cols-2 pt-2'>
               <div className='space-y-2'>
-                <Label>Giới tính</Label>
+                <Label className='text-slate-700'>Giới tính</Label>
                 <Controller
                   name='gender'
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger>
+                      <SelectTrigger className='w-full border-slate-200 focus:ring-green-500'>
                         <SelectValue placeholder='Chọn giới tính' />
                       </SelectTrigger>
                       <SelectContent>
@@ -167,23 +199,37 @@ export default function CreateUserPage() {
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='dateOfBirth'>Ngày sinh</Label>
-                <Input type='date' id='dateOfBirth' {...register('dateOfBirth')} />
+                <Label htmlFor='dateOfBirth' className='text-slate-700'>
+                  Ngày sinh
+                </Label>
+                <Input
+                  type='date'
+                  id='dateOfBirth'
+                  {...register('dateOfBirth')}
+                  className='border-slate-200 focus-visible:ring-green-500'
+                />
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='phone'>Số điện thoại</Label>
-                <Input id='phone' placeholder='09xxxx' {...register('phone')} />
+                <Label htmlFor='phone' className='text-slate-700'>
+                  Số điện thoại
+                </Label>
+                <Input
+                  id='phone'
+                  placeholder='09xx xxx xxx'
+                  {...register('phone')}
+                  className='border-slate-200 focus-visible:ring-green-500'
+                />
               </div>
 
               <div className='space-y-2'>
-                <Label>Thành phố</Label>
+                <Label className='text-slate-700'>Thành phố</Label>
                 <Controller
                   name='city'
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger>
+                      <SelectTrigger className='w-full border-slate-200 focus:ring-green-500'>
                         <SelectValue placeholder='Chọn thành phố' />
                       </SelectTrigger>
                       <SelectContent>
@@ -200,25 +246,35 @@ export default function CreateUserPage() {
               </div>
 
               <div className='space-y-2 md:col-span-2'>
-                <Label htmlFor='address'>Địa chỉ chi tiết</Label>
+                <Label htmlFor='address' className='text-slate-700'>
+                  Địa chỉ chi tiết
+                </Label>
                 <Input
                   id='address'
-                  placeholder='Số nhà, đường, phường/xã...'
+                  placeholder='Số nhà, tên đường, phường/xã...'
                   {...register('address')}
+                  className='border-slate-200 focus-visible:ring-green-500'
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Phân quyền</CardTitle>
-              <CardDescription>Chọn vai trò cho người dùng</CardDescription>
+          {/* Roles */}
+          <Card className='border-none shadow-md overflow-hidden'>
+            <div className='h-1.5 bg-purple-500' />
+            <CardHeader className='pb-4'>
+              <CardTitle className='text-xl flex items-center gap-2'>
+                <div className='p-2 rounded-lg bg-purple-50 text-purple-600'>
+                  <CheckCheckbox className='h-5 w-5' />
+                </div>
+                Phân quyền
+              </CardTitle>
+              <CardDescription>Gán vai trò và quyền hạn trên hệ thống.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className='flex flex-wrap gap-4'>
+              <div className='flex flex-wrap gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100'>
                 {Object.values(Role).map((role) => (
-                  <div key={role} className='flex items-center space-x-2'>
+                  <div key={role} className='flex items-center space-x-3'>
                     <Controller
                       name='roles'
                       control={control}
@@ -237,11 +293,15 @@ export default function CreateUserPage() {
                                 field.onChange(currentRoles.filter((r) => r !== role))
                               }
                             }}
+                            className='data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
                           />
                         )
                       }}
                     />
-                    <Label htmlFor={`role-${role}`} className='cursor-pointer'>
+                    <Label
+                      htmlFor={`role-${role}`}
+                      className='cursor-pointer text-sm font-medium text-slate-700'
+                    >
                       {role}
                     </Label>
                   </div>
@@ -250,17 +310,51 @@ export default function CreateUserPage() {
             </CardContent>
           </Card>
 
-          <div className='flex justify-end gap-4'>
-            <Button variant='outline' type='button' onClick={() => router.back()}>
+          <div className='flex items-center justify-end gap-4'>
+            <Button
+              variant='ghost'
+              type='button'
+              onClick={() => router.back()}
+              className='text-slate-500 hover:text-slate-700'
+            >
               Hủy bỏ
             </Button>
-            <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-              Tạo người dùng
+            <Button
+              type='submit'
+              disabled={createMutation.isPending}
+              className='bg-slate-900 hover:bg-slate-800 text-white min-w-[140px] shadow-lg shadow-slate-200'
+            >
+              {createMutation.isPending ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                <div className='flex items-center'>
+                  <Plus className='mr-2 h-4 w-4' /> Tạo người dùng
+                </div>
+              )}
             </Button>
           </div>
         </div>
       </form>
     </div>
+  )
+}
+
+function CheckCheckbox(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns='http://www.w3.org/2000/svg'
+      width='24'
+      height='24'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z' />
+      <path d='m9 12 2 2 4-4' />
+    </svg>
   )
 }
