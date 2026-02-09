@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -60,8 +60,9 @@ export default function UserDetailPage() {
   const params = useParams()
   const userId = params.id as string
   const router = useRouter()
+  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(searchParams.get('mode') === 'edit')
 
   const avatarInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -171,7 +172,7 @@ export default function UserDetailPage() {
   // --- View Mode UI ---
   if (!isEditing) {
     return (
-      <div className='mx-auto max-w-5xl space-y-8 pb-10'>
+      <div className='space-y-8 pb-10'>
         {/* Navigation & Actions */}
         <div className='flex items-center justify-between'>
           <Button
@@ -396,7 +397,7 @@ export default function UserDetailPage() {
 
   // --- Edit Mode UI (Redesigned) ---
   return (
-    <div className='mx-auto max-w-4xl pb-10'>
+    <div className='pb-10'>
       {/* Header */}
       <div className='flex items-center justify-between mb-8'>
         <div className='flex items-center gap-4'>

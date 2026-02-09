@@ -5,6 +5,8 @@ import {
   UserUpdateRequest,
   UserSearchCriteria,
   UserUpdateProfileRequest,
+  UserBatchCreateRequest,
+  UserBatchCreateResponse,
 } from '@/types/user'
 
 const USER_PATH = '/users'
@@ -90,5 +92,8 @@ export const userService = {
 
   hardDeleteUsersBatch: (ids: number[]) => {
     return http.delete<IBackendRes<any>>(`${USER_PATH}/batch/hard`, { data: ids })
+  },
+  createUsersBatch: (data: UserBatchCreateRequest) => {
+    return http.post<IBackendRes<UserBatchCreateResponse>>(`${USER_PATH}/batch-create`, data)
   },
 }

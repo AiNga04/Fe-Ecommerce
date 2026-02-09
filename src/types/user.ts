@@ -90,3 +90,17 @@ export interface UserUpdateProfileRequest {
   dateOfBirth?: string
   gender?: string
 }
+
+export interface UserBatchCreateRequest {
+  users: UserCreateRequest[]
+}
+
+export interface FailedUserResponse {
+  email: string
+  reason: string
+}
+
+export interface UserBatchCreateResponse {
+  created: User[]
+  failed: FailedUserResponse[]
+}

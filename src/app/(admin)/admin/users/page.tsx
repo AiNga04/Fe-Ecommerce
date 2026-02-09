@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -14,6 +14,11 @@ import {
   Archive,
   Filter,
   Eye,
+  Check,
+  FileJson,
+  X,
+  Loader2,
+  CheckSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { userService } from '@/services/user'
@@ -47,7 +52,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -64,13 +68,31 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { UserSearchCriteria, Role, UserStatus, Gender } from '@/types/user'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { UserSearchCriteria, Role, UserStatus, Gender, UserBatchCreateRequest } from '@/types/user'
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
   const [viewDeleted, setViewDeleted] = useState(false)
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
+
+  // Selection State
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+
+  // Batch Create State
+  const [isBatchCreateOpen, setIsBatchCreateOpen] = useState(false)
+  const [batchJson, setBatchJson] = useState('')
 
   // Search Params State
   const [searchTerm, setSearchTerm] = useState('')
@@ -80,7 +102,7 @@ export default function UsersPage() {
   const criteria: UserSearchCriteria = {
     page,
     size: pageSize,
-    firstName: searchTerm || undefined, // Simple search by name for now, or expand to more fields
+    firstName: searchTerm || undefined,
     role: filterRole !== 'ALL' ? filterRole : undefined,
     status: filterStatus !== 'ALL' ? filterStatus : undefined,
   }
@@ -88,11 +110,13 @@ export default function UsersPage() {
   const { data: usersData, isLoading } = useQuery({
     queryKey: ['admin-users', viewDeleted, criteria],
     queryFn: async () => {
+      // Clear selection when fetching new data
+      setSelectedIds(new Set())
+
       const response = viewDeleted
         ? await userService.getDeletedUsers(criteria)
         : await userService.searchUsers(criteria)
 
-      // Fallback: Client-side filtering if backend returns mismatched statuses
       if (!viewDeleted && criteria.status && response.data?.data) {
         response.data.data = response.data.data.filter((u) => u.status === criteria.status)
       }
@@ -102,6 +126,28 @@ export default function UsersPage() {
   })
 
   const users = usersData?.data?.data || []
+
+  // --- Selection Handlers ---
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = users.map((u) => u.id)
+      setSelectedIds(new Set(allIds))
+    } else {
+      setSelectedIds(new Set())
+    }
+  }
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    const newSelected = new Set(selectedIds)
+    if (checked) {
+      newSelected.add(id)
+    } else {
+      newSelected.delete(id)
+    }
+    setSelectedIds(newSelected)
+  }
+
+  const isAllSelected = users.length > 0 && selectedIds.size === users.length
 
   // --- Mutations ---
   const softDeleteMutation = useMutation({
@@ -131,13 +177,84 @@ export default function UsersPage() {
     onError: () => toast.error('Xóa thất bại'),
   })
 
+  // --- Batch Mutations ---
+  const batchSoftDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => userService.softDeleteUsersBatch(ids),
+    onSuccess: (data) => {
+      toast.success(`Đã xóa ${data.data?.data?.deletedIds?.length || 0} người dùng`)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: () => toast.error('Xóa hàng loạt thất bại'),
+  })
+
+  const batchRestoreMutation = useMutation({
+    mutationFn: (ids: number[]) => userService.restoreUsersBatch(ids),
+    onSuccess: (data) => {
+      toast.success(`Đã khôi phục ${data.data?.data?.restoredIds?.length || 0} người dùng`)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: () => toast.error('Khôi phục hàng loạt thất bại'),
+  })
+
+  const batchHardDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => userService.hardDeleteUsersBatch(ids),
+    onSuccess: (data) => {
+      toast.success(`Đã xóa vĩnh viễn ${data.data?.data?.deletedIds?.length || 0} người dùng`)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: () => toast.error('Xóa vĩnh viễn thất bại'),
+  })
+
+  const batchCreateMutation = useMutation({
+    mutationFn: (data: UserBatchCreateRequest) => userService.createUsersBatch(data),
+    onSuccess: (res) => {
+      const { created, failed } = res.data?.data || {}
+      if (created && created.length > 0) {
+        toast.success(`Tạo thành công ${created.length} người dùng`)
+      }
+      if (failed && failed.length > 0) {
+        toast.error(`Thất bại ${failed.length} người dùng. Kiểm tra console để xem chi tiết.`)
+        console.error('Failed users:', failed)
+      }
+      setIsBatchCreateOpen(false)
+      setBatchJson('')
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: (err: any) => {
+      toast.error(
+        'Lỗi khi tạo hàng loạt: ' + (err?.response?.data?.message || 'Lỗi không xác định'),
+      )
+    },
+  })
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    setPage(0) // Reset to first page on search
+    setPage(0)
+  }
+
+  const handleBatchCreateSubmit = () => {
+    try {
+      const parsed = JSON.parse(batchJson)
+      if (!Array.isArray(parsed)) {
+        toast.error('Dữ liệu phải là một mảng JSON (Array)')
+        return
+      }
+      if (parsed.length === 0) {
+        toast.error('Mảng dữ liệu trống')
+        return
+      }
+      // Basic validation could go here
+      batchCreateMutation.mutate({ users: parsed })
+    } catch (e) {
+      toast.error('JSON không hợp lệ. Vui lòng kiểm tra lại cú pháp.')
+    }
   }
 
   return (
-    <div className='flex flex-col gap-6'>
+    <div className='flex flex-col gap-6 relative'>
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div>
           <h1 className='text-3xl font-bold tracking-tight'>
@@ -164,15 +281,159 @@ export default function UsersPage() {
             )}
             {viewDeleted ? 'Danh sách chính' : 'Thùng rác'}
           </Button>
+
           {!viewDeleted && (
-            <Button asChild>
-              <Link href='/admin/users/create'>
-                <Plus className='mr-2 h-4 w-4' /> Thêm mới
-              </Link>
-            </Button>
+            <>
+              <Button asChild variant='outline'>
+                <Link href='/admin/users/create'>
+                  <Plus className='mr-2 h-4 w-4' /> Thêm mới
+                </Link>
+              </Button>
+
+              <Dialog open={isBatchCreateOpen} onOpenChange={setIsBatchCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button variant='secondary'>
+                    <FileJson className='mr-2 h-4 w-4' /> Tạo hàng loạt
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className='max-w-3xl'>
+                  <DialogHeader>
+                    <DialogTitle>Tạo người dùng hàng loạt (JSON)</DialogTitle>
+                    <DialogDescription>
+                      Nhập danh sách người dùng dưới dạng mảng JSON. Các trường bắt buộc: firstName,
+                      lastName, email, password.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className='grid gap-4 py-4'>
+                    <div className='space-y-2'>
+                      <Textarea
+                        placeholder='[{ "firstName": "Nguyen", "lastName": "Van A", "email": "a@test.com", "password": "123" }, ...]'
+                        className='font-mono h-[300px]'
+                        value={batchJson}
+                        onChange={(e) => setBatchJson(e.target.value)}
+                      />
+                      <p className='text-xs text-muted-foreground'>
+                        Hỗ trợ các trường: firstName, lastName, email, password, phone, address,
+                        gender (MALE/FEMALE), roles (["USER", "ADMIN"])
+                      </p>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant='outline' onClick={() => setIsBatchCreateOpen(false)}>
+                      Hủy
+                    </Button>
+                    <Button
+                      onClick={handleBatchCreateSubmit}
+                      disabled={batchCreateMutation.isPending}
+                    >
+                      {batchCreateMutation.isPending && (
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      )}
+                      Tạo ngay
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
       </div>
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className='sticky top-4 z-50 flex items-center justify-between gap-4 rounded-lg border bg-slate-900 p-4 text-white shadow-xl animate-in slide-in-from-top-2'>
+          <div className='flex items-center gap-2'>
+            <CheckSquare className='h-5 w-5 text-green-400' />
+            <span className='font-medium'>Đã chọn {selectedIds.size} người dùng</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <Button
+              variant='ghost'
+              size='sm'
+              className='text-white hover:bg-slate-800'
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Hủy chọn
+            </Button>
+
+            {viewDeleted ? (
+              <>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  className='bg-green-600 hover:bg-green-700 text-white border-0'
+                  onClick={() => batchRestoreMutation.mutate(Array.from(selectedIds))}
+                  disabled={batchRestoreMutation.isPending}
+                >
+                  <RefreshCw className='mr-2 h-4 w-4' /> Khôi phục ({selectedIds.size})
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant='destructive'
+                      size='sm'
+                      disabled={batchHardDeleteMutation.isPending}
+                    >
+                      <Trash2 className='mr-2 h-4 w-4' /> Xóa vĩnh viễn ({selectedIds.size})
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Xóa vĩnh viễn {selectedIds.size} người dùng?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Hành động này không thể hoàn tác. Dữ liệu sẽ bị mất hoàn toàn.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Hủy</AlertDialogCancel>
+                      <AlertDialogAction
+                        className='bg-red-600 hover:bg-red-700'
+                        onClick={() => batchHardDeleteMutation.mutate(Array.from(selectedIds))}
+                      >
+                        Xóa vĩnh viễn
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            ) : (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant='destructive'
+                    size='sm'
+                    disabled={batchSoftDeleteMutation.isPending}
+                  >
+                    <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm ({selectedIds.size})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Chuyển {selectedIds.size} người dùng vào thùng rác?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Họ sẽ không thể đăng nhập cho đến khi được khôi phục.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                    <AlertDialogAction
+                      className='bg-red-600 hover:bg-red-700'
+                      onClick={() => batchSoftDeleteMutation.mutate(Array.from(selectedIds))}
+                    >
+                      Xóa tạm
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-lg border shadow-sm'>
         <form onSubmit={handleSearch} className='relative flex-1 w-full md:max-w-sm'>
@@ -219,6 +480,13 @@ export default function UsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className='w-[40px]'>
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label='Select all'
+                />
+              </TableHead>
               <TableHead className='w-[80px]'>ID</TableHead>
               <TableHead>Thông tin</TableHead>
               <TableHead>Liên hệ</TableHead>
@@ -231,19 +499,26 @@ export default function UsersPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className='h-24 text-center text-muted-foreground'>
+                <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
                   Đang tải dữ liệu...
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className='h-24 text-center text-muted-foreground'>
+                <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
                   Không tìm thấy người dùng nào phù hợp.
                 </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} data-state={selectedIds.has(user.id) && 'selected'}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(user.id)}
+                      onCheckedChange={(checked) => handleSelectOne(user.id, checked as boolean)}
+                      aria-label={`Select user ${user.id}`}
+                    />
+                  </TableCell>
                   <TableCell className='font-medium'>#{user.id}</TableCell>
                   <TableCell>
                     <div className='flex items-center gap-3'>
@@ -336,7 +611,10 @@ export default function UsersPage() {
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                              <Link href={`/admin/users/${user.id}`} className='cursor-pointer'>
+                              <Link
+                                href={`/admin/users/${user.id}?mode=edit`}
+                                className='cursor-pointer'
+                              >
                                 <Edit className='mr-2 h-4 w-4' /> Sửa
                               </Link>
                             </DropdownMenuItem>
