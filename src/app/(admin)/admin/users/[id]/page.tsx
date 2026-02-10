@@ -23,6 +23,8 @@ import {
   Undo2,
   Camera,
   Save,
+  CalendarIcon,
+  KeyRound,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { userService } from '@/services/user'
@@ -482,7 +484,6 @@ export default function UserDetailPage() {
         <div className='grid gap-8'>
           {/* Section 1: Thông tin định danh */}
           <Card className='border-none shadow-md overflow-hidden'>
-            <div className='h-1.5 bg-blue-500' />
             <CardHeader className='pb-4'>
               <CardTitle className='text-xl flex items-center gap-2'>
                 <UserIcon className='h-5 w-5 text-blue-500' /> Thông tin cơ bản
@@ -539,7 +540,6 @@ export default function UserDetailPage() {
 
           {/* Section 2: Thông tin cá nhân & Liên hệ */}
           <Card className='border-none shadow-md overflow-hidden'>
-            <div className='h-1.5 bg-green-500' />
             <CardHeader className='pb-4'>
               <CardTitle className='text-xl flex items-center gap-2'>
                 <MapPin className='h-5 w-5 text-green-500' /> Cá nhân & Liên hệ
@@ -630,7 +630,6 @@ export default function UserDetailPage() {
 
           {/* Section 3: Phân quyền */}
           <Card className='border-none shadow-md overflow-hidden'>
-            <div className='h-1.5 bg-purple-500' />
             <CardHeader className='pb-4'>
               <CardTitle className='text-xl flex items-center gap-2'>
                 <Shield className='h-5 w-5 text-purple-500' /> Phân quyền hệ thống

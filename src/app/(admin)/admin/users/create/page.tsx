@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, Loader2, CalendarIcon, Plus } from 'lucide-react'
+import { ChevronLeft, CalendarIcon, Plus, KeyRound, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { userService } from '@/services/user'
@@ -89,13 +89,12 @@ export default function CreateUserPage() {
         <div className='grid gap-8'>
           {/* Account Info */}
           <Card className='border-none shadow-md overflow-hidden'>
-            <div className='h-1.5 bg-blue-500' />
             <CardHeader className='pb-4'>
               <CardTitle className='text-xl flex items-center gap-2'>
                 <div className='p-2 rounded-lg bg-blue-50 text-blue-600'>
-                  <Loader2 className='h-5 w-5' />
+                  <KeyRound className='h-5 w-5' />
                 </div>
-                Thông tin tài khoản
+                Tài khoản
               </CardTitle>
               <CardDescription>Thiết lập thông tin đăng nhập và định danh cơ bản.</CardDescription>
             </CardHeader>
@@ -167,7 +166,6 @@ export default function CreateUserPage() {
 
           {/* Personal & Contact */}
           <Card className='border-none shadow-md overflow-hidden'>
-            <div className='h-1.5 bg-green-500' />
             <CardHeader className='pb-4'>
               <CardTitle className='text-xl flex items-center gap-2'>
                 <div className='p-2 rounded-lg bg-green-50 text-green-600'>
@@ -261,7 +259,6 @@ export default function CreateUserPage() {
 
           {/* Roles */}
           <Card className='border-none shadow-md overflow-hidden'>
-            <div className='h-1.5 bg-purple-500' />
             <CardHeader className='pb-4'>
               <CardTitle className='text-xl flex items-center gap-2'>
                 <div className='p-2 rounded-lg bg-purple-50 text-purple-600'>
