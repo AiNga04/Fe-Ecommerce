@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { getImageUrl } from '@/lib/utils'
 
 export default function ProductsPage() {
   const { data: productsData, isLoading } = useQuery({
@@ -82,7 +83,7 @@ export default function ProductsPage() {
                   <TableCell>
                     {product.imageUrl ? (
                       <img
-                        src={product.imageUrl}
+                        src={getImageUrl(product.imageUrl)}
                         alt={product.name}
                         className='h-10 w-10 rounded-md object-cover'
                       />
