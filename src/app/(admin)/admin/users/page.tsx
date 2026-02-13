@@ -68,18 +68,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { UserSearchCriteria, Role, UserStatus, Gender, UserBatchCreateRequest } from '@/types/user'
+import { BulkCreateDialog } from './components/bulk-create-dialog'
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
@@ -89,10 +80,6 @@ export default function UsersPage() {
 
   // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
-
-  // Batch Create State
-  const [isBatchCreateOpen, setIsBatchCreateOpen] = useState(false)
-  const [batchJson, setBatchJson] = useState('')
 
   // Search Params State
   const [searchTerm, setSearchTerm] = useState('')
@@ -208,49 +195,9 @@ export default function UsersPage() {
     onError: () => toast.error('Xóa vĩnh viễn thất bại'),
   })
 
-  const batchCreateMutation = useMutation({
-    mutationFn: (data: UserBatchCreateRequest) => userService.createUsersBatch(data),
-    onSuccess: (res) => {
-      const { created, failed } = res.data?.data || {}
-      if (created && created.length > 0) {
-        toast.success(`Tạo thành công ${created.length} người dùng`)
-      }
-      if (failed && failed.length > 0) {
-        toast.error(`Thất bại ${failed.length} người dùng. Kiểm tra console để xem chi tiết.`)
-        console.error('Failed users:', failed)
-      }
-      setIsBatchCreateOpen(false)
-      setBatchJson('')
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-    },
-    onError: (err: any) => {
-      toast.error(
-        'Lỗi khi tạo hàng loạt: ' + (err?.response?.data?.message || 'Lỗi không xác định'),
-      )
-    },
-  })
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setPage(0)
-  }
-
-  const handleBatchCreateSubmit = () => {
-    try {
-      const parsed = JSON.parse(batchJson)
-      if (!Array.isArray(parsed)) {
-        toast.error('Dữ liệu phải là một mảng JSON (Array)')
-        return
-      }
-      if (parsed.length === 0) {
-        toast.error('Mảng dữ liệu trống')
-        return
-      }
-      // Basic validation could go here
-      batchCreateMutation.mutate({ users: parsed })
-    } catch (e) {
-      toast.error('JSON không hợp lệ. Vui lòng kiểm tra lại cú pháp.')
-    }
   }
 
   return (
@@ -290,62 +237,13 @@ export default function UsersPage() {
                 </Link>
               </Button>
 
-              <Dialog open={isBatchCreateOpen} onOpenChange={setIsBatchCreateOpen}>
-                <DialogTrigger asChild>
+              <BulkCreateDialog
+                trigger={
                   <Button variant='secondary'>
                     <FileJson className='mr-2 h-4 w-4' /> Tạo hàng loạt
                   </Button>
-                </DialogTrigger>
-                <DialogContent className='max-w-3xl'>
-                  <DialogHeader>
-                    <DialogTitle>Tạo người dùng hàng loạt (JSON)</DialogTitle>
-                    <DialogDescription>
-                      Nhập danh sách người dùng dưới dạng mảng JSON. Các trường bắt buộc: firstName,
-                      lastName, email, password.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className='grid gap-4 py-4'>
-                    <div className='space-y-2'>
-                      <div className='rounded-md bg-slate-50 p-3 text-xs text-slate-500 border border-slate-100'>
-                        <p className='font-medium text-slate-700 mb-1'>Mẫu dữ liệu (JSON):</p>
-                        <pre className='overflow-x-auto whitespace-pre-wrap'>
-                          {`[
-  {
-    "firstName": "Hương",
-    "lastName": "Phạm Lan",
-    "email": "huong.pham@example.com",
-    "password": "password123",
-    "phone": "0987654321",
-    "gender": "FEMALE",
-    "roles": ["USER"]
-  }
-]`}
-                        </pre>
-                      </div>
-                      <Textarea
-                        placeholder='Dán danh sách JSON vào đây...'
-                        className='font-mono h-[200px] text-sm'
-                        value={batchJson}
-                        onChange={(e) => setBatchJson(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant='outline' onClick={() => setIsBatchCreateOpen(false)}>
-                      Hủy
-                    </Button>
-                    <Button
-                      onClick={handleBatchCreateSubmit}
-                      disabled={batchCreateMutation.isPending}
-                    >
-                      {batchCreateMutation.isPending && (
-                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      )}
-                      Tạo ngay
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                }
+              />
             </>
           )}
         </div>
