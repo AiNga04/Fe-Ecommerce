@@ -136,6 +136,7 @@ export default function CreateUserPage() {
                   type='email'
                   id='email'
                   placeholder='example@mail.com'
+                  autoComplete="off"
                   {...register('email', { required: 'Vui lòng nhập email' })}
                   className='border-slate-200 focus-visible:ring-blue-500'
                 />
@@ -151,6 +152,7 @@ export default function CreateUserPage() {
                   type='password'
                   id='password'
                   placeholder='••••••'
+                  autoComplete="new-password"
                   {...register('password', {
                     required: 'Vui lòng nhập mật khẩu',
                     minLength: { value: 6, message: 'Tối thiểu 6 ký tự' },

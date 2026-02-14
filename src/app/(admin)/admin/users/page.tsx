@@ -607,50 +607,73 @@ export default function UsersPage() {
         </Table>
       </div>
 
-      {usersData?.data?.pagination && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href='#'
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (page > 0) setPage(page - 1)
-                }}
-                className={page === 0 ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-            {Array.from({ length: usersData?.data?.pagination?.totalPages || 0 }).map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  href='#'
-                  isActive={page === i}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setPage(i)
-                  }}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href='#'
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (page < (usersData.data?.pagination?.totalPages || 1) - 1) setPage(page + 1)
-                }}
-                className={
-                  page >= (usersData.data?.pagination?.totalPages || 1) - 1
-                    ? 'pointer-events-none opacity-50'
-                    : ''
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      <div className='flex flex-col-reverse md:flex-row items-center justify-between gap-4 mt-4'>
+        {/* Page Size Selector */}
+        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+          <span>Hiển thị</span>
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value))
+              setPage(0) // Reset to first page
+            }}
+          >
+            <SelectTrigger className='h-8 w-[70px]'>
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent side='top'>
+              {[10, 20, 50].map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>người dùng mỗi trang</span>
+        </div>
+
+        {/* Pagination Controls */}
+        {usersData?.data?.pagination && (
+          <div className='flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-center md:justify-end'>
+            <div className='text-sm text-muted-foreground'>
+              Trang {page + 1} / {usersData.data.pagination.totalPages || 1}
+            </div>
+            <Pagination className='justify-end w-auto'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page > 0) setPage(page - 1)
+                    }}
+                    className={page === 0 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+
+                {/* Simplified logic for now: show current, prev, next if possible, or just prev/next buttons */}
+                {/* For better UX with many pages, consider a proper pagination builder hook/logic */}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page < (usersData.data?.pagination?.totalPages || 1) - 1)
+                        setPage(page + 1)
+                    }}
+                    className={
+                      page >= (usersData.data?.pagination?.totalPages || 1) - 1
+                        ? 'pointer-events-none opacity-50'
+                        : ''
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
