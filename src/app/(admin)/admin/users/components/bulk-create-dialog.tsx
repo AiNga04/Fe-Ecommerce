@@ -37,9 +37,13 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
   const { mutate, isPending } = useMutation({
     mutationFn: userService.createUsersBatch,
     onSuccess: (data) => {
-      const { created, failed } = data.data as any // Temporary cast if types are tricky, or data.data
-      const successCount = created?.length || 0
-      const failCount = failed?.length || 0
+      // data is AxiosResponse, data.data is IBackendRes, data.data.data is UserBatchCreateResponse
+      const responseData = data.data?.data
+      const created = responseData?.created || []
+      const failed = responseData?.failed || []
+
+      const successCount = created.length
+      const failCount = failed.length
 
       if (successCount > 0) {
         toast.success(`Successfully created ${successCount} users`)
@@ -53,7 +57,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
       }
 
       if (successCount > 0) {
-        queryClient.invalidateQueries({ queryKey: ['users'] })
+        queryClient.invalidateQueries({ queryKey: ['admin-users'] })
         setOpen(false)
         setJsonInput('')
         setParsedUsers([])
@@ -74,14 +78,22 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
 
     const newObj: any = {}
     Object.keys(obj).forEach((key) => {
+      const lowerKey = key.toLowerCase()
       const value = obj[key]
-      // CamelCase conversion if needed (simple version)
-      // For now, let's assume keys match or are close enough
-      newObj[key] = value
 
-      // Handle the specific "role" vs "roles" case
-      if (key === 'role' && !obj['roles']) {
-        newObj['roles'] = [value]
+      newObj[lowerKey] = value
+
+      // Handle "role" -> "roles" mapping specifically
+      if (lowerKey === 'role') {
+        // If "roles" doesn't exist yet (or we haven't processed it), create it
+        if (!newObj['roles']) {
+          newObj['roles'] = [value]
+        }
+      }
+
+      // If we see "roles" explicitly, ensure it overrides or is used
+      if (lowerKey === 'roles') {
+        newObj['roles'] = Array.isArray(value) ? value : [value]
       }
     })
     return newObj
@@ -91,35 +103,74 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
     return data.map((item) => {
       const normalized = normalizeKeys(item)
 
-      // Basic validation/transformation
+      // Use the normalized keys (all lowercase)
+      // Note: UserCreateRequest expects SpecificCasing but our normalized obj has lowercase keys.
+      // We need to map lowercase keys back to required fields if we normalized them.
+      // Actually, let's keep it simple: normalizeKeys converts keys to lowercase.
+      // So we access them via lowercase property names.
+
+      let mappedRoles = [Role.USER]
+      if (normalized.roles && Array.isArray(normalized.roles) && normalized.roles.length > 0) {
+        mappedRoles = normalized.roles
+      } else if (normalized.role) {
+        mappedRoles = [normalized.role]
+      }
+
+      // Handle Excel Serial Date (number)
+      let dob = normalized.dateofbirth || normalized['date of birth']
+      if (typeof dob === 'number') {
+        const date = new Date(Math.round((dob - 25569) * 86400 * 1000))
+        // Check if valid date
+        if (!isNaN(date.getTime())) {
+          dob = date.toISOString().split('T')[0]
+        }
+      }
+
+      // Handle Phone (number to string)
+      let phone = normalized.phone
+      if (typeof phone === 'number') {
+        phone = phone.toString()
+      }
+
       return {
-        firstName: normalized.firstName || '',
-        lastName: normalized.lastName || '',
+        firstName: normalized.firstname || normalized['first name'] || '',
+        lastName: normalized.lastname || normalized['last name'] || '',
         email: normalized.email || '',
-        password: normalized.password || '123456', // Default password if missing? Or require it?
-        gender: normalized.gender as Gender,
-        dateOfBirth: normalized.dateOfBirth, // String format YYYY-MM-DD
-        phone: normalized.phone,
+        password: normalized.password || '123456',
+        gender: (normalized.gender as Gender) || Gender.OTHER,
+        dateOfBirth: dob,
+        phone: phone,
         address: normalized.address,
-        city: normalized.city as City,
-        roles: Array.isArray(normalized.roles)
-          ? normalized.roles
-          : normalized.role
-            ? [normalized.role]
-            : [Role.USER],
+        city: (normalized.city as City) || City.HO_CHI_MINH,
+        roles: mappedRoles,
       } as UserCreateRequest
     })
   }
 
   const handleJsonSubmit = () => {
     try {
-      const data = JSON.parse(jsonInput)
-      if (!Array.isArray(data)) {
-        toast.error('Input must be a JSON array')
+      const parsed = JSON.parse(jsonInput)
+      let data: any[] = []
+
+      if (Array.isArray(parsed)) {
+        data = parsed
+      } else if (parsed.users && Array.isArray(parsed.users)) {
+        data = parsed.users
+      } else {
+        toast.error('Input must be a JSON array or object with "users" array')
         return
       }
+
       const users = validateAndParse(data)
       setParsedUsers(users)
+
+      // If using JSON input, we perform mutation immediately (previous behavior for JSON tab?)
+      // Wait, the previous code called mutate immediately for JSON.
+      // Do we want to show preview for JSON too?
+      // The previous code: setParsedUsers(users); mutate({ users });
+      // Let's stick to that for now to avoid changing flow too much,
+      // but maybe consistency with file upload (preview first) is better?
+      // For now, assume immediate submit for JSON as per previous code.
       mutate({ users })
     } catch (e) {
       toast.error('Invalid JSON format')
