@@ -30,6 +30,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
   const [open, setOpen] = useState(false)
   const [jsonInput, setJsonInput] = useState('')
   const [parsedUsers, setParsedUsers] = useState<UserCreateRequest[]>([])
+  const [failedUsers, setFailedUsers] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState('json')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
@@ -47,20 +48,26 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
 
       if (successCount > 0) {
         toast.success(`Successfully created ${successCount} users`)
+        queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+
+        // If there are no failures, close the dialog
+        if (failCount === 0) {
+          setOpen(false)
+          setJsonInput('')
+          setParsedUsers([])
+          setFailedUsers([])
+          return
+        }
       }
 
       if (failCount > 0) {
         toast.error(`Failed to create ${failCount} users`, {
-          description: 'Check the console for details',
+          description: 'Please review the errors below.',
         })
-        console.error('Failed users:', failed)
-      }
-
-      if (successCount > 0) {
-        queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-        setOpen(false)
-        setJsonInput('')
-        setParsedUsers([])
+        setFailedUsers(failed)
+        // Switch to a new 'results' view or just show them.
+        // For simplicity, we can clear the parsed users and show the errors in the current tab or a dedicated area.
+        setParsedUsers([]) // Clear pending imports?
       }
     },
     onError: (error) => {
@@ -299,6 +306,32 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
             )}
           </TabsContent>
         </Tabs>
+
+        {failedUsers.length > 0 && (
+          <div className='mt-4 border-t pt-4'>
+            <h3 className='text-sm font-semibold text-red-600 mb-2'>
+              Import Errors ({failedUsers.length})
+            </h3>
+            <ScrollArea className='h-[150px] w-full rounded-md border p-2'>
+              <div className='space-y-2'>
+                {failedUsers.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className='flex flex-col text-sm border-b pb-2 last:border-0 last:pb-0'
+                  >
+                    <span className='font-medium text-slate-800'>{item.email}</span>
+                    <span className='text-red-500 text-xs'>{item.reason}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className='mt-2 text-right'>
+              <Button variant='ghost' size='sm' onClick={() => setFailedUsers([])}>
+                Clear Errors
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )
