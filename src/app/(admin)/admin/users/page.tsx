@@ -195,6 +195,21 @@ export default function UsersPage() {
     onError: () => toast.error('Xóa vĩnh viễn thất bại'),
   })
 
+  // Start Selection: Status Mutation
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: UserStatus }) =>
+      userService.updateStatus(id, status),
+    onSuccess: (data) => {
+      toast.success('Cập nhật trạng thái thành công')
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: (error) => {
+      toast.error('Cập nhật trạng thái thất bại')
+      console.error(error)
+    },
+  })
+  // End Selection
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setPage(0)
@@ -378,9 +393,9 @@ export default function UsersPage() {
             <SelectContent>
               <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
               <SelectItem value={UserStatus.ACTIVE}>Hoạt động</SelectItem>
-              <SelectItem value={UserStatus.PENDING}>Chờ duyệt</SelectItem>
-              <SelectItem value={UserStatus.INACTIVE}>Không hoạt động</SelectItem>
-              <SelectItem value={UserStatus.LOCKED}>Đã khóa</SelectItem>
+              <SelectItem value={UserStatus.PENDING}>Chờ xác minh</SelectItem>
+              <SelectItem value={UserStatus.DISABLED}>Bị khóa</SelectItem>
+              <SelectItem value={UserStatus.DELETED}>Đã xóa</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -480,18 +495,66 @@ export default function UsersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={user.status === UserStatus.ACTIVE ? 'default' : 'secondary'}
-                      className={
-                        user.status === UserStatus.ACTIVE
-                          ? 'bg-green-600 hover:bg-green-700'
-                          : user.status === UserStatus.LOCKED
-                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                            : 'bg-gray-400 hover:bg-gray-500'
-                      }
-                    >
-                      {user.status}
-                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className='focus:outline-none'>
+                        <Badge
+                          variant={user.status === UserStatus.ACTIVE ? 'default' : 'secondary'}
+                          className={`cursor-pointer select-none ${
+                            user.status === UserStatus.ACTIVE
+                              ? 'bg-green-600 hover:bg-green-700'
+                              : user.status === UserStatus.DISABLED
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : user.status === UserStatus.PENDING
+                                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                                  : 'bg-gray-400 hover:bg-gray-500'
+                          }`}
+                        >
+                          {user.status === UserStatus.ACTIVE && 'Đang hoạt động'}
+                          {user.status === UserStatus.PENDING && 'Chờ xác minh'}
+                          {user.status === UserStatus.DISABLED && 'Bị khóa'}
+                          {user.status === UserStatus.DELETED && 'Đã xóa'}
+                        </Badge>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='start'>
+                        <DropdownMenuLabel>Đổi trạng thái</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+
+                        {/* ACTIVE Option: Only allowed if NOT PENDING (or if already ACTIVE/DISABLED/DELETED - though DELETED handled separately) 
+                            Actually, PENDING -> ACTIVE is forbidden manually. 
+                            DISABLED -> ACTIVE is allowed.
+                        */}
+                        <DropdownMenuItem
+                          disabled={user.status === UserStatus.PENDING}
+                          onClick={() =>
+                            statusMutation.mutate({ id: user.id, status: UserStatus.ACTIVE })
+                          }
+                          className={
+                            user.status === UserStatus.PENDING
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
+                          }
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${user.status === UserStatus.ACTIVE ? 'opacity-100' : 'opacity-0'}`}
+                          />
+                          Đang hoạt động
+                        </DropdownMenuItem>
+
+                        {/* PENDING Option: REMOVED as per requirements (Admin cannot set PENDING) */}
+
+                        <DropdownMenuItem
+                          onClick={() =>
+                            statusMutation.mutate({ id: user.id, status: UserStatus.DISABLED })
+                          }
+                          className='text-red-600 focus:text-red-600'
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${user.status === UserStatus.DISABLED ? 'opacity-100' : 'opacity-0'}`}
+                          />
+                          Bị khóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                   <TableCell className='text-sm text-muted-foreground'>
                     {new Date(user.createdAt).toLocaleDateString('vi-VN')}

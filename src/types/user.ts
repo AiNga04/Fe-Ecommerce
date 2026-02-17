@@ -7,8 +7,8 @@ export enum Gender {
 export enum UserStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  LOCKED = 'LOCKED',
+  DISABLED = 'DISABLED',
+  DELETED = 'DELETED',
 }
 
 export enum Role {

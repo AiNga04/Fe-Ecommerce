@@ -3,6 +3,7 @@ import {
   User,
   UserCreateRequest,
   UserUpdateRequest,
+  UserStatus,
   UserSearchCriteria,
   UserUpdateProfileRequest,
   UserBatchCreateRequest,
@@ -19,6 +20,10 @@ export const userService = {
 
   updateUser: (id: number | string, data: UserUpdateRequest) => {
     return http.put<IBackendRes<User>>(`${USER_PATH}/${id}`, data)
+  },
+
+  updateStatus: (id: number | string, status: UserStatus) => {
+    return http.patch<IBackendRes<User>>(`${USER_PATH}/${id}/status`, { status })
   },
 
   getUserById: (id: number | string) => {
