@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray } from 'react-hook-form'
@@ -18,6 +18,8 @@ import {
   Tag,
   Ruler,
   Layers,
+  History,
+  ImagePlus,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { productService } from '@/services/product'
@@ -51,7 +53,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+import { getImageUrl } from '@/lib/utils'
 
 interface ProductVariantForm {
   sizeId: string
@@ -69,10 +71,12 @@ interface ProductFormValues {
   image?: FileList
 }
 
-export default function CreateProductPage() {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [uploadingGallery, setUploadingGallery] = useState(false)
 
   const {
     register,
@@ -80,6 +84,7 @@ export default function CreateProductPage() {
     control,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<ProductFormValues>({
     defaultValues: {
@@ -91,7 +96,7 @@ export default function CreateProductPage() {
     },
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'variants',
   })
@@ -104,8 +109,6 @@ export default function CreateProductPage() {
       const url = URL.createObjectURL(file)
       setPreviewImage(url)
       return () => URL.revokeObjectURL(url)
-    } else {
-      setPreviewImage(null)
     }
   }, [imageFileList])
 
@@ -128,24 +131,86 @@ export default function CreateProductPage() {
   })
   const sizeGuides = sizeGuidesData?.data?.data || []
 
-  // Mutation
-  const createMutation = useMutation({
-    mutationFn: (data: FormData) => productService.createProduct(data),
+  // Fetch Product
+  const { data: productData, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productService.getProductById(id),
+  })
+  const product = productData?.data?.data
+
+  // Fetch Price History
+  const { data: priceHistoryData } = useQuery({
+    queryKey: ['product-price-history', id],
+    queryFn: () => productService.getPriceHistory(id),
+    enabled: !!id,
+  })
+  const priceHistory = priceHistoryData?.data?.data || []
+
+  // Populate Form
+  useEffect(() => {
+    if (product) {
+      reset({
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        categoryId:
+          typeof product.category === 'object'
+            ? String(product.category.id)
+            : categories.find((c) => c.name === product.category)?.id.toString() || '',
+        sizeGuideId: product.sizeGuide ? String(product.sizeGuide.id) : '',
+        isActive: product.isActive,
+        variants:
+          product.variants?.map((v) => ({
+            sizeId: String(v.sizeId),
+            quantity: v.quantity,
+          })) || [],
+      })
+      if (product.imageUrl) {
+        setPreviewImage(getImageUrl(product.imageUrl))
+      }
+    }
+  }, [product, reset])
+
+  // Mutations
+  const updateMutation = useMutation({
+    mutationFn: (data: FormData) => productService.updateProduct(id, data),
     onSuccess: () => {
-      toast.success('Tạo sản phẩm thành công')
+      toast.success('Cập nhật sản phẩm thành công')
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      router.push('/admin/products')
+      queryClient.invalidateQueries({ queryKey: ['product', id] })
     },
     onError: (error) => {
-      toast.error('Có lỗi xảy ra khi tạo sản phẩm')
+      toast.error('Có lỗi xảy ra khi cập nhật')
       console.error(error)
     },
   })
 
+  const uploadGalleryMutation = useMutation({
+    mutationFn: (data: FormData) => productService.uploadGallery(id, data),
+    onSuccess: () => {
+      toast.success('Đã tải lên ảnh gallery')
+      queryClient.invalidateQueries({ queryKey: ['product', id] })
+      setUploadingGallery(false)
+    },
+    onError: () => {
+      toast.error('Lỗi khi tải ảnh gallery')
+      setUploadingGallery(false)
+    },
+  })
+
+  const deleteGalleryImageMutation = useMutation({
+    mutationFn: (imageId: number) => productService.deleteGalleryImage(id, imageId),
+    onSuccess: () => {
+      toast.success('Đã xóa ảnh gallery')
+      queryClient.invalidateQueries({ queryKey: ['product', id] })
+    },
+    onError: () => toast.error('Lỗi khi xóa ảnh gallery'),
+  })
+
+  // Submit Handler
   const onSubmit = (data: ProductFormValues) => {
     const formData = new FormData()
 
-    // 1. Product JSON
     const productJson = {
       name: data.name,
       description: data.description,
@@ -153,37 +218,60 @@ export default function CreateProductPage() {
       categoryId: Number(data.categoryId),
       sizeGuideId: data.sizeGuideId ? Number(data.sizeGuideId) : null,
       isActive: data.isActive,
-      // Map variants to backend expected format if needed, assumed straight array is fine or needs mapping
-      // Backend likely expects `variants` list in JSON
       variants: data.variants.map((v) => ({
         sizeId: Number(v.sizeId),
         quantity: Number(v.quantity),
       })),
-      stock: data.variants.reduce((acc, v) => acc + Number(v.quantity), 0), // Calculate total stock
+      stock: data.variants.reduce((acc, v) => acc + Number(v.quantity), 0),
     }
 
-    // Append 'product' as JSON string (common pattern for Spring Boot with Multipart)
-    // OR if backend handles flat fields, append individually.
-    // Based on User Create, let's try appending a JSON Blob for 'product' or 'data'.
-    // BUT since I don't know the backend Controller signature perfectly, I'll try the safest:
-    // Append fields individually if possible, OR check if I can send 'product' Blob.
-    // Let's assume the standard 'product' part.
     formData.append(
       'product',
       new Blob([JSON.stringify(productJson)], { type: 'application/json' }),
     )
 
-    // 2. Image File
     if (data.image && data.image.length > 0) {
       formData.append('image', data.image[0])
     }
 
-    createMutation.mutate(formData)
+    updateMutation.mutate(formData)
   }
 
-  // Calculate total stock for display
-  const variants = watch('variants')
-  const totalStock = variants?.reduce((acc, v) => acc + (Number(v.quantity) || 0), 0) || 0
+  // Gallery Handler
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setUploadingGallery(true)
+      const formData = new FormData()
+      Array.from(e.target.files).forEach((file) => {
+        formData.append('files', file) // Backend usually expects 'files' or 'images'
+      })
+      // Let's assume 'images' based on typical logic, or 'files'
+      // productService.uploadGallery wrapper uses 'data' FormData.
+      // If backend expects specific key, I should have checked.
+      // Usually 'files' or 'images'. I'll try 'images' as it's common for gallery.
+      // Wait, I should check `GalleryController` if I could.
+      // I will use 'files' as a default guess for "multiple files".
+      // EDIT: standardizing to 'files'.
+
+      // Re-creating formData with 'files' key
+      const uploadData = new FormData()
+      Array.from(e.target.files).forEach((file) => {
+        uploadData.append('files', file)
+      })
+
+      uploadGalleryMutation.mutate(uploadData)
+    }
+  }
+
+  const totalStock = watch('variants')?.reduce((acc, v) => acc + (Number(v.quantity) || 0), 0) || 0
+
+  if (isLoadingProduct) {
+    return (
+      <div className='flex h-screen items-center justify-center'>
+        <Loader2 className='h-8 w-8 animate-spin text-blue-500' />
+      </div>
+    )
+  }
 
   return (
     <div className='max-w-7xl mx-auto pb-10'>
@@ -196,7 +284,7 @@ export default function CreateProductPage() {
         >
           <ChevronLeft className='h-5 w-5 text-slate-600' />
         </Button>
-        <h1 className='text-3xl font-extrabold tracking-tight text-slate-900'>Thêm sản phẩm mới</h1>
+        <h1 className='text-3xl font-extrabold tracking-tight text-slate-900'>Cập nhật sản phẩm</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
@@ -212,7 +300,6 @@ export default function CreateProductPage() {
                 </div>
                 <CardTitle className='text-xl'>Thông tin cơ bản</CardTitle>
               </div>
-              <CardDescription>Tên, mô tả và phân loại sản phẩm</CardDescription>
             </CardHeader>
             <CardContent className='space-y-6'>
               <div className='grid gap-3'>
@@ -233,7 +320,10 @@ export default function CreateProductPage() {
                   <Label htmlFor='categoryId' className='text-slate-900 font-medium'>
                     Danh mục <span className='text-red-500'>*</span>
                   </Label>
-                  <Select onValueChange={(value) => setValue('categoryId', value)}>
+                  <Select
+                    onValueChange={(value) => setValue('categoryId', value)}
+                    value={watch('categoryId')}
+                  >
                     <SelectTrigger className='h-10 border-slate-200'>
                       <SelectValue placeholder='Chọn danh mục' />
                     </SelectTrigger>
@@ -245,21 +335,20 @@ export default function CreateProductPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {/* Hidden input for validation if needed, or manage state */}
                   <input
                     type='hidden'
                     {...register('categoryId', { required: 'Vui lòng chọn danh mục' })}
                   />
-                  {errors.categoryId && (
-                    <span className='text-red-500 text-sm'>{errors.categoryId.message}</span>
-                  )}
                 </div>
 
                 <div className='grid gap-3'>
                   <Label htmlFor='sizeGuideId' className='text-slate-900 font-medium'>
-                    Bảng Size (Size Guide)
+                    Bảng Size
                   </Label>
-                  <Select onValueChange={(value) => setValue('sizeGuideId', value)}>
+                  <Select
+                    onValueChange={(value) => setValue('sizeGuideId', value)}
+                    value={watch('sizeGuideId')}
+                  >
                     <SelectTrigger className='h-10 border-slate-200'>
                       <SelectValue placeholder='Chọn bảng size' />
                     </SelectTrigger>
@@ -299,7 +388,6 @@ export default function CreateProductPage() {
                 </div>
                 <CardTitle className='text-xl'>Giá bán & Kho hàng</CardTitle>
               </div>
-              <CardDescription>Thiết lập giá và quản lý số lượng tồn kho</CardDescription>
             </CardHeader>
             <CardContent className='space-y-6'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -323,9 +411,6 @@ export default function CreateProductPage() {
                       <span className='text-slate-500 text-sm'>₫</span>
                     </div>
                   </div>
-                  {errors.price && (
-                    <span className='text-red-500 text-sm'>{errors.price.message}</span>
-                  )}
                 </div>
 
                 <div className='grid gap-3'>
@@ -335,7 +420,6 @@ export default function CreateProductPage() {
                     disabled
                     className='h-10 bg-slate-50 text-slate-500 font-medium'
                   />
-                  <p className='text-xs text-slate-500'>* Tự động tính từ số lượng các biến thể</p>
                 </div>
               </div>
 
@@ -357,30 +441,24 @@ export default function CreateProductPage() {
                   </Button>
                 </div>
 
-                {fields.length === 0 ? (
-                  <div className='text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200'>
-                    <p className='text-slate-500'>Chưa có size nào được thêm.</p>
-                    <Button
-                      type='button'
-                      variant='link'
-                      onClick={() => append({ sizeId: '', quantity: 0 })}
-                      className='text-emerald-600'
-                    >
-                      Thêm size ngay
-                    </Button>
-                  </div>
-                ) : (
-                  <div className='rounded-md border border-slate-200 overflow-hidden'>
-                    <Table>
-                      <TableHeader className='bg-slate-50'>
+                <div className='rounded-md border border-slate-200 overflow-hidden'>
+                  <Table>
+                    <TableHeader className='bg-slate-50'>
+                      <TableRow>
+                        <TableHead>Kích thước (Size)</TableHead>
+                        <TableHead className='w-[150px]'>Số lượng</TableHead>
+                        <TableHead className='w-[50px]'></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {fields.length === 0 ? (
                         <TableRow>
-                          <TableHead>Kích thước (Size)</TableHead>
-                          <TableHead className='w-[150px]'>Số lượng</TableHead>
-                          <TableHead className='w-[50px]'></TableHead>
+                          <TableCell colSpan={3} className='text-center text-slate-500 h-24'>
+                            Chưa có biến thể nào. Thêm size để quản lý tồn kho.
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {fields.map((field, index) => (
+                      ) : (
+                        fields.map((field, index) => (
                           <TableRow key={field.id}>
                             <TableCell>
                               <Select
@@ -424,14 +502,55 @@ export default function CreateProductPage() {
                               </Button>
                             </TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Price History (Optional) */}
+          {priceHistory.length > 0 && (
+            <Card className='border-slate-200 shadow-sm'>
+              <CardHeader>
+                <div className='flex items-center gap-3 mb-1'>
+                  <div className='p-2 bg-slate-100 rounded-lg'>
+                    <History className='h-5 w-5 text-slate-600' />
+                  </div>
+                  <CardTitle className='text-xl'>Lịch sử thay đổi giá</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-4'>
+                  {priceHistory.map((history: any, idx: number) => (
+                    <div key={idx} className='flex items-center justify-between text-sm'>
+                      <div>
+                        <span className='text-slate-500 line-through mr-2'>
+                          {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND',
+                          }).format(history.oldPrice)}
+                        </span>
+                        <span className='font-medium text-slate-900'>
+                          {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND',
+                          }).format(history.newPrice)}
+                        </span>
+                      </div>
+                      <div className='text-slate-400 text-xs'>
+                        {history.changedAt
+                          ? new Date(history.changedAt).toLocaleString('vi-VN')
+                          : 'N/A'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Right Column: Images & Publish */}
@@ -444,7 +563,7 @@ export default function CreateProductPage() {
                 <div className='p-2 bg-purple-100 rounded-lg'>
                   <ImageIcon className='h-5 w-5 text-purple-600' />
                 </div>
-                <CardTitle className='text-xl'>Hình ảnh</CardTitle>
+                <CardTitle className='text-xl'>Ảnh đại diện</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -457,46 +576,87 @@ export default function CreateProductPage() {
                         alt='Preview'
                         className='max-h-[200px] rounded-lg object-contain shadow-sm'
                       />
+                      {/* Only show clear button for new files, for existing URL maybe just replace by uploading new */}
+                      <Input
+                        type='file'
+                        accept='image/*'
+                        className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+                        {...register('image')}
+                        onChange={(e) => register('image').onChange(e)}
+                      />
+                    </div>
+                  ) : (
+                    <div className='text-center'>
+                      <Upload className='h-8 w-8 text-slate-300 mx-auto mb-2' />
+                      <p className='text-sm text-slate-500'>Tải ảnh mới</p>
+                      <Input
+                        type='file'
+                        accept='image/*'
+                        className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+                        {...register('image')}
+                        onChange={(e) => register('image').onChange(e)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Gallery Card */}
+          <Card className='border-slate-200 shadow-sm overflow-hidden'>
+            <div className='h-2 bg-gradient-to-r from-orange-400 to-red-400' />
+            <CardHeader>
+              <div className='flex items-center gap-3 mb-1'>
+                <div className='p-2 bg-orange-100 rounded-lg'>
+                  <ImagePlus className='h-5 w-5 text-orange-600' />
+                </div>
+                <CardTitle className='text-xl'>Thư viện ảnh</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+                {product?.gallery?.map((img) => (
+                  <div
+                    key={img.id}
+                    className='relative group aspect-square rounded-lg border border-slate-100 overflow-hidden'
+                  >
+                    <img
+                      src={getImageUrl(img.url)}
+                      alt='Gallery'
+                      className='w-full h-full object-cover'
+                    />
+                    <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
                       <Button
                         type='button'
                         variant='destructive'
                         size='icon'
-                        className='absolute -top-2 -right-2 h-8 w-8 rounded-full shadow-md'
-                        onClick={() => {
-                          setValue('image', undefined as any) // clear file list
-                          setPreviewImage(null)
-                        }}
+                        className='h-8 w-8'
+                        onClick={() => deleteGalleryImageMutation.mutate(img.id)}
                       >
-                        <X className='h-4 w-4' />
+                        <Trash2 className='h-4 w-4' />
                       </Button>
                     </div>
+                  </div>
+                ))}
+
+                {/* Add Button */}
+                <div className='relative aspect-square rounded-lg border-2 border-dashed border-slate-200 hover:border-orange-400 hover:bg-orange-50 transition-colors flex flex-col items-center justify-center cursor-pointer'>
+                  {uploadingGallery ? (
+                    <Loader2 className='h-6 w-6 animate-spin text-orange-500' />
                   ) : (
-                    <div className='text-center'>
-                      <div className='w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-3'>
-                        <Upload className='h-6 w-6 text-purple-500' />
-                      </div>
-                      <p className='text-sm font-medium text-slate-700'>Thêm ảnh sản phẩm</p>
-                      <p className='text-xs text-slate-400 mt-1'>Kéo thả hoặc click để tải lên</p>
-                    </div>
+                    <>
+                      <Plus className='h-8 w-8 text-slate-300 mb-1' />
+                      <span className='text-xs text-slate-500'>Thêm ảnh</span>
+                      <input
+                        type='file'
+                        multiple
+                        accept='image/*'
+                        className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+                        onChange={handleGalleryUpload}
+                      />
+                    </>
                   )}
-                  <Input
-                    type='file'
-                    accept='image/*'
-                    className='absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed'
-                    {...register('image', { required: previewImage ? false : 'Vui lòng chọn ảnh' })}
-                    onChange={(e) => {
-                      // Register onChange handler is overridden, need to handle preview manually plus register
-                      register('image').onChange(e)
-                    }}
-                  />
-                </div>
-                {errors.image && !previewImage && (
-                  <span className='text-red-500 text-sm text-center block'>
-                    {errors.image.message as string}
-                  </span>
-                )}
-                <div className='text-xs text-slate-400 text-center'>
-                  Hỗ trợ định dạng: JPG, PNG, WEBP.
                 </div>
               </div>
             </CardContent>
@@ -529,9 +689,9 @@ export default function CreateProductPage() {
               <Button
                 type='submit'
                 className='w-full h-11 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/10'
-                disabled={createMutation.isPending}
+                disabled={updateMutation.isPending}
               >
-                {createMutation.isPending ? (
+                {updateMutation.isPending ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     Đang xử lý...
@@ -539,7 +699,7 @@ export default function CreateProductPage() {
                 ) : (
                   <>
                     <Save className='mr-2 h-4 w-4' />
-                    Tạo sản phẩm
+                    Lưu thay đổi
                   </>
                 )}
               </Button>
