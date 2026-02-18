@@ -19,6 +19,8 @@ import {
   X,
   Loader2,
   CheckSquare,
+  ArrowLeft,
+  PlusCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { userService } from '@/services/user'
@@ -230,35 +232,58 @@ export default function UsersPage() {
         </div>
         <div className='flex items-center gap-2 flex-wrap'>
           <Button
-            variant={viewDeleted ? 'default' : 'outline'}
+            variant='outline'
+            size='sm'
             onClick={() => {
               setViewDeleted(!viewDeleted)
               setPage(0)
             }}
+            className={`gap-2 transition-all duration-200 border-dashed ${
+              viewDeleted
+                ? 'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 hover:text-orange-700 hover:border-orange-300'
+                : 'text-muted-foreground hover:text-foreground hover:bg-slate-50'
+            }`}
           >
             {viewDeleted ? (
-              <UserCog className='mr-2 h-4 w-4' />
+              <>
+                <ArrowLeft className='h-4 w-4' /> Quay lại danh sách
+              </>
             ) : (
-              <Archive className='mr-2 h-4 w-4' />
+              <>
+                <Trash2 className='h-4 w-4' /> Thùng rác
+              </>
             )}
-            {viewDeleted ? 'Danh sách chính' : 'Thùng rác'}
           </Button>
 
           {!viewDeleted && (
             <>
-              <Button asChild variant='outline'>
-                <Link href='/admin/users/create'>
-                  <Plus className='mr-2 h-4 w-4' /> Thêm mới
-                </Link>
-              </Button>
+              <div className='h-6 w-px bg-slate-200 hidden sm:block mx-1' />
 
               <BulkCreateDialog
                 trigger={
-                  <Button variant='secondary'>
-                    <FileJson className='mr-2 h-4 w-4' /> Tạo hàng loạt
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-colors'
+                  >
+                    <FileJson className='h-4 w-4' />
+                    <span className='hidden sm:inline'>Import File</span>
+                    <span className='sm:hidden'>Import</span>
                   </Button>
                 }
               />
+
+              <Button
+                asChild
+                size='sm'
+                className='gap-2 shadow-sm bg-slate-900 hover:bg-slate-800 transition-all hover:shadow-md'
+              >
+                <Link href='/admin/users/create'>
+                  <PlusCircle className='h-4 w-4' />
+                  <span className='hidden sm:inline'>Thêm người dùng</span>
+                  <span className='sm:hidden'>Thêm mới</span>
+                </Link>
+              </Button>
             </>
           )}
         </div>
