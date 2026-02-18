@@ -16,7 +16,13 @@ const nextConfig: NextConfig = {
         hostname: 'ui-avatars.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
     ],
+    formats: ['image/avif', 'image/webp'],
   },
 }
 

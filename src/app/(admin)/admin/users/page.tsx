@@ -228,7 +228,7 @@ export default function UsersPage() {
               : 'Quản lý tài khoản người dùng trong hệ thống'}
           </p>
         </div>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-2 flex-wrap'>
           <Button
             variant={viewDeleted ? 'default' : 'outline'}
             onClick={() => {
