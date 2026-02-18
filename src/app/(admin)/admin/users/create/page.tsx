@@ -5,7 +5,20 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, CalendarIcon, Plus, KeyRound, Loader2 } from 'lucide-react'
+import {
+  ChevronLeft,
+  Calendar as CalendarIcon,
+  Plus,
+  KeyRound,
+  Loader2,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  Save,
+  X,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { userService } from '@/services/user'
@@ -20,8 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-// import { Calendar } from '@/components/ui/calendar' // Use standard date input for simplicity if calendar component issues arise, but let's try standard input first for robustness.
 import { Gender, Role, City, UserCreateRequest } from '@/types/user'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CITIES } from '@/constants/locations'
@@ -65,100 +76,118 @@ export default function CreateUserPage() {
   }
 
   return (
-    <div className='pb-10'>
-      <div className='flex items-center gap-4 mb-8'>
+    <div className='pb-10 w-full mx-auto'>
+      <div className='flex items-center gap-4 mb-6'>
         <Button
           variant='outline'
           size='icon'
           asChild
-          className='h-10 w-10 rounded-full border-slate-200 bg-white hover:bg-slate-50'
+          className='h-10 w-10 rounded-full border-slate-200 bg-white hover:bg-slate-50 shadow-sm'
         >
           <Link href='/admin/users'>
             <ChevronLeft className='h-5 w-5 text-slate-600' />
           </Link>
         </Button>
         <div>
-          <h1 className='text-3xl font-extrabold tracking-tight text-slate-900'>
+          <h1 className='text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-blue-700 to-indigo-700'>
             Thêm người dùng mới
           </h1>
-          <p className='text-slate-500 font-medium'>Tạo tài khoản khách hàng hoặc nhân viên mới</p>
+          <p className='text-sm md:text-base text-slate-500 font-medium'>
+            Thiết lập hồ sơ người dùng để cấp quyền truy cập vào hệ thống.
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='grid gap-8'>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
+        {/* Main Grid: 2 Columns for Info */}
+        <div className='grid gap-6 md:grid-cols-2 lg:items-start'>
           {/* Account Info */}
-          <Card className='border-none shadow-md overflow-hidden'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='text-xl flex items-center gap-2'>
-                <div className='p-2 rounded-lg bg-blue-50 text-blue-600'>
+          <Card className='border-0 shadow-lg shadow-blue-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
+            <div className='h-2 bg-linear-to-r from-blue-500 to-cyan-500' />
+            <CardHeader className='pb-4 flex-none'>
+              <CardTitle className='text-xl flex items-center gap-3'>
+                <div className='p-2.5 rounded-xl bg-blue-50 text-blue-600 shadow-inner'>
                   <KeyRound className='h-5 w-5' />
                 </div>
-                Tài khoản
+                Thông tin tài khoản
               </CardTitle>
-              <CardDescription>Thiết lập thông tin đăng nhập và định danh cơ bản.</CardDescription>
+              <CardDescription className='min-h-[20px]'>
+                Thông tin đăng nhập bắt buộc cho người dùng.
+              </CardDescription>
             </CardHeader>
-            <CardContent className='grid gap-6 md:grid-cols-2 pt-2'>
-              <div className='space-y-2'>
-                <Label htmlFor='lastName' className='text-slate-700'>
-                  Họ & Tên đệm <span className='text-red-500'>*</span>
-                </Label>
-                <Input
-                  id='lastName'
-                  placeholder='Ví dụ: Nguyễn Văn'
-                  {...register('lastName', { required: 'Vui lòng nhập họ' })}
-                  className='border-slate-200 focus-visible:ring-blue-500'
-                />
-                {errors.lastName && (
-                  <p className='text-xs text-red-500 font-medium'>{errors.lastName.message}</p>
-                )}
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='firstName' className='text-slate-700'>
-                  Tên <span className='text-red-500'>*</span>
-                </Label>
-                <Input
-                  id='firstName'
-                  placeholder='Ví dụ: A'
-                  {...register('firstName', { required: 'Vui lòng nhập tên' })}
-                  className='border-slate-200 focus-visible:ring-blue-500'
-                />
-                {errors.firstName && (
-                  <p className='text-xs text-red-500 font-medium'>{errors.firstName.message}</p>
-                )}
+            <CardContent className='space-y-5 flex-1'>
+              <div className='grid grid-cols-2 gap-4 pb-1.5'>
+                <div className='space-y-2'>
+                  <Label htmlFor='lastName' className='text-slate-700 font-medium'>
+                    Họ & Tên đệm <span className='text-red-500'>*</span>
+                  </Label>
+                  <div className='relative'>
+                    <User className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                    <Input
+                      id='lastName'
+                      placeholder='Nguyễn Văn'
+                      {...register('lastName', { required: 'Vui lòng nhập họ' })}
+                      className='pl-9 h-10 border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 focus:bg-white transition-colors'
+                    />
+                  </div>
+                  {errors.lastName && (
+                    <p className='text-xs text-red-500 font-medium'>{errors.lastName.message}</p>
+                  )}
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='firstName' className='text-slate-700 font-medium'>
+                    Tên <span className='text-red-500'>*</span>
+                  </Label>
+                  <Input
+                    id='firstName'
+                    placeholder='A'
+                    {...register('firstName', { required: 'Vui lòng nhập tên' })}
+                    className='h-10 border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 focus:bg-white transition-colors'
+                  />
+                  {errors.firstName && (
+                    <p className='text-xs text-red-500 font-medium'>{errors.firstName.message}</p>
+                  )}
+                </div>
               </div>
 
-              <div className='space-y-2'>
-                <Label htmlFor='email' className='text-slate-700'>
-                  Email <span className='text-red-500'>*</span>
+              <div className='space-y-2 pb-1.5'>
+                <Label htmlFor='email' className='text-slate-700 font-medium'>
+                  Email đăng nhập <span className='text-red-500'>*</span>
                 </Label>
-                <Input
-                  type='email'
-                  id='email'
-                  placeholder='example@mail.com'
-                  autoComplete="off"
-                  {...register('email', { required: 'Vui lòng nhập email' })}
-                  className='border-slate-200 focus-visible:ring-blue-500'
-                />
+                <div className='relative'>
+                  <Mail className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                  <Input
+                    type='email'
+                    id='email'
+                    placeholder='name@company.com'
+                    autoComplete='off'
+                    {...register('email', { required: 'Vui lòng nhập email' })}
+                    className='pl-9 h-10 border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 focus:bg-white transition-colors'
+                  />
+                </div>
                 {errors.email && (
                   <p className='text-xs text-red-500 font-medium'>{errors.email.message}</p>
                 )}
               </div>
+
               <div className='space-y-2'>
-                <Label htmlFor='password' className='text-slate-700'>
-                  Mật khẩu <span className='text-red-500'>*</span>
+                <Label htmlFor='password' className='text-slate-700 font-medium'>
+                  Mật khẩu khởi tạo <span className='text-red-500'>*</span>
                 </Label>
-                <Input
-                  type='password'
-                  id='password'
-                  placeholder='••••••'
-                  autoComplete="new-password"
-                  {...register('password', {
-                    required: 'Vui lòng nhập mật khẩu',
-                    minLength: { value: 6, message: 'Tối thiểu 6 ký tự' },
-                  })}
-                  className='border-slate-200 focus-visible:ring-blue-500'
-                />
+                <div className='relative'>
+                  <KeyRound className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                  <Input
+                    type='password'
+                    id='password'
+                    placeholder='••••••••'
+                    autoComplete='new-password'
+                    {...register('password', {
+                      required: 'Vui lòng nhập mật khẩu',
+                      minLength: { value: 6, message: 'Tối thiểu 6 ký tự' },
+                    })}
+                    className='pl-9 h-10 border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 focus:bg-white transition-colors'
+                  />
+                </div>
                 {errors.password && (
                   <p className='text-xs text-red-500 font-medium'>{errors.password.message}</p>
                 )}
@@ -166,194 +195,215 @@ export default function CreateUserPage() {
             </CardContent>
           </Card>
 
-          {/* Personal & Contact */}
-          <Card className='border-none shadow-md overflow-hidden'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='text-xl flex items-center gap-2'>
-                <div className='p-2 rounded-lg bg-green-50 text-green-600'>
-                  <CalendarIcon className='h-5 w-5' />
+          {/* Personal Info */}
+          <Card className='border-0 shadow-lg shadow-emerald-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
+            <div className='h-2 bg-linear-to-r from-emerald-500 to-teal-500' />
+            <CardHeader className='pb-4 flex-none'>
+              <CardTitle className='text-xl flex items-center gap-3'>
+                <div className='p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shadow-inner'>
+                  <User className='h-5 w-5' />
                 </div>
-                Cá nhân & Liên hệ
+                Thông tin cá nhân
               </CardTitle>
-              <CardDescription>Thông tin chi tiết và địa chỉ giao hàng.</CardDescription>
+              <CardDescription className='min-h-[20px]'>
+                Hồ sơ chi tiết và thông tin liên hệ.
+              </CardDescription>
             </CardHeader>
-            <CardContent className='grid gap-6 md:grid-cols-2 pt-2'>
-              <div className='space-y-2'>
-                <Label className='text-slate-700'>Giới tính</Label>
-                <Controller
-                  name='gender'
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger className='w-full border-slate-200 focus:ring-green-500'>
-                        <SelectValue placeholder='Chọn giới tính' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={Gender.MALE}>Nam</SelectItem>
-                        <SelectItem value={Gender.FEMALE}>Nữ</SelectItem>
-                        <SelectItem value={Gender.OTHER}>Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+            <CardContent className='space-y-5 flex-1'>
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label className='text-slate-700 font-medium'>Giới tính</Label>
+                  <Controller
+                    name='gender'
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger className='w-full h-10 border-slate-200 focus:ring-emerald-500 bg-slate-50/50'>
+                          <SelectValue placeholder='Chọn giới tính' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={Gender.MALE}>Nam</SelectItem>
+                          <SelectItem value={Gender.FEMALE}>Nữ</SelectItem>
+                          <SelectItem value={Gender.OTHER}>Khác</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='dateOfBirth' className='text-slate-700 font-medium'>
+                    Ngày sinh
+                  </Label>
+                  <div className='relative'>
+                    <CalendarIcon className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                    <Input
+                      type='date'
+                      id='dateOfBirth'
+                      {...register('dateOfBirth')}
+                      className='pl-9 h-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50 focus:bg-white transition-colors block w-full'
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='phone' className='text-slate-700 font-medium'>
+                    Số điện thoại
+                  </Label>
+                  <div className='relative'>
+                    <Phone className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                    <Input
+                      id='phone'
+                      placeholder='09xx...'
+                      {...register('phone')}
+                      className='pl-9 h-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50 focus:bg-white transition-colors'
+                    />
+                  </div>
+                </div>
+
+                <div className='space-y-2'>
+                  <Label className='text-slate-700 font-medium'>Thành phố</Label>
+                  <Controller
+                    name='city'
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger className='w-full h-10 border-slate-200 focus:ring-emerald-500 bg-slate-50/50'>
+                          <SelectValue placeholder='Chọn thành phố' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CITIES.map((city) => (
+                            <SelectItem key={city.value} value={city.value}>
+                              {city.label}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value={City.OTHER}>Khác</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='dateOfBirth' className='text-slate-700'>
-                  Ngày sinh
-                </Label>
-                <Input
-                  type='date'
-                  id='dateOfBirth'
-                  {...register('dateOfBirth')}
-                  className='border-slate-200 focus-visible:ring-green-500'
-                />
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='phone' className='text-slate-700'>
-                  Số điện thoại
-                </Label>
-                <Input
-                  id='phone'
-                  placeholder='09xx xxx xxx'
-                  {...register('phone')}
-                  className='border-slate-200 focus-visible:ring-green-500'
-                />
-              </div>
-
-              <div className='space-y-2'>
-                <Label className='text-slate-700'>Thành phố</Label>
-                <Controller
-                  name='city'
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger className='w-full border-slate-200 focus:ring-green-500'>
-                        <SelectValue placeholder='Chọn thành phố' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CITIES.map((city) => (
-                          <SelectItem key={city.value} value={city.value}>
-                            {city.label}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value={City.OTHER}>Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-
-              <div className='space-y-2 md:col-span-2'>
-                <Label htmlFor='address' className='text-slate-700'>
+                <Label htmlFor='address' className='text-slate-700 font-medium'>
                   Địa chỉ chi tiết
                 </Label>
-                <Input
-                  id='address'
-                  placeholder='Số nhà, tên đường, phường/xã...'
-                  {...register('address')}
-                  className='border-slate-200 focus-visible:ring-green-500'
+                <div className='relative'>
+                  <MapPin className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                  <Input
+                    id='address'
+                    placeholder='Số nhà, tên đường, phường/xã...'
+                    {...register('address')}
+                    className='pl-9 h-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50 focus:bg-white transition-colors'
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Roles Section - Full Width */}
+        <Card className='border-0 shadow-lg shadow-purple-500/5 overflow-hidden ring-1 ring-slate-200/50'>
+          <div className='h-2 bg-linear-to-r from-purple-500 to-fuchsia-500' />
+          <CardHeader className='pb-4'>
+            <CardTitle className='text-xl flex items-center gap-3'>
+              <div className='p-2.5 rounded-xl bg-purple-50 text-purple-600 shadow-inner'>
+                <Shield className='h-5 w-5' />
+              </div>
+              Phân quyền truy cập
+            </CardTitle>
+            <CardDescription>
+              Lựa chọn vai trò phù hợp để cấp quyền hạn tương ứng trên hệ thống cho người dùng này.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+              {Object.values(Role).map((role) => (
+                <Controller
+                  key={role}
+                  name='roles'
+                  control={control}
+                  render={({ field }) => {
+                    const currentRoles = (Array.isArray(field.value) ? field.value : []) as string[]
+                    const isChecked = currentRoles.includes(role)
+                    return (
+                      <label
+                        htmlFor={`role-${role}`}
+                        className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer h-full ${
+                          isChecked
+                            ? 'border-purple-200 bg-purple-50 shadow-sm'
+                            : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
+                        }`}
+                      >
+                        <Checkbox
+                          id={`role-${role}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              field.onChange([...currentRoles, role])
+                            } else {
+                              field.onChange(currentRoles.filter((r) => r !== role))
+                            }
+                          }}
+                          className='mt-1 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
+                        />
+                        <div className='flex-1'>
+                          <div
+                            className={`font-semibold text-sm mb-1 ${
+                              isChecked ? 'text-purple-900' : 'text-slate-700'
+                            }`}
+                          >
+                            {role}
+                          </div>
+                          <div className='text-xs text-slate-500 leading-tight'>
+                            {role === Role.ADMIN
+                              ? 'Quyền quản trị cao nhất, truy cập mọi tính năng.'
+                              : role === Role.STAFF
+                                ? 'Quản lý sản phẩm, đơn hàng và nội dung.'
+                                : role === Role.SHIPPER
+                                  ? 'Xem và cập nhật trạng thái giao hàng.'
+                                  : 'Khách hàng mua sắm và quản lý đơn cá nhân.'}
+                          </div>
+                        </div>
+                      </label>
+                    )
+                  }}
                 />
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Roles */}
-          <Card className='border-none shadow-md overflow-hidden'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='text-xl flex items-center gap-2'>
-                <div className='p-2 rounded-lg bg-purple-50 text-purple-600'>
-                  <CheckCheckbox className='h-5 w-5' />
-                </div>
-                Phân quyền
-              </CardTitle>
-              <CardDescription>Gán vai trò và quyền hạn trên hệ thống.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-wrap gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100'>
-                {Object.values(Role).map((role) => (
-                  <div key={role} className='flex items-center space-x-3'>
-                    <Controller
-                      name='roles'
-                      control={control}
-                      render={({ field }) => {
-                        const currentRoles = (
-                          Array.isArray(field.value) ? field.value : []
-                        ) as string[]
-                        return (
-                          <Checkbox
-                            id={`role-${role}`}
-                            checked={currentRoles.includes(role)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                field.onChange([...currentRoles, role])
-                              } else {
-                                field.onChange(currentRoles.filter((r) => r !== role))
-                              }
-                            }}
-                            className='data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
-                          />
-                        )
-                      }}
-                    />
-                    <Label
-                      htmlFor={`role-${role}`}
-                      className='cursor-pointer text-sm font-medium text-slate-700'
-                    >
-                      {role}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className='flex items-center justify-end gap-4'>
-            <Button
-              variant='ghost'
-              type='button'
-              onClick={() => router.back()}
-              className='text-slate-500 hover:text-slate-700'
-            >
-              Hủy bỏ
-            </Button>
-            <Button
-              type='submit'
-              disabled={createMutation.isPending}
-              className='bg-slate-900 hover:bg-slate-800 text-white min-w-[140px] shadow-lg shadow-slate-200'
-            >
-              {createMutation.isPending ? (
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-              ) : (
-                <div className='flex items-center'>
-                  <Plus className='mr-2 h-4 w-4' /> Tạo người dùng
-                </div>
-              )}
-            </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className='flex items-center justify-end gap-4 pt-4 border-t border-slate-100'>
+          <Button
+            variant='outline'
+            type='button'
+            onClick={() => router.back()}
+            className='h-11 px-8 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+          >
+            <X className='mr-2 h-4 w-4' /> Hủy bỏ
+          </Button>
+          <Button
+            type='submit'
+            disabled={createMutation.isPending}
+            className='bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 text-base shadow-lg shadow-slate-900/10'
+          >
+            {createMutation.isPending ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang xử lý...
+              </>
+            ) : (
+              <>
+                <Save className='mr-2 h-4 w-4' /> Tạo người dùng
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </div>
-  )
-}
-
-function CheckCheckbox(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns='http://www.w3.org/2000/svg'
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    >
-      <path d='M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z' />
-      <path d='m9 12 2 2 4-4' />
-    </svg>
   )
 }
