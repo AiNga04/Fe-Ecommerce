@@ -12,7 +12,7 @@ export interface Order {
   id: number
   code: string
   totalPrice: number
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELED'
+  status: 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELED' | 'COMPLETED'
   paymentMethod: string
   paymentStatus: string
   shippingFee: number

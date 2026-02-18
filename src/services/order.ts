@@ -29,9 +29,11 @@ export const orderService = {
     return http.get<IBackendRes<Order>>(`${ORDER_PATH}/${id}`)
   },
   getOrders: (params?: OrderSearchParams) => {
-    return http.get<IBackendRes<Order[]>>(`${ORDER_PATH}`, { params })
+    return http.get<IBackendRes<Order[]>>(`${ORDER_PATH}/admin`, { params })
   },
   updateOrderStatus: (id: number | string, status: string) => {
-    return http.put<IBackendRes<Order>>(`${ORDER_PATH}/${id}/status`, { status })
+    return http.put<IBackendRes<Order>>(`${ORDER_PATH}/${id}/status`, null, {
+      params: { status },
+    })
   },
 }
