@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Upload, FileUp, AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { Upload, FileUp, AlertCircle, CheckCircle2, X, FileJson, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
 import { userService } from '@/services/user'
@@ -47,7 +47,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
       const failCount = failed.length
 
       if (successCount > 0) {
-        toast.success(`Successfully created ${successCount} users`)
+        toast.success(`Đã tạo thành công ${successCount} người dùng`)
         queryClient.invalidateQueries({ queryKey: ['admin-users'] })
 
         // If there are no failures, close the dialog
@@ -61,17 +61,15 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
       }
 
       if (failCount > 0) {
-        toast.error(`Failed to create ${failCount} users`, {
-          description: 'Please review the errors below.',
+        toast.error(`Thất bại ${failCount} người dùng`, {
+          description: 'Vui lòng xem chi tiết lỗi bên dưới.',
         })
         setFailedUsers(failed)
-        // Switch to a new 'results' view or just show them.
-        // For simplicity, we can clear the parsed users and show the errors in the current tab or a dedicated area.
         setParsedUsers([]) // Clear pending imports?
       }
     },
     onError: (error) => {
-      toast.error('Failed to create users')
+      toast.error('Tạo người dùng thất bại')
       console.error(error)
     },
   })
@@ -164,7 +162,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
       } else if (parsed.users && Array.isArray(parsed.users)) {
         data = parsed.users
       } else {
-        toast.error('Input must be a JSON array or object with "users" array')
+        toast.error('Dữ liệu không hợp lệ. Phải là mảng JSON hoặc object chứa mảng "users"')
         return
       }
 
@@ -180,7 +178,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
       // For now, assume immediate submit for JSON as per previous code.
       mutate({ users })
     } catch (e) {
-      toast.error('Invalid JSON format')
+      toast.error('Định dạng JSON không hợp lệ')
     }
   }
 
@@ -199,12 +197,12 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
 
         const users = validateAndParse(data)
         setParsedUsers(users)
-        toast.success(`Parsed ${users.length} users from file`)
+        toast.success(`Đã đọc được ${users.length} người dùng từ file`)
 
         // Reset file input
         if (fileInputRef.current) fileInputRef.current.value = ''
       } catch (e) {
-        toast.error('Failed to parse file')
+        toast.error('Đọc file thất bại')
         console.error(e)
       }
     }
@@ -215,123 +213,213 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant='outline'>
-            <Upload className='mr-2 h-4 w-4' /> Bulk Import
+          <Button
+            variant='outline'
+            className='gap-2 bg-white text-blue-600 border-blue-200 hover:bg-blue-50'
+          >
+            <FileUp className='h-4 w-4' /> Nhập từ Excel
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='sm:max-w-xl'>
-        <DialogHeader>
-          <DialogTitle>Bulk User Creation</DialogTitle>
-          <DialogDescription>
-            Import users via JSON paste or upload Excel/CSV file.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className='sm:max-w-2xl bg-white p-0 overflow-hidden gap-0 rounded-2xl shadow-2xl'>
+        {/* Header decoration */}
+        <div className='bg-blue-600 p-6 text-white'>
+          <div className='flex items-center gap-4'>
+            <div className='p-3 bg-white/20 rounded-xl backdrop-blur-sm'>
+              <FileJson className='h-8 w-8 text-white' />
+            </div>
+            <div>
+              <DialogTitle className='text-xl font-bold'>Tạo Người Dùng Hàng Loạt</DialogTitle>
+              <DialogDescription className='text-blue-100 mt-1'>
+                Nhập dữ liệu người dùng nhanh chóng qua file Excel/CSV hoặc mã JSON.
+              </DialogDescription>
+            </div>
+          </div>
+        </div>
 
-        <Tabs defaultValue='json' value={activeTab} onValueChange={setActiveTab} className='w-full'>
-          <TabsList className='grid w-full grid-cols-2'>
-            <TabsTrigger value='json'>Paste JSON</TabsTrigger>
-            <TabsTrigger value='file'>Upload File</TabsTrigger>
-          </TabsList>
+        <div className='p-6'>
+          <Tabs
+            defaultValue='file'
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className='w-full'
+          >
+            <TabsList className='grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6'>
+              <TabsTrigger
+                value='file'
+                className='rounded-lg data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all'
+              >
+                <Upload className='mr-2 h-4 w-4' /> Tải file Excel/CSV
+              </TabsTrigger>
+              <TabsTrigger
+                value='json'
+                className='rounded-lg data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm transition-all'
+              >
+                <FileJson className='mr-2 h-4 w-4' /> Dán mã JSON
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value='json' className='space-y-4 py-4'>
-            <div className='grid w-full gap-2'>
-              <Textarea
-                placeholder={`[
+            <TabsContent value='file' className='space-y-4 focus-visible:outline-none'>
+              <div
+                className='group relative border-2 border-dashed border-slate-200 rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300'
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className='p-4 bg-blue-50 text-blue-500 rounded-full mb-4 group-hover:scale-110 group-hover:bg-blue-100 transition-transform'>
+                  <FileUp className='h-8 w-8' />
+                </div>
+                <div className='font-semibold text-slate-900 text-lg mb-1'>
+                  Nhấn để tải lên hoặc kéo thả file
+                </div>
+                <div className='text-sm text-slate-500'>
+                  Hỗ trợ định dạng .xlsx, .xls, .csv (Tối đa 5MB)
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type='file'
+                  className='hidden'
+                  accept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                  onChange={handleFileUpload}
+                />
+              </div>
+
+              <div className='bg-orange-50 p-4 rounded-xl border border-orange-100 flex gap-3 items-start'>
+                <AlertCircle className='h-5 w-5 text-orange-600 mt-0.5 shrink-0' />
+                <div className='text-sm text-orange-800'>
+                  <p className='font-semibold mb-1'>Yêu cầu định dạng file:</p>
+                  <p>
+                    File cần có hàng tiêu đề (header) với các cột:{' '}
+                    <code className='bg-white px-1 py-0.5 rounded border border-orange-200 text-orange-700 font-mono text-xs'>
+                      email
+                    </code>
+                    ,{' '}
+                    <code className='bg-white px-1 py-0.5 rounded border border-orange-200 text-orange-700 font-mono text-xs'>
+                      firstName
+                    </code>
+                    ,{' '}
+                    <code className='bg-white px-1 py-0.5 rounded border border-orange-200 text-orange-700 font-mono text-xs'>
+                      lastName
+                    </code>
+                    .
+                  </p>
+                  <p className='mt-1 text-xs opacity-80'>
+                    Các cột tùy chọn: phone, address, gender, dateOfBirth...
+                  </p>
+                </div>
+              </div>
+
+              {parsedUsers.length > 0 && activeTab === 'file' && (
+                <div className='flex items-center justify-between bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-sm animate-in fade-in slide-in-from-bottom-2'>
+                  <div className='flex items-center gap-3'>
+                    <div className='p-2 bg-emerald-100 text-emerald-600 rounded-lg'>
+                      <CheckCircle2 className='h-5 w-5' />
+                    </div>
+                    <span>
+                      Đã đọc thành công{' '}
+                      <span className='font-bold text-emerald-700 text-lg'>
+                        {parsedUsers.length}
+                      </span>{' '}
+                      người dùng.
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => mutate({ users: parsedUsers })}
+                    disabled={isPending}
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200 shadow-lg'
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang xử lý...
+                      </>
+                    ) : (
+                      'Tiến hành Import'
+                    )}
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value='json' className='space-y-4 focus-visible:outline-none'>
+              <div className='relative'>
+                <Textarea
+                  placeholder={`[
   {
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john@example.com",
-    "dateOfBirth": "2004-01-01",
-    "gender": "FEMALE",
-    "password": "123456",
+    "firstName": "Nguyen",
+    "lastName": "Van A",
+    "email": "a.nguyen@example.com",
+    "dateOfBirth": "1999-01-01",
+    "gender": "MALE",
+    "password": "password123",
     "role": "USER",
     "phone": "0988777666",
-    "address": "123 Nguyen Van Linh",
+    "address": "123 Đường ABC",
     "city": "HO_CHI_MINH"
   }
 ]`}
-                className='h-[300px] font-mono text-sm'
-                value={jsonInput}
-                onChange={(e) => setJsonInput(e.target.value)}
-              />
-              <p className='text-xs text-muted-foreground'>Paste a JSON array of user objects.</p>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleJsonSubmit} disabled={isPending || !jsonInput.trim()}>
-                {isPending ? 'Processing...' : 'Import JSON'}
-              </Button>
-            </DialogFooter>
-          </TabsContent>
-
-          <TabsContent value='file' className='space-y-4 py-4'>
-            <div
-              className='border-2 border-dashed border-slate-200 rounded-lg p-12 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors'
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <FileUp className='h-12 w-12 text-slate-400 mb-4' />
-              <div className='font-medium text-slate-900'>Click to upload or drag and drop</div>
-              <div className='text-sm text-slate-500 mt-1'>CSV, Excel (.xlsx, .xls) files</div>
-              <input
-                ref={fileInputRef}
-                type='file'
-                className='hidden'
-                accept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
-                onChange={handleFileUpload}
-              />
-            </div>
-
-            <Alert>
-              <AlertCircle className='h-4 w-4' />
-              <AlertTitle>Format Requirements</AlertTitle>
-              <AlertDescription>
-                Ensure your file has headers matching the user fields: firstName, lastName, email,
-              </AlertDescription>
-            </Alert>
-
-            {parsedUsers.length > 0 && activeTab === 'file' && (
-              <div className='flex items-center justify-between bg-slate-50 p-3 rounded-md border text-sm'>
-                <span>
-                  Ready to import <span className='font-semibold'>{parsedUsers.length}</span> users
-                  from file.
-                </span>
+                  className='h-[350px] font-mono text-sm border-slate-200 focus:border-purple-500 focus:ring-purple-500 bg-slate-50'
+                  value={jsonInput}
+                  onChange={(e) => setJsonInput(e.target.value)}
+                />
+                <div className='absolute bottom-3 right-3 text-xs text-slate-400 pointer-events-none'>
+                  JSON Array Format
+                </div>
+              </div>
+              <DialogFooter>
                 <Button
-                  onClick={() => mutate({ users: parsedUsers })}
-                  disabled={isPending}
-                  size='sm'
+                  onClick={handleJsonSubmit}
+                  disabled={isPending || !jsonInput.trim()}
+                  className='w-full bg-purple-600 hover:bg-purple-700 text-white shadow-purple-200 shadow-lg'
                 >
-                  {isPending ? 'Importing...' : 'Import Users'}
+                  {isPending ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang xử lý...
+                    </>
+                  ) : (
+                    'Import từ JSON'
+                  )}
+                </Button>
+              </DialogFooter>
+            </TabsContent>
+          </Tabs>
+
+          {failedUsers.length > 0 && (
+            <div className='mt-6 border-t border-slate-100 pt-4 animate-in fade-in slide-in-from-bottom-4'>
+              <div className='flex items-center justify-between mb-3'>
+                <h3 className='text-sm font-bold text-red-600 flex items-center gap-2'>
+                  <AlertCircle className='h-4 w-4' />
+                  Có {failedUsers.length} lỗi xảy ra
+                </h3>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={() => setFailedUsers([])}
+                  className='text-slate-400 hover:text-slate-600 h-8 text-xs'
+                >
+                  Xóa danh sách lỗi
                 </Button>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {failedUsers.length > 0 && (
-          <div className='mt-4 border-t pt-4'>
-            <h3 className='text-sm font-semibold text-red-600 mb-2'>
-              Import Errors ({failedUsers.length})
-            </h3>
-            <ScrollArea className='h-[150px] w-full rounded-md border p-2'>
-              <div className='space-y-2'>
-                {failedUsers.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className='flex flex-col text-sm border-b pb-2 last:border-0 last:pb-0'
-                  >
-                    <span className='font-medium text-slate-800'>{item.email}</span>
-                    <span className='text-red-500 text-xs'>{item.reason}</span>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            <div className='mt-2 text-right'>
-              <Button variant='ghost' size='sm' onClick={() => setFailedUsers([])}>
-                Clear Errors
-              </Button>
+              <ScrollArea className='h-[150px] w-full rounded-xl border border-red-100 bg-red-50/50 p-1'>
+                <div className='space-y-1 p-1'>
+                  {failedUsers.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className='flex items-start justify-between p-2.5 rounded-lg bg-white border border-red-100 shadow-sm'
+                    >
+                      <div className='flex flex-col gap-0.5'>
+                        <span className='font-semibold text-slate-800 text-sm'>
+                          {item.email || 'Không rõ email'}
+                        </span>
+                        <span className='text-red-600 text-xs font-medium bg-red-50 w-fit px-1.5 py-0.5 rounded'>
+                          {item.reason}
+                        </span>
+                      </div>
+                      <div className='h-1.5 w-1.5 rounded-full bg-red-500 mt-2' />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
