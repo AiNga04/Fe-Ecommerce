@@ -17,6 +17,11 @@ const sidebarItems = [
     icon: Package,
   },
   {
+    title: 'Danh mục',
+    href: '/admin/categories',
+    icon: LayoutDashboard, // Or another icon like List code
+  },
+  {
     title: 'Đơn hàng',
     href: '/admin/orders',
     icon: ShoppingCart,
