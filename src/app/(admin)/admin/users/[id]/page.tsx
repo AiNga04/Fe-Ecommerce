@@ -399,30 +399,29 @@ export default function UserDetailPage() {
 
   // --- Edit Mode UI (Redesigned) ---
   return (
-    <div className='pb-10'>
+    <div className='pb-10 w-full mx-auto'>
       {/* Header */}
-      <div className='flex items-center justify-between mb-8'>
-        <div className='flex items-center gap-4'>
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={() => setIsEditing(false)}
-            className='h-10 w-10 rounded-full border-slate-200 bg-white hover:bg-slate-50'
-          >
-            <ChevronLeft className='h-5 w-5 text-slate-600' />
-          </Button>
-          <div>
-            <h1 className='text-3xl font-extrabold tracking-tight text-slate-900'>
-              Chỉnh sửa thông tin
-            </h1>
-            <p className='text-slate-500 font-medium'>
-              Cập nhật hồ sơ cho {user.lastName} {user.firstName}
-            </p>
-          </div>
+      <div className='flex items-center gap-4 mb-6'>
+        <Button
+          variant='outline'
+          size='icon'
+          onClick={() => setIsEditing(false)}
+          className='h-10 w-10 rounded-full border-slate-200 bg-white hover:bg-slate-50 shadow-sm'
+        >
+          <ChevronLeft className='h-5 w-5 text-slate-600' />
+        </Button>
+        <div>
+          <h1 className='text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-blue-700 to-indigo-700'>
+            Chỉnh sửa thông tin
+          </h1>
+          <p className='text-sm md:text-base text-slate-500 font-medium'>
+            Cập nhật hồ sơ cho {user.lastName} {user.firstName}
+          </p>
         </div>
       </div>
 
-      <div className='mb-8 flex flex-col items-center justify-center space-y-4 rounded-2xl border border-slate-100 bg-white p-8 shadow-sm'>
+      {/* Avatar Upload Section (Centered) */}
+      <div className='mb-8 flex flex-col items-center justify-center space-y-4 rounded-2xl border border-slate-100 bg-white p-8 shadow-sm w-full mx-auto'>
         <div className='relative group'>
           <div className='h-32 w-32 rounded-full border-4 border-slate-50 shadow-lg overflow-hidden bg-slate-100'>
             {user.avatarUrl ? (
@@ -480,48 +479,60 @@ export default function UserDetailPage() {
         />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='grid gap-8'>
-          {/* Section 1: Thông tin định danh */}
-          <Card className='border-none shadow-md overflow-hidden'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='text-xl flex items-center gap-2'>
-                <UserIcon className='h-5 w-5 text-blue-500' /> Thông tin cơ bản
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
+        {/* Main Grid: 2 Columns for Info */}
+        <div className='grid gap-6 md:grid-cols-2 lg:items-start'>
+          {/* Account Info */}
+          <Card className='border-0 shadow-lg shadow-blue-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
+            <div className='h-2 bg-linear-to-r from-blue-500 to-cyan-500' />
+            <CardHeader className='pb-4 flex-none'>
+              <CardTitle className='text-xl flex items-center gap-3'>
+                <div className='p-2.5 rounded-xl bg-blue-50 text-blue-600 shadow-inner'>
+                  <KeyRound className='h-5 w-5' />
+                </div>
+                Thông tin tài khoản
               </CardTitle>
-              <CardDescription>Các thông tin định danh chính của người dùng.</CardDescription>
+              <CardDescription className='min-h-[20px]'>
+                Thông tin đăng nhập bắt buộc cho người dùng.
+              </CardDescription>
             </CardHeader>
-            <CardContent className='grid gap-6 md:grid-cols-2 pt-2'>
-              <div className='space-y-2'>
-                <Label htmlFor='lastName' className='text-slate-700'>
-                  Họ & Tên đệm <span className='text-red-500'>*</span>
-                </Label>
-                <Input
-                  id='lastName'
-                  {...register('lastName', { required: 'Vui lòng nhập họ' })}
-                  className='border-slate-200 focus-visible:ring-blue-500'
-                  placeholder='Ví dụ: Nguyễn Văn'
-                />
-                {errors.lastName && (
-                  <p className='text-xs text-red-500 font-medium'>{errors.lastName.message}</p>
-                )}
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='firstName' className='text-slate-700'>
-                  Tên <span className='text-red-500'>*</span>
-                </Label>
-                <Input
-                  id='firstName'
-                  {...register('firstName', { required: 'Vui lòng nhập tên' })}
-                  className='border-slate-200 focus-visible:ring-blue-500'
-                  placeholder='Ví dụ: A'
-                />
-                {errors.firstName && (
-                  <p className='text-xs text-red-500 font-medium'>{errors.firstName.message}</p>
-                )}
+            <CardContent className='space-y-5 flex-1'>
+              <div className='grid grid-cols-2 gap-4 pb-1.5'>
+                <div className='space-y-2'>
+                  <Label htmlFor='lastName' className='text-slate-700 font-medium'>
+                    Họ & Tên đệm <span className='text-red-500'>*</span>
+                  </Label>
+                  <div className='relative'>
+                    <UserIcon className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                    <Input
+                      id='lastName'
+                      placeholder='Nguyễn Văn'
+                      {...register('lastName', { required: 'Vui lòng nhập họ' })}
+                      className='pl-9 h-10 border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 focus:bg-white transition-colors'
+                    />
+                  </div>
+                  {errors.lastName && (
+                    <p className='text-xs text-red-500 font-medium'>{errors.lastName.message}</p>
+                  )}
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='firstName' className='text-slate-700 font-medium'>
+                    Tên <span className='text-red-500'>*</span>
+                  </Label>
+                  <Input
+                    id='firstName'
+                    placeholder='A'
+                    {...register('firstName', { required: 'Vui lòng nhập tên' })}
+                    className='h-10 border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 focus:bg-white transition-colors'
+                  />
+                  {errors.firstName && (
+                    <p className='text-xs text-red-500 font-medium'>{errors.firstName.message}</p>
+                  )}
+                </div>
               </div>
 
-              <div className='space-y-2 md:col-span-2'>
-                <Label htmlFor='email' className='text-slate-700'>
+              <div className='space-y-2 pt-1.5'>
+                <Label htmlFor='email' className='text-slate-700 font-medium'>
                   Email đăng nhập
                 </Label>
                 <div className='relative'>
@@ -530,174 +541,221 @@ export default function UserDetailPage() {
                     id='email'
                     {...register('email')}
                     disabled
-                    className='pl-10 border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed'
+                    className='pl-9 h-10 border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed'
                   />
                 </div>
-                <p className='text-xs text-muted-foreground'>Email không thể thay đổi</p>
+                <p className='text-xs text-slate-400'>Email không thể thay đổi sau khi tạo.</p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Section 2: Thông tin cá nhân & Liên hệ */}
-          <Card className='border-none shadow-md overflow-hidden'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='text-xl flex items-center gap-2'>
-                <MapPin className='h-5 w-5 text-green-500' /> Cá nhân & Liên hệ
+          {/* Personal Info */}
+          <Card className='border-0 shadow-lg shadow-emerald-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
+            <div className='h-2 bg-linear-to-r from-emerald-500 to-teal-500' />
+            <CardHeader className='pb-4 flex-none'>
+              <CardTitle className='text-xl flex items-center gap-3'>
+                <div className='p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shadow-inner'>
+                  <UserIcon className='h-5 w-5' />
+                </div>
+                Thông tin cá nhân
               </CardTitle>
-              <CardDescription>Thông tin liên lạc và địa chỉ giao hàng.</CardDescription>
+              <CardDescription className='min-h-[20px]'>
+                Hồ sơ chi tiết và thông tin liên hệ.
+              </CardDescription>
             </CardHeader>
-            <CardContent className='grid gap-6 md:grid-cols-2 pt-2'>
-              <div className='space-y-2'>
-                <Label className='text-slate-700'>Giới tính</Label>
-                <Controller
-                  name='gender'
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className='w-full border-slate-200 focus:ring-green-500'>
-                        <SelectValue placeholder='Chọn giới tính' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={Gender.MALE}>Nam</SelectItem>
-                        <SelectItem value={Gender.FEMALE}>Nữ</SelectItem>
-                        <SelectItem value={Gender.OTHER}>Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+            <CardContent className='space-y-5 flex-1'>
+              <div className='grid grid-cols-2 gap-4 pb-1.5'>
+                <div className='space-y-2'>
+                  <Label className='text-slate-700 font-medium'>Giới tính</Label>
+                  <Controller
+                    name='gender'
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className='w-full h-10 border-slate-200 focus:ring-emerald-500 bg-slate-50/50'>
+                          <SelectValue placeholder='Chọn giới tính' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={Gender.MALE}>Nam</SelectItem>
+                          <SelectItem value={Gender.FEMALE}>Nữ</SelectItem>
+                          <SelectItem value={Gender.OTHER}>Khác</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='dateOfBirth' className='text-slate-700 font-medium'>
+                    Ngày sinh
+                  </Label>
+                  <div className='relative'>
+                    <CalendarIcon className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                    <Input
+                      type='date'
+                      id='dateOfBirth'
+                      {...register('dateOfBirth')}
+                      className='pl-9 h-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50 focus:bg-white transition-colors block w-full'
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='phone' className='text-slate-700 font-medium'>
+                    Số điện thoại
+                  </Label>
+                  <div className='relative'>
+                    <Phone className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                    <Input
+                      id='phone'
+                      placeholder='09xx...'
+                      {...register('phone')}
+                      className='pl-9 h-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50 focus:bg-white transition-colors'
+                    />
+                  </div>
+                </div>
+
+                <div className='space-y-2'>
+                  <Label className='text-slate-700 font-medium'>Thành phố</Label>
+                  <Controller
+                    name='city'
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value as string}>
+                        <SelectTrigger className='w-full h-10 border-slate-200 focus:ring-emerald-500 bg-slate-50/50'>
+                          <SelectValue placeholder='Chọn thành phố' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CITIES.map((city) => (
+                            <SelectItem key={city.value} value={city.value}>
+                              {city.label}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value={City.OTHER}>Khác</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='dateOfBirth' className='text-slate-700'>
-                  Ngày sinh
-                </Label>
-                <Input
-                  type='date'
-                  id='dateOfBirth'
-                  {...register('dateOfBirth')}
-                  className='border-slate-200 focus-visible:ring-green-500'
-                />
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='phone' className='text-slate-700'>
-                  Số điện thoại
-                </Label>
-                <Input
-                  id='phone'
-                  placeholder='09xx xxx xxx'
-                  {...register('phone')}
-                  className='border-slate-200 focus-visible:ring-green-500'
-                />
-              </div>
-
-              <div className='space-y-2'>
-                <Label className='text-slate-700'>Thành phố</Label>
-                <Controller
-                  name='city'
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                      <SelectTrigger className='w-full border-slate-200 focus:ring-green-500'>
-                        <SelectValue placeholder='Chọn thành phố' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CITIES.map((city) => (
-                          <SelectItem key={city.value} value={city.value}>
-                            {city.label}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value={City.OTHER}>Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-
-              <div className='space-y-2 md:col-span-2'>
-                <Label htmlFor='address' className='text-slate-700'>
+                <Label htmlFor='address' className='text-slate-700 font-medium'>
                   Địa chỉ chi tiết
                 </Label>
-                <Input
-                  id='address'
-                  className='border-slate-200 focus-visible:ring-green-500'
-                  placeholder='Số nhà, tên đường, phường/xã...'
-                  {...register('address')}
+                <div className='relative'>
+                  <MapPin className='absolute left-3 top-2.5 h-4 w-4 text-slate-400' />
+                  <Input
+                    id='address'
+                    placeholder='Số nhà, tên đường, phường/xã...'
+                    {...register('address')}
+                    className='pl-9 h-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50 focus:bg-white transition-colors'
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Roles Section - Full Width */}
+        <Card className='border-0 shadow-lg shadow-purple-500/5 overflow-hidden ring-1 ring-slate-200/50'>
+          <div className='h-2 bg-linear-to-r from-purple-500 to-fuchsia-500' />
+          <CardHeader className='pb-4'>
+            <CardTitle className='text-xl flex items-center gap-3'>
+              <div className='p-2.5 rounded-xl bg-purple-50 text-purple-600 shadow-inner'>
+                <Shield className='h-5 w-5' />
+              </div>
+              Phân quyền truy cập
+            </CardTitle>
+            <CardDescription>
+              Lựa chọn vai trò phù hợp để cấp quyền hạn tương ứng trên hệ thống cho người dùng này.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+              {Object.values(Role).map((role) => (
+                <Controller
+                  key={role}
+                  name='roles'
+                  control={control}
+                  render={({ field }) => {
+                    const currentRoles = (Array.isArray(field.value) ? field.value : []) as string[]
+                    const isChecked = currentRoles.includes(role)
+                    return (
+                      <label
+                        htmlFor={`role-${role}`}
+                        className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer h-full ${
+                          isChecked
+                            ? 'border-purple-200 bg-purple-50 shadow-sm'
+                            : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
+                        }`}
+                      >
+                        <Checkbox
+                          id={`role-${role}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              field.onChange([...currentRoles, role])
+                            } else {
+                              field.onChange(currentRoles.filter((r) => r !== role))
+                            }
+                          }}
+                          className='mt-1 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
+                        />
+                        <div className='flex-1'>
+                          <div
+                            className={`font-semibold text-sm mb-1 ${
+                              isChecked ? 'text-purple-900' : 'text-slate-700'
+                            }`}
+                          >
+                            {role}
+                          </div>
+                          <div className='text-xs text-slate-500 leading-tight'>
+                            {role === Role.ADMIN
+                              ? 'Quyền quản trị cao nhất, truy cập mọi tính năng.'
+                              : role === Role.STAFF
+                                ? 'Quản lý sản phẩm, đơn hàng và nội dung.'
+                                : role === Role.SHIPPER
+                                  ? 'Xem và cập nhật trạng thái giao hàng.'
+                                  : 'Khách hàng mua sắm và quản lý đơn cá nhân.'}
+                          </div>
+                        </div>
+                      </label>
+                    )
+                  }}
                 />
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Section 3: Phân quyền */}
-          <Card className='border-none shadow-md overflow-hidden'>
-            <CardHeader className='pb-4'>
-              <CardTitle className='text-xl flex items-center gap-2'>
-                <Shield className='h-5 w-5 text-purple-500' /> Phân quyền hệ thống
-              </CardTitle>
-              <CardDescription>Cấp quyền truy cập cho người dùng này.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-wrap gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100'>
-                {Object.values(Role).map((role) => (
-                  <div key={role} className='flex items-center space-x-3'>
-                    <Controller
-                      name='roles'
-                      control={control}
-                      render={({ field }) => {
-                        const currentRoles = (
-                          Array.isArray(field.value) ? field.value : []
-                        ) as string[]
-                        return (
-                          <Checkbox
-                            id={`role-${role}`}
-                            checked={currentRoles.includes(role)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                field.onChange([...currentRoles, role])
-                              } else {
-                                field.onChange(currentRoles.filter((r) => r !== role))
-                              }
-                            }}
-                            className='data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
-                          />
-                        )
-                      }}
-                    />
-                    <Label
-                      htmlFor={`role-${role}`}
-                      className='text-sm font-medium cursor-pointer text-slate-700'
-                    >
-                      {role}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Footer Actions */}
-          <div className='flex items-center justify-end gap-4 pt-4'>
-            <Button
-              variant='ghost'
-              type='button'
-              onClick={() => setIsEditing(false)}
-              className='text-slate-500 hover:text-slate-700'
-            >
-              Hủy bỏ
-            </Button>
-            <Button
-              type='submit'
-              disabled={updateMutation.isPending}
-              className='bg-slate-900 hover:bg-slate-800 text-white min-w-[140px] shadow-lg shadow-slate-200'
-            >
-              {updateMutation.isPending ? (
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-              ) : (
-                <Save className='mr-2 h-4 w-4' />
-              )}
-              Lưu thay đổi
-            </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className='flex items-center justify-end gap-4 pt-4 border-t border-slate-100'>
+          <Button
+            variant='outline'
+            type='button'
+            onClick={() => setIsEditing(false)}
+            className='h-11 px-8 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+          >
+            <XCircle className='mr-2 h-4 w-4' /> Hủy bỏ
+          </Button>
+          <Button
+            type='submit'
+            disabled={updateMutation.isPending}
+            className='bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 text-base shadow-lg shadow-slate-900/10'
+          >
+            {updateMutation.isPending ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang xử lý...
+              </>
+            ) : (
+              <>
+                <Save className='mr-2 h-4 w-4' /> Lưu thay đổi
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </div>
