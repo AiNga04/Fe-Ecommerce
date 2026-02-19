@@ -1,25 +1,48 @@
 import { http } from '@/lib/http'
+import {
+  Voucher,
+  VoucherCreateRequest,
+  VoucherResponse,
+  VoucherUpdateRequest,
+} from '@/types/voucher'
 
-export interface Voucher {
-  id: number
-  code: string
-  name: string
-  description: string
-  type: 'FREESHIP' | 'FIXED_AMOUNT' | 'PERCENTAGE'
-  scope: 'GLOBAL'
-  discountValue: number
-  maxDiscountAmount: number | null
-  minOrderValue: number
-  maxUsagePerUser: number
-  maxUsage: number
-  usedCount: number
-  status: 'ACTIVE'
-  startDate: string
-  endDate: string
-}
+const VOUCHER_PATH = '/vouchers'
 
 export const voucherService = {
-  getActiveVouchers: () => {
-    return http.get<IBackendRes<Voucher[]>>('/vouchers/active')
+  // ADMIN + STAFF: List all vouchers
+  getAll: (page: number = 0, size: number = 20) => {
+    return http.get<IBackendRes<VoucherResponse[]>>(`${VOUCHER_PATH}?page=${page}&size=${size}`)
+  },
+
+  // ADMIN + STAFF: Get by ID
+  getById: (id: number | string) => {
+    return http.get<IBackendRes<VoucherResponse>>(`${VOUCHER_PATH}/${id}`)
+  },
+
+  // ADMIN: Create Draft
+  create: (data: VoucherCreateRequest) => {
+    return http.post<IBackendRes<VoucherResponse>>(`${VOUCHER_PATH}`, data)
+  },
+
+  // ADMIN: Update
+  update: (id: number | string, data: VoucherUpdateRequest) => {
+    return http.put<IBackendRes<VoucherResponse>>(`${VOUCHER_PATH}/${id}`, data)
+  },
+
+  // ADMIN: Deactivate (Soft delete/Independent logic)
+  deactivate: (id: number | string) => {
+    return http.delete<IBackendRes<void>>(`${VOUCHER_PATH}/${id}`)
+  },
+
+  // ADMIN + STAFF: Activate
+  activate: (id: number | string) => {
+    return http.put<IBackendRes<void>>(`${VOUCHER_PATH}/${id}/activate`, {})
+  },
+
+  // USER: List active vouchers
+  listActive: (page: number = 0, size: number = 20) => {
+    return http.get<IBackendRes<VoucherResponse[]>>(
+      `${VOUCHER_PATH}/active?page=${page}&size=${size}`,
+    )
   },
 }

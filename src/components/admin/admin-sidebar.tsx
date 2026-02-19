@@ -3,7 +3,18 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  Settings,
+  LogOut,
+  Ruler,
+  Proportions,
+  Layers,
+  TicketPercent,
+} from 'lucide-react'
 
 const sidebarItems = [
   {
@@ -19,12 +30,27 @@ const sidebarItems = [
   {
     title: 'Danh mục',
     href: '/admin/categories',
-    icon: LayoutDashboard, // Or another icon like List code
+    icon: Layers, // Changed from LayoutDashboard
   },
   {
     title: 'Đơn hàng',
     href: '/admin/orders',
     icon: ShoppingCart,
+  },
+  {
+    title: 'Bảng Size',
+    href: '/admin/size-guides',
+    icon: Ruler,
+  },
+  {
+    title: 'Kích thước',
+    href: '/admin/sizes',
+    icon: Proportions,
+  },
+  {
+    title: 'Mã giảm giá',
+    href: '/admin/vouchers',
+    icon: TicketPercent,
   },
   {
     title: 'Người dùng',

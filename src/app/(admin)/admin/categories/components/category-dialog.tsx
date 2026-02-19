@@ -36,7 +36,12 @@ const updateSchema = z.object({
 })
 
 // Union type for form values
-type FormValues = z.infer<typeof createSchema> & { isActive?: boolean }
+type FormValues = {
+  code?: string
+  name: string
+  description?: string
+  isActive?: boolean
+}
 
 interface CategoryDialogProps {
   category?: Category | null
@@ -56,7 +61,7 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(isEditing ? updateSchema : createSchema),
+    resolver: zodResolver(isEditing ? updateSchema : createSchema) as any,
     defaultValues: {
       code: '',
       name: '',
@@ -99,7 +104,7 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
         return categoryService.update(category.id, updateData)
       } else {
         const createData: CategoryCreateRequest = {
-          code: data.code!,
+          code: data.code || '',
           name: data.name,
           description: data.description,
         }
