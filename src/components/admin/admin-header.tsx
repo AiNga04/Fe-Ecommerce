@@ -34,7 +34,11 @@ export function AdminHeader() {
 
           <SheetContent side='left' className='p-0 w-72 border-r-0 bg-slate-900 text-slate-100'>
             <SheetTitle className='sr-only'>Menu</SheetTitle>
-            <AdminSidebar className='border-none' onNavigate={() => setOpen(false)} />
+            <AdminSidebar
+              className='border-none'
+              onNavigate={() => setOpen(false)}
+              forceExpanded={true}
+            />
           </SheetContent>
         </Sheet>
         <div className='font-medium text-sm text-muted-foreground hidden md:block'>
