@@ -2,18 +2,18 @@
 
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Pencil, Trash2, Loader2, MoreVertical } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, Loader2, MoreVertical, AlertTriangle } from 'lucide-react'
 import { categoryService } from '@/services/category'
-import { Category } from '@/types/product'
+import { Category } from '@/types/category'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableCell,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -41,21 +41,27 @@ import {
 } from '@/components/ui/alert-dialog'
 import { CategoryDialog } from './components/category-dialog'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CategoriesPage() {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
+  const [search, setSearch] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
   // Delete state
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
+  // Disable Confirmation State
+  const [confirmDisableId, setConfirmDisableId] = useState<number | null>(null)
+
   const queryClient = useQueryClient()
 
   const { data: categoriesData, isLoading } = useQuery({
-    queryKey: ['categories', page, pageSize],
-    queryFn: () => categoryService.list({ page, size: pageSize }),
+    queryKey: ['categories', page, pageSize, search],
+    queryFn: () => categoryService.list({ page, size: pageSize, activeOnly: false, search }),
   })
 
   const categories = categoriesData?.data?.data || []
@@ -68,8 +74,31 @@ export default function CategoriesPage() {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       setDeleteId(null)
     },
+    onError: (error: any) => {
+      if (error?.response?.status === 409) {
+        toast.error('Không thể xóa: Danh mục này đang có sản phẩm.', {
+          description: 'Vui lòng gỡ hết sản phẩm khỏi danh mục trước khi xóa.',
+          action: {
+            label: 'Xem sản phẩm',
+            onClick: () => window.open(`/products?category=${deleteId}`, '_blank'), // Simple redirect for now
+          },
+        })
+      } else {
+        toast.error('Có lỗi xảy ra khi xóa danh mục')
+      }
+    },
+  })
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+      categoryService.update(id, { isActive }),
+    onSuccess: () => {
+      toast.success('Cập nhật trạng thái thành công')
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      setConfirmDisableId(null)
+    },
     onError: () => {
-      toast.error('Có lỗi xảy ra khi xóa danh mục')
+      toast.error('Có lỗi xảy ra khi cập nhật trạng thái')
     },
   })
 
@@ -86,6 +115,22 @@ export default function CategoriesPage() {
   const handleDeleteCallback = () => {
     if (deleteId) {
       deleteMutation.mutate(deleteId)
+    }
+  }
+
+  const handleStatusClick = (category: Category) => {
+    if (category.isActive) {
+      // Trying to disable -> Confirm first
+      setConfirmDisableId(category.id)
+    } else {
+      // Enable -> Do immediately
+      toggleStatusMutation.mutate({ id: category.id, isActive: true })
+    }
+  }
+
+  const handleConfirmDisable = () => {
+    if (confirmDisableId) {
+      toggleStatusMutation.mutate({ id: confirmDisableId, isActive: false })
     }
   }
 
@@ -107,7 +152,13 @@ export default function CategoriesPage() {
       <div className='flex items-center gap-4 bg-white p-4 rounded-lg border shadow-sm'>
         <div className='relative flex-1 max-w-sm'>
           <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
-          <Input type='search' placeholder='Tìm kiếm danh mục...' className='pl-8' />
+          <Input
+            type='search'
+            placeholder='Tìm kiếm danh mục...'
+            className='pl-8'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
 
@@ -125,16 +176,32 @@ export default function CategoriesPage() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className='h-32 text-center text-muted-foreground'>
-                  <Loader2 className='h-6 w-6 animate-spin mx-auto mb-2' />
-                  Đang tải dữ liệu...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className='h-4 w-8' />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className='h-4 w-16' />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className='h-4 w-32' />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className='h-4 w-48' />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className='h-6 w-20 rounded-full' />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className='h-8 w-8 ml-auto rounded-full' />
+                  </TableCell>
+                </TableRow>
+              ))
             ) : categories.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className='h-32 text-center text-muted-foreground'>
-                  Chưa có danh mục nào.
+                  Chưa có danh mục nào. Hãy tạo danh mục đầu tiên.
                 </TableCell>
               </TableRow>
             ) : (
@@ -156,11 +223,13 @@ export default function CategoriesPage() {
                   <TableCell>
                     <Badge
                       variant={category.isActive ? 'default' : 'secondary'}
-                      className={
+                      className={cn(
+                        'cursor-pointer hover:opacity-80 transition-opacity',
                         category.isActive
                           ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200'
-                          : 'bg-slate-100 text-slate-500 border-slate-200'
-                      }
+                          : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200',
+                      )}
+                      onClick={() => handleStatusClick(category)}
                     >
                       {category.isActive ? 'Hoạt động' : 'Tạm ẩn'}
                     </Badge>
@@ -240,13 +309,14 @@ export default function CategoriesPage() {
         category={selectedCategory}
       />
 
+      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+            <AlertDialogTitle>Bạn có chắc muốn xóa danh mục này?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này sẽ ẩn danh mục khỏi hệ thống. Bạn có thể khôi phục lại sau nếu cần thiết
-              (tùy thuộc vào chính sách hệ thống).
+              Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan đến danh mục này sẽ bị xóa
+              vĩnh viễn.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -255,7 +325,38 @@ export default function CategoriesPage() {
               onClick={handleDeleteCallback}
               className='bg-red-600 hover:bg-red-700 text-white'
             >
-              {deleteMutation.isPending ? 'Đang xóa...' : 'Xóa danh mục'}
+              {deleteMutation.isPending ? 'Đang xóa...' : 'Xóa vĩnh viễn'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Disable Confirmation */}
+      <AlertDialog
+        open={!!confirmDisableId}
+        onOpenChange={(open) => !open && setConfirmDisableId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className='flex items-center gap-2 text-amber-600 mb-2'>
+              <AlertTriangle className='h-5 w-5' />
+              <AlertDialogTitle>Xác nhận ẩn danh mục</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className='text-base'>
+              Bạn có chắc muốn ẩn danh mục này khỏi website?
+              <br />
+              <span className='text-sm text-muted-foreground mt-1 block'>
+                Việc này sẽ khiến khách hàng không tìm thấy danh mục và có thể ảnh hưởng đến SEO.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDisable}
+              className='bg-amber-600 hover:bg-amber-700 text-white'
+            >
+              Đồng ý ẩn
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

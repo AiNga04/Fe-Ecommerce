@@ -1,10 +1,10 @@
 import { http } from '@/lib/http'
-import { Category } from '@/types/product'
+import { Category, CategorySearchParams } from '@/types/category'
 
 const CATEGORY_PATH = '/categories'
 
 export const categoryService = {
-  list: (params?: any) => {
+  list: (params?: CategorySearchParams) => {
     return http.get<IBackendRes<Category[]>>(`${CATEGORY_PATH}`, { params })
   },
   getById: (id: number | string) => {

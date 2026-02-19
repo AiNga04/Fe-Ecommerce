@@ -11,11 +11,19 @@ import { useAuthSession } from '@/hooks/use-auth-session'
 import { Role } from '@/constants/enum/role'
 import Routers from '@/constants/routers'
 
+import { useCategories } from '@/hooks/use-categories'
+import { Skeleton } from '@/components/ui/skeleton'
+
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cartCount = useCartStore((state) => state.count)
   const fetchCartCount = useCartStore((state) => state.fetchCount)
   const { isAuthenticated, user } = useAuthSession()
+
+  const { data: categories = [], isLoading: isLoadingCategories } = useCategories(true) // activeOnly = true
+
+  // Use category names for nav.
+  // Requirement: "Hover underline animation", "Menu tu dong render tu API"
 
   const getProfileLink = () => {
     const roles = user?.roles || []
@@ -28,17 +36,6 @@ export function Header() {
   useEffect(() => {
     fetchCartCount()
   }, [])
-
-  const navItems = [
-    'Thời trang nữ',
-    'Thời trang nam',
-    'Giày & Túi xách',
-    'Phụ kiện',
-    'Áo khoác',
-    'Quần jean',
-    'Đồ mùa đông',
-    'Bộ sưu tập mới',
-  ]
 
   return (
     <>
@@ -89,16 +86,20 @@ export function Header() {
                       Danh Mục Sản Phẩm
                     </span>
                     <nav className='flex flex-col space-y-1'>
-                      {navItems.map((item) => (
-                        <Link
-                          key={item}
-                          href='#'
-                          className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
-                        >
-                          {item}
-                          <ArrowRight className='w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary' />
-                        </Link>
-                      ))}
+                      {isLoadingCategories
+                        ? Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} className='h-10 w-full rounded-lg' />
+                          ))
+                        : categories.map((item) => (
+                            <Link
+                              key={item.id}
+                              href={`/products?category=${item.id}`}
+                              className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                            >
+                              {item.name}
+                              <ArrowRight className='w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary' />
+                            </Link>
+                          ))}
                     </nav>
 
                     <div className='mt-8 pt-8 border-t space-y-6'>
@@ -178,17 +179,44 @@ export function Header() {
 
             {/* Center: Desktop Navigation */}
             <nav className='hidden md:flex items-center gap-1'>
-              {navItems.slice(0, 5).map((item) => (
-                <Link
-                  key={item}
-                  href='#'
-                  className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
-                >
-                  {item}
-                  <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
-                </Link>
-              ))}
-              {/* More dropdown could go here if needed */}
+              <Link
+                href='/products'
+                className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
+              >
+                Tất cả sản phẩm
+                <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
+              </Link>
+
+              {isLoadingCategories ? (
+                <div className='flex gap-2'>
+                  <Skeleton className='h-6 w-20' />
+                  <Skeleton className='h-6 w-24' />
+                  <Skeleton className='h-6 w-16' />
+                </div>
+              ) : (
+                <>
+                  {categories.slice(0, 5).map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/products?category=${item.id}`}
+                      className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
+                    >
+                      {item.name}
+                      <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
+                    </Link>
+                  ))}
+                  {/* More dropdown could go here if needed categories > 5 */}
+                  {categories.length > 5 && (
+                    <Link
+                      href='/products'
+                      className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
+                    >
+                      Xem thêm
+                      <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
+                    </Link>
+                  )}
+                </>
+              )}
             </nav>
 
             {/* Right: Actions & Search */}

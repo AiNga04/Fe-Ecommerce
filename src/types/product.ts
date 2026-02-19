@@ -1,24 +1,6 @@
-export interface Category {
-  id: number
-  name: string
-  code: string
-  description?: string
-  isActive: boolean
-  createdAt?: string
-  updatedAt?: string
-}
+import { Category } from './category'
 
-export interface CategoryCreateRequest {
-  code: string
-  name: string
-  description?: string
-}
-
-export interface CategoryUpdateRequest {
-  name?: string
-  description?: string
-  isActive?: boolean
-}
+export * from './category'
 
 export interface Size {
   id: number

@@ -21,7 +21,7 @@ import { Switch } from '@/components/ui/switch'
 import { Loader2, FolderPlus, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { categoryService } from '@/services/category'
-import { Category, CategoryCreateRequest, CategoryUpdateRequest } from '@/types/product'
+import { Category, CategoryCreateRequest, CategoryUpdateRequest } from '@/types/category'
 
 const createSchema = z.object({
   code: z.string().min(1, 'Mã danh mục là bắt buộc'),

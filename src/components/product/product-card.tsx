@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardContent className='flex-1 p-4'>
         <div className='space-y-2'>
           <p className='text-xs text-muted-foreground uppercase tracking-wider'>
-            {product.category}
+            {typeof product.category === 'string' ? product.category : product.category?.name}
           </p>
           <Link href={`/products/${product.id}`}>
             <h3 className='font-semibold text-lg leading-tight hover:text-primary transition-colors line-clamp-2'>
