@@ -26,7 +26,7 @@ export function UserAuditLogs() {
   }
 
   return (
-    <Card className='col-span-3'>
+    <Card className='col-span-1 lg:col-span-3'>
       <CardHeader>
         <CardTitle>Hoạt động người dùng</CardTitle>
       </CardHeader>

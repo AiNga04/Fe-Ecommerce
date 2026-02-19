@@ -5,6 +5,7 @@ import {
   PriceHistory,
   GalleryImage,
   InventoryAuditLog,
+  GlobalPriceHistory,
 } from '@/types/product'
 
 const PRODUCT_PATH = '/products'
@@ -81,6 +82,11 @@ export const productService = {
   // Price History
   getPriceHistory: (id: number | string) => {
     return http.get<IBackendRes<PriceHistory[]>>(`${PRODUCT_PATH}/${id}/price-history`)
+  },
+  getGlobalPriceHistory: (params?: { page: number; size: number }) => {
+    return http.get<IBackendRes<GlobalPriceHistory[]>>(`${PRODUCT_PATH}/global-price-history`, {
+      params,
+    })
   },
 
   // Inventory Audit Logs

@@ -87,6 +87,12 @@ export interface PriceHistory {
   changedBy?: string // Username or email
 }
 
+export interface GlobalPriceHistory extends PriceHistory {
+  productId: number
+  productName: string
+  productImage?: string
+}
+
 export interface ProductCriteria {
   name?: string
   category?: string

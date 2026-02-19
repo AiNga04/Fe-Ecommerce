@@ -17,7 +17,7 @@ export function InventoryAuditLogs() {
   const logs = data?.data?.data || []
 
   return (
-    <Card className='col-span-4'>
+    <Card className='col-span-1 lg:col-span-4'>
       <CardHeader>
         <CardTitle>Lịch sử kho hàng</CardTitle>
       </CardHeader>
