@@ -1,5 +1,11 @@
 import { http } from '@/lib/http'
-import { Product, ProductSearchParams, PriceHistory, GalleryImage } from '@/types/product'
+import {
+  Product,
+  ProductSearchParams,
+  PriceHistory,
+  GalleryImage,
+  InventoryAuditLog,
+} from '@/types/product'
 
 const PRODUCT_PATH = '/products'
 
@@ -75,5 +81,10 @@ export const productService = {
   // Price History
   getPriceHistory: (id: number | string) => {
     return http.get<IBackendRes<PriceHistory[]>>(`${PRODUCT_PATH}/${id}/price-history`)
+  },
+
+  // Inventory Audit Logs
+  getInventoryAuditLogs: (params?: { page: number; size: number }) => {
+    return http.get<IBackendRes<InventoryAuditLog[]>>('/inventory/audit-logs', { params })
   },
 }

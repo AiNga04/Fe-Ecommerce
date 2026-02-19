@@ -35,6 +35,18 @@ export interface SizeGuide {
   isActive: boolean
 }
 
+export interface InventoryAuditLog {
+  id: number
+  productId: number
+  productName: string
+  changedByUserId: number
+  changedByUserName: string
+  oldStock: number
+  newStock: number
+  reason: string
+  changedAt: string
+}
+
 export interface GalleryImage {
   id: number
   url: string

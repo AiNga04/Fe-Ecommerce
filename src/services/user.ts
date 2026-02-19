@@ -8,6 +8,7 @@ import {
   UserUpdateProfileRequest,
   UserBatchCreateRequest,
   UserBatchCreateResponse,
+  UserAuditLog,
 } from '@/types/user'
 
 const USER_PATH = '/users'
@@ -100,5 +101,10 @@ export const userService = {
   },
   createUsersBatch: (data: UserBatchCreateRequest) => {
     return http.post<IBackendRes<UserBatchCreateResponse>>(`${USER_PATH}/batch-create`, data)
+  },
+
+  // Audit Logs
+  getAuditLogs: (params?: { page: number; size: number }) => {
+    return http.get<IBackendRes<UserAuditLog[]>>(`${USER_PATH}/audit-logs`, { params })
   },
 }

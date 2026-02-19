@@ -104,3 +104,15 @@ export interface UserBatchCreateResponse {
   created: User[]
   failed: FailedUserResponse[]
 }
+
+export interface UserAuditLog {
+  id: number
+  userId: number
+  action: string
+  detail: string
+  ipAddress: string
+  createdAt: string
+  actorId: number
+  actorEmail: string
+  userEmail: string
+}
