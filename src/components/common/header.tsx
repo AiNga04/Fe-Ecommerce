@@ -11,19 +11,11 @@ import { useAuthSession } from '@/hooks/use-auth-session'
 import { Role } from '@/constants/enum/role'
 import Routers from '@/constants/routers'
 
-import { useCategories } from '@/hooks/use-categories'
-import { Skeleton } from '@/components/ui/skeleton'
-
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cartCount = useCartStore((state) => state.count)
   const fetchCartCount = useCartStore((state) => state.fetchCount)
   const { isAuthenticated, user } = useAuthSession()
-
-  const { data: categories = [], isLoading: isLoadingCategories } = useCategories(true) // activeOnly = true
-
-  // Use category names for nav.
-  // Requirement: "Hover underline animation", "Menu tu dong render tu API"
 
   const getProfileLink = () => {
     const roles = user?.roles || []
@@ -42,9 +34,9 @@ export function Header() {
       {/* Top bar - Promotion / Welcome */}
       <div className='bg-primary text-primary-foreground text-[10px] sm:text-xs py-1.5 text-center font-medium tracking-wide relative z-50'>
         <div className='container mx-auto px-4 flex justify-between items-center'>
-          <span className='hidden sm:inline'>Hotline: 1900 1234</span>
-          <span className='mx-auto sm:mx-0'>MIỄN PHÍ VẬN CHUYỂN CHO ĐƠN HÀNG TỪ 500K</span>
-          <span className='hidden sm:inline'>Giao Hàng Toàn Quốc</span>
+          <span className='hidden sm:inline'>Hotline: 0912 345 678</span>
+          <span className='mx-auto sm:mx-0'>HUYỀN THOẠI THỜI TRANG TRỞ LẠI - SALE UP TO 50%</span>
+          <span className='hidden sm:inline'>Đổi trả trong 30 ngày</span>
         </div>
       </div>
 
@@ -86,20 +78,44 @@ export function Header() {
                       Danh Mục Sản Phẩm
                     </span>
                     <nav className='flex flex-col space-y-1'>
-                      {isLoadingCategories
-                        ? Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton key={i} className='h-10 w-full rounded-lg' />
-                          ))
-                        : categories.map((item) => (
-                            <Link
-                              key={item.id}
-                              href={`/products?category=${item.id}`}
-                              className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
-                            >
-                              {item.name}
-                              <ArrowRight className='w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary' />
-                            </Link>
-                          ))}
+                      <Link
+                        href='/'
+                        className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                        onClick={() => setIsSearchOpen(false)}
+                      >
+                        Trang Chủ
+                      </Link>
+                      <Link
+                        href='/products?sort=newest'
+                        className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                        onClick={() => setIsSearchOpen(false)}
+                      >
+                        Hàng Mới Về
+                        <ArrowRight className='w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary' />
+                      </Link>
+
+                      <Link
+                        href='/products'
+                        className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                        onClick={() => setIsSearchOpen(false)}
+                      >
+                        Tất Cả Sản Phẩm
+                        <ArrowRight className='w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary' />
+                      </Link>
+                      <Link
+                        href='/about'
+                        className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                        onClick={() => setIsSearchOpen(false)}
+                      >
+                        Về Zyna
+                      </Link>
+                      <Link
+                        href='/contact'
+                        className='flex items-center justify-between text-base font-medium py-3 px-2 rounded-lg hover:bg-muted/50 hover:text-primary transition-all group'
+                        onClick={() => setIsSearchOpen(false)}
+                      >
+                        Liên Hệ
+                      </Link>
                     </nav>
 
                     <div className='mt-8 pt-8 border-t space-y-6'>
@@ -148,7 +164,8 @@ export function Header() {
                         </span>
                         <div className='flex flex-col gap-3 text-sm text-muted-foreground px-2'>
                           <span className='flex items-center gap-2'>
-                            Hotline: <span className='text-foreground font-medium'>1900 1234</span>
+                            Hotline:{' '}
+                            <span className='text-foreground font-medium'>0912 345 678</span>
                           </span>
                           <span className='flex items-center gap-2'>
                             Email:{' '}
@@ -180,43 +197,34 @@ export function Header() {
             {/* Center: Desktop Navigation */}
             <nav className='hidden md:flex items-center gap-1'>
               <Link
-                href='/products'
+                href='/'
                 className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
               >
-                Tất cả sản phẩm
+                Trang Chủ
+                <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
+              </Link>
+              <Link
+                href='/products?sort=newest'
+                className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
+              >
+                Hàng Mới Về
                 <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
               </Link>
 
-              {isLoadingCategories ? (
-                <div className='flex gap-2'>
-                  <Skeleton className='h-6 w-20' />
-                  <Skeleton className='h-6 w-24' />
-                  <Skeleton className='h-6 w-16' />
-                </div>
-              ) : (
-                <>
-                  {categories.slice(0, 5).map((item) => (
-                    <Link
-                      key={item.id}
-                      href={`/products?category=${item.id}`}
-                      className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
-                    >
-                      {item.name}
-                      <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
-                    </Link>
-                  ))}
-                  {/* More dropdown could go here if needed categories > 5 */}
-                  {categories.length > 5 && (
-                    <Link
-                      href='/products'
-                      className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
-                    >
-                      Xem thêm
-                      <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
-                    </Link>
-                  )}
-                </>
-              )}
+              <Link
+                href='/about'
+                className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
+              >
+                Về Zyna
+                <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
+              </Link>
+              <Link
+                href='/contact'
+                className='px-3 py-2 text-sm font-medium hover:text-primary relative group transition-colors'
+              >
+                Liên Hệ
+                <span className='absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
+              </Link>
             </nav>
 
             {/* Right: Actions & Search */}
