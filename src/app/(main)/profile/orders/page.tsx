@@ -161,7 +161,7 @@ export default function OrderHistoryPage() {
   }
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8 md:py-12 relative'>
+    <div className='container max-w-10xl mx-auto px-4 py-8 md:py-12 relative'>
       <LoadingOverlay visible={isProcessing} />
 
       <div className='grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8'>

@@ -274,7 +274,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className='max-w-7xl mx-auto pb-10'>
+    <div className='max-w-10xl mx-auto pb-10'>
       <div className='flex items-center gap-4 mb-6'>
         <Button
           variant='outline'

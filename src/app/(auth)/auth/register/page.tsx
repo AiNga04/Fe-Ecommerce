@@ -10,7 +10,7 @@ const Register = () => {
     <div className='flex flex-col min-h-screen bg-background'>
       <Header />
       {/* Main Content */}
-      <main className='max-w-7xl mx-auto w-full px-4 py-12'>
+      <main className='max-w-10xl mx-auto w-full px-4 py-12'>
         {/* Back Button */}
         <Link
           href={Routers.LOGIN}

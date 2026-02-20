@@ -93,7 +93,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8 md:py-12'>
+    <div className='container max-w-10xl mx-auto px-4 py-8 md:py-12'>
       <div className='grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8'>
         {/* Left Sidebar */}
         <div className='md:col-span-4 lg:col-span-3'>

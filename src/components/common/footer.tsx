@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator'
 export function Footer() {
   return (
     <footer className='bg-zinc-950 text-zinc-200 pt-16 pb-8 border-t border-zinc-800'>
-      <div className='container max-w-7xl mx-auto px-4'>
+      <div className='container max-w-10xl mx-auto px-4'>
         {/* Main Footer Content: 4 Columns */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12'>
           {/* Column 1: Brand */}

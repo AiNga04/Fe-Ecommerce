@@ -58,11 +58,11 @@ export function RevenueChart() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value: number) => `${(value / 1000000).toFixed(0)}M`}
+                  tickFormatter={(value: any) => `${(value / 1000000).toFixed(0)}M`}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${value.toLocaleString('vi-VN')} ₫`, 'Doanh thu']}
-                  labelFormatter={(label: string) => `Ngày ${label}`}
+                  formatter={(value: any) => [`${value.toLocaleString('vi-VN')} ₫`, 'Doanh thu']}
+                  labelFormatter={(label: any) => `Ngày ${label}`}
                   contentStyle={{
                     backgroundColor: 'white',
                     border: '1px solid #e2e8f0',

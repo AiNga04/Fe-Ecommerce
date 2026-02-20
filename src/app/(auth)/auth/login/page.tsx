@@ -11,7 +11,7 @@ export default function LoginPage() {
       <Header />
 
       {/* Main Content */}
-      <main className='flex-1 max-w-7xl mx-auto w-full px-4 py-12'>
+      <main className='flex-1 max-w-10xl mx-auto w-full px-4 py-12'>
         {/* Back Button */}
         <Link
           href={Routers.HOME}

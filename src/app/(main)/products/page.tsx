@@ -30,7 +30,7 @@ export default async function ProductsPage({
   }
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8'>
+    <div className='container max-w-10xl mx-auto px-4 py-8'>
       <div className='flex flex-col gap-8'>
         <div className='text-center space-y-2'>
           <h1 className='text-3xl font-bold tracking-tight'>Sản phẩm của chúng tôi</h1>

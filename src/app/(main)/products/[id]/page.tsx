@@ -43,7 +43,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   }
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8'>
+    <div className='container max-w-10xl mx-auto px-4 py-8'>
       {/* Breadcrumb */}
       <nav className='flex items-center gap-2 text-sm text-muted-foreground mb-8'>
         <Link href='/' className='hover:text-primary transition-colors'>

@@ -7,7 +7,8 @@ import Image from 'next/image'
 import { toast } from 'sonner'
 import { cartService } from '@/services/cart'
 import { addressService } from '@/services/address'
-import { voucherService, Voucher } from '@/services/voucher'
+import { voucherService } from '@/services/voucher'
+import { Voucher } from '@/types/voucher'
 import { orderService } from '@/services/order'
 import { paymentService } from '@/services/payment'
 import { CartItem } from '@/types/cart'
@@ -92,7 +93,7 @@ function CheckoutContent() {
         }
 
         // 3. Fetch Vouchers
-        const vRes = await voucherService.getActiveVouchers()
+        const vRes = await voucherService.listActive()
         if (vRes.data.success && vRes.data.data) {
           setVouchers(vRes.data.data)
         }
@@ -237,7 +238,7 @@ function CheckoutContent() {
 
   if (orderItems.length === 0) {
     return (
-      <div className='container max-w-7xl mx-auto px-4 py-20 text-center'>
+      <div className='container max-w-10xl mx-auto px-4 py-20 text-center'>
         <h2 className='text-xl font-bold'>Không tìm thấy sản phẩm nào để thanh toán</h2>
         <Button asChild className='mt-4'>
           <Link href='/carts'>Quay lại giỏ hàng</Link>
@@ -440,9 +441,9 @@ function CheckoutContent() {
                       <SelectItem
                         key={v.id}
                         value={String(v.id)}
-                        disabled={subtotal < v.minOrderValue}
+                        disabled={subtotal < (v.minOrderValue || 0)}
                       >
-                        {v.code} - {v.name} (Min: {formatCurrency(v.minOrderValue)})
+                        {v.code} - {v.name} (Min: {formatCurrency(v.minOrderValue || 0)})
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -465,9 +466,9 @@ function CheckoutContent() {
                       <SelectItem
                         key={v.id}
                         value={String(v.id)}
-                        disabled={subtotal < v.minOrderValue}
+                        disabled={subtotal < (v.minOrderValue || 0)}
                       >
-                        {v.code} - {v.name} (Min: {formatCurrency(v.minOrderValue)})
+                        {v.code} - {v.name} (Min: {formatCurrency(v.minOrderValue || 0)})
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -649,7 +650,7 @@ function CheckoutContent() {
   )
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8 bg-gray-50 min-h-screen'>
+    <div className='container max-w-10xl mx-auto px-4 py-8 bg-gray-50 min-h-screen'>
       {/* Stepper Header */}
       <div className='mb-8 max-w-3xl mx-auto'>
         <div className='flex items-center justify-between relative z-10'>

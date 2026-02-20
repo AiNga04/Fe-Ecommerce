@@ -26,7 +26,7 @@ export default async function Home() {
 
       {/* Categories Review (Optional - Static for now) */}
       <section className='py-16 bg-slate-50'>
-        <div className='container max-w-7xl mx-auto px-4'>
+        <div className='container max-w-10xl mx-auto px-4'>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             {[
               {
@@ -68,7 +68,7 @@ export default async function Home() {
 
       {/* Brands Section */}
       <section className='py-10 bg-white'>
-        <div className='container max-w-7xl mx-auto px-4'>
+        <div className='container max-w-10xl mx-auto px-4'>
           <h2 className='text-3xl font-bold tracking-tight mb-8 '>Mua Sắm Theo Thương Hiệu</h2>
           <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
             {[
@@ -96,7 +96,7 @@ export default async function Home() {
 
       {/* Featured Products */}
       <section className='pt-10 pb-20'>
-        <div className='container max-w-7xl mx-auto px-4'>
+        <div className='container max-w-10xl mx-auto px-4'>
           <div className='flex items-center justify-between mb-10'>
             <div>
               <h2 className='text-3xl font-bold tracking-tight'>Sản Phẩm Mới Nhất</h2>
@@ -130,7 +130,7 @@ export default async function Home() {
 
       {/* Service Highlights Section */}
       <section className='py-12 border-t border-gray-100 bg-white'>
-        <div className='container max-w-7xl mx-auto px-4'>
+        <div className='container max-w-10xl mx-auto px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
             <div className='flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-300 group'>
               <div className='flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300'>

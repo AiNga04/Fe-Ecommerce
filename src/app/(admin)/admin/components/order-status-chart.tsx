@@ -61,7 +61,7 @@ export function OrderStatusChart() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => [value, 'Đơn hàng']}
+                  formatter={(value: any) => [value, 'Đơn hàng']}
                   contentStyle={{
                     backgroundColor: 'white',
                     border: '1px solid #e2e8f0',

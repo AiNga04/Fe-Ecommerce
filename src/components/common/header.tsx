@@ -49,7 +49,7 @@ export function Header() {
       </div>
 
       <header className='sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60'>
-        <div className='container max-w-7xl mx-auto px-4'>
+        <div className='container max-w-10xl mx-auto px-4'>
           <div className='flex h-16 items-center justify-between gap-4'>
             {/* Left: Mobile Menu & Logo */}
             <div className='flex items-center gap-2 md:gap-4'>

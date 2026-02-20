@@ -186,7 +186,7 @@ export default function CreateProductPage() {
   const totalStock = variants?.reduce((acc, v) => acc + (Number(v.quantity) || 0), 0) || 0
 
   return (
-    <div className='max-w-7xl mx-auto pb-10'>
+    <div className='max-w-10xl mx-auto pb-10'>
       <div className='flex items-center gap-4 mb-6'>
         <Button
           variant='outline'

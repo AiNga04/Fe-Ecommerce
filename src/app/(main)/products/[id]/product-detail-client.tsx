@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { Product } from '@/types/product'
+import { Product, ProductVariant } from '@/types/product'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatCurrency, getImageUrl } from '@/lib/utils'
@@ -32,7 +32,7 @@ interface ProductDetailClientProps {
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(product.imageUrl)
-  const [selectedVariant, setSelectedVariant] = useState<Product['variants'][0] | null>(null)
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [isBuyingNow, setIsBuyingNow] = useState(false)
   const fetchCartCount = useCartStore((state) => state.fetchCount)
@@ -124,7 +124,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     }
   }
 
-  const maxStock = selectedVariant ? selectedVariant.quantity : product.stock
+  const maxStock = selectedVariant ? selectedVariant.quantity : product.stock || 0
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 gap-12'>
@@ -194,7 +194,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       <div className='space-y-8'>
         <div>
           <Badge variant='secondary' className='mb-3'>
-            {product.category}
+            {typeof product.category === 'object' ? product.category?.name : product.category}
           </Badge>
           <h1 className='text-3xl md:text-4xl font-bold text-gray-900'>{product.name}</h1>
           <div className='flex items-center gap-4 mt-4'>

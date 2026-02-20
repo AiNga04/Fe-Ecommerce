@@ -160,7 +160,7 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <div className='container max-w-7xl mx-auto px-4 py-16 text-center'>
+      <div className='container max-w-10xl mx-auto px-4 py-16 text-center'>
         <div className='bg-gray-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6'>
           <ShoppingBag className='w-10 h-10 text-gray-400' />
         </div>
@@ -176,7 +176,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className='container max-w-7xl mx-auto px-4 py-8 md:py-12'>
+    <div className='container max-w-10xl mx-auto px-4 py-8 md:py-12'>
       <h1 className='text-3xl font-bold text-gray-900 mb-8'>Giỏ hàng ({cartItems.length})</h1>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
