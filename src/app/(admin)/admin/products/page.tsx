@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -69,6 +70,7 @@ import { UpdateProductDialog } from './components/update-product-dialog'
 import { Product } from '@/types/product'
 
 export default function ProductsPage() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'active' | 'trash'>('active')
   const [page, setPage] = useState(0)
@@ -336,6 +338,12 @@ export default function ProductsPage() {
                               className='cursor-pointer'
                             >
                               <Edit className='mr-2 h-4 w-4' /> Chỉnh sửa
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/admin/products/${product.id}`)}
+                              className='cursor-pointer'
+                            >
+                              <Eye className='mr-2 h-4 w-4' /> Xem chi tiết
                             </DropdownMenuItem>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>

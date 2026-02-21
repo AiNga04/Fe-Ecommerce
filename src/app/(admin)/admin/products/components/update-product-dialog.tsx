@@ -152,6 +152,9 @@ export function UpdateProductDialog({ product, open, onOpenChange }: UpdateProdu
     onSuccess: () => {
       toast.success('Cập nhật sản phẩm thành công')
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      if (product) {
+        queryClient.invalidateQueries({ queryKey: ['product', product.id] })
+      }
       onOpenChange(false)
     },
     onError: (error) => {
