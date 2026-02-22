@@ -23,6 +23,7 @@ import {
   PlusCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { BulkActionBar } from '../components/bulk-action-bar'
 import { userService } from '@/services/user'
 import { getImageUrl } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -289,100 +290,90 @@ export default function UsersPage() {
       </div>
 
       {/* Bulk Actions Bar */}
-      {selectedIds.size > 0 && (
-        <div className='sticky top-4 z-50 flex items-center justify-between gap-4 rounded-lg border bg-slate-900 p-4 text-white shadow-xl animate-in slide-in-from-top-2'>
-          <div className='flex items-center gap-2'>
-            <CheckSquare className='h-5 w-5 text-green-400' />
-            <span className='font-medium'>Đã chọn {selectedIds.size} người dùng</span>
-          </div>
-          <div className='flex items-center gap-2'>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='text-white hover:bg-slate-800'
-              onClick={() => setSelectedIds(new Set())}
-            >
-              Hủy chọn
-            </Button>
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        itemType='người dùng'
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={
+          viewDeleted ? (
+            <>
+              <Button
+                variant='outline'
+                size='sm'
+                className='border-green-200 bg-green-50 text-green-700 hover:bg-green-100 font-medium shadow-sm transition-all'
+                onClick={() => batchRestoreMutation.mutate(Array.from(selectedIds))}
+                disabled={batchRestoreMutation.isPending}
+              >
+                <RefreshCw className='mr-2 h-4 w-4' /> Khôi phục
+              </Button>
 
-            {viewDeleted ? (
-              <>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  className='bg-green-600 hover:bg-green-700 text-white border-0'
-                  onClick={() => batchRestoreMutation.mutate(Array.from(selectedIds))}
-                  disabled={batchRestoreMutation.isPending}
-                >
-                  <RefreshCw className='mr-2 h-4 w-4' /> Khôi phục ({selectedIds.size})
-                </Button>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant='destructive'
-                      size='sm'
-                      disabled={batchHardDeleteMutation.isPending}
-                    >
-                      <Trash2 className='mr-2 h-4 w-4' /> Xóa vĩnh viễn ({selectedIds.size})
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Xóa vĩnh viễn {selectedIds.size} người dùng?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Hành động này không thể hoàn tác. Dữ liệu sẽ bị mất hoàn toàn.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Hủy</AlertDialogCancel>
-                      <AlertDialogAction
-                        className='bg-red-600 hover:bg-red-700'
-                        onClick={() => batchHardDeleteMutation.mutate(Array.from(selectedIds))}
-                      >
-                        Xóa vĩnh viễn
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </>
-            ) : (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant='destructive'
                     size='sm'
-                    disabled={batchSoftDeleteMutation.isPending}
+                    className='shadow-sm font-medium'
+                    disabled={batchHardDeleteMutation.isPending}
                   >
-                    <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm ({selectedIds.size})
+                    <Trash2 className='mr-2 h-4 w-4' /> Xóa vĩnh viễn
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Chuyển {selectedIds.size} người dùng vào thùng rác?
+                    <AlertDialogTitle className='text-xl'>
+                      Xóa vĩnh viễn {selectedIds.size} người dùng?
                     </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Họ sẽ không thể đăng nhập cho đến khi được khôi phục.
+                    <AlertDialogDescription className='text-slate-500'>
+                      Hành động này không thể hoàn tác. Dữ liệu sẽ bị mất hoàn toàn.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
+                  <AlertDialogFooter className='gap-2 sm:gap-0 mt-2'>
                     <AlertDialogCancel>Hủy</AlertDialogCancel>
                     <AlertDialogAction
-                      className='bg-red-600 hover:bg-red-700'
-                      onClick={() => batchSoftDeleteMutation.mutate(Array.from(selectedIds))}
+                      className='bg-red-600 hover:bg-red-700 font-medium'
+                      onClick={() => batchHardDeleteMutation.mutate(Array.from(selectedIds))}
                     >
-                      Xóa tạm
+                      Xóa vĩnh viễn
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            )}
-          </div>
-        </div>
-      )}
+            </>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant='destructive'
+                  size='sm'
+                  className='shadow-sm font-medium'
+                  disabled={batchSoftDeleteMutation.isPending}
+                >
+                  <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm ({selectedIds.size})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className='text-xl'>
+                    Chuyển {selectedIds.size} người dùng vào thùng rác?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className='text-slate-500'>
+                    Họ sẽ không thể đăng nhập cho đến khi được khôi phục.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className='gap-2 sm:gap-0 mt-2'>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction
+                    className='bg-red-600 hover:bg-red-700 font-medium'
+                    onClick={() => batchSoftDeleteMutation.mutate(Array.from(selectedIds))}
+                  >
+                    Xóa tạm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )
+        }
+      />
 
       <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-lg border shadow-sm'>
         <form onSubmit={handleSearch} className='relative flex-1 w-full md:max-w-sm'>

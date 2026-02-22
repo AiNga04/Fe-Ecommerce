@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner'
 import { productService } from '@/services/product'
 import { categoryService } from '@/services/category'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -65,6 +66,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { getImageUrl, cn } from '@/lib/utils'
+import { BulkActionBar } from '../components/bulk-action-bar'
 import { CreateProductDialog } from './components/create-product-dialog'
 import { UpdateProductDialog } from './components/update-product-dialog'
 import { Product } from '@/types/product'
@@ -77,6 +79,9 @@ export default function ProductsPage() {
   const [pageSize, setPageSize] = useState(10)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
+
+  // Selection State
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
   // Update Dialog State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -117,10 +122,37 @@ export default function ProductsPage() {
     },
   })
 
+  // Clear selection when data changes
+  React.useEffect(() => {
+    setSelectedIds(new Set())
+  }, [activeTab, page, pageSize, debouncedSearch, categoryFilter])
+
   const products = productsData?.data?.data || []
   const pagination = productsData?.data?.pagination
 
-  // Mutations
+  // --- Selection Handlers ---
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = products.map((p) => p.id)
+      setSelectedIds(new Set(allIds))
+    } else {
+      setSelectedIds(new Set())
+    }
+  }
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    const newSelected = new Set(selectedIds)
+    if (checked) {
+      newSelected.add(id)
+    } else {
+      newSelected.delete(id)
+    }
+    setSelectedIds(newSelected)
+  }
+
+  const isAllSelected = products.length > 0 && selectedIds.size === products.length
+
+  // --- Mutations ---
   const softDeleteMutation = useMutation({
     mutationFn: (id: number) => productService.softDeleteProduct(id),
     onSuccess: () => {
@@ -146,6 +178,37 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ['products'] })
     },
     onError: () => toast.error('Lỗi khi xóa vĩnh viễn sản phẩm'),
+  })
+
+  // --- Batch Mutations ---
+  const batchSoftDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => productService.softDeleteProducts(ids),
+    onSuccess: (data) => {
+      toast.success(`Đã chuyển ${data.data?.data?.length || 0} sản phẩm vào thùng rác`)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: () => toast.error('Lỗi khi xóa sản phẩm hàng loạt'),
+  })
+
+  const batchRestoreMutation = useMutation({
+    mutationFn: (ids: number[]) => productService.restoreProducts(ids),
+    onSuccess: (data) => {
+      toast.success(`Đã khôi phục ${data.data?.data?.length || 0} sản phẩm`)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: () => toast.error('Lỗi khi khôi phục sản phẩm hàng loạt'),
+  })
+
+  const batchHardDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => productService.hardDeleteProducts(ids),
+    onSuccess: (data) => {
+      toast.success(`Đã xóa vĩnh viễn ${data.data?.data?.length || 0} sản phẩm`)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: () => toast.error('Lỗi khi xóa vĩnh viễn sản phẩm hàng loạt'),
   })
 
   const handleEditClick = (product: Product) => {
@@ -204,6 +267,92 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        itemType='sản phẩm'
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={
+          activeTab === 'trash' ? (
+            <>
+              <Button
+                variant='outline'
+                size='sm'
+                className='border-green-200 bg-green-50 text-green-700 hover:bg-green-100 font-medium shadow-sm transition-all'
+                onClick={() => batchRestoreMutation.mutate(Array.from(selectedIds))}
+                disabled={batchRestoreMutation.isPending}
+              >
+                <RefreshCcw className='mr-2 h-4 w-4' /> Khôi phục
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant='destructive'
+                    size='sm'
+                    className='shadow-sm font-medium'
+                    disabled={batchHardDeleteMutation.isPending}
+                  >
+                    <Trash2 className='mr-2 h-4 w-4' /> Xóa vĩnh viễn
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className='text-xl'>
+                      Xóa vĩnh viễn {selectedIds.size} sản phẩm?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className='text-slate-500'>
+                      Hành động này không thể hoàn tác. Dữ liệu sẽ bị mất hoàn toàn.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className='gap-2 sm:gap-0 mt-2'>
+                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                    <AlertDialogAction
+                      className='bg-red-600 hover:bg-red-700 font-medium'
+                      onClick={() => batchHardDeleteMutation.mutate(Array.from(selectedIds))}
+                    >
+                      Xóa vĩnh viễn
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant='destructive'
+                  size='sm'
+                  className='shadow-sm font-medium'
+                  disabled={batchSoftDeleteMutation.isPending}
+                >
+                  <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm ({selectedIds.size})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className='text-xl'>
+                    Chuyển {selectedIds.size} sản phẩm vào thùng rác?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className='text-slate-500'>
+                    Các sản phẩm này sẽ bị ẩn khỏi cửa hàng và có thể khôi phục sau.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className='gap-2 sm:gap-0 mt-2'>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction
+                    className='bg-red-600 hover:bg-red-700 font-medium'
+                    onClick={() => batchSoftDeleteMutation.mutate(Array.from(selectedIds))}
+                  >
+                    Xóa tạm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )
+        }
+      />
+
       <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-lg border shadow-sm'>
         <div className='relative flex-1 w-full md:max-w-sm'>
           <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
@@ -240,6 +389,13 @@ export default function ProductsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className='w-[40px]'>
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label='Select all'
+                />
+              </TableHead>
               <TableHead className='w-[80px] text-center'>Ảnh</TableHead>
               <TableHead>Tên sản phẩm</TableHead>
               <TableHead>Danh mục</TableHead>
@@ -252,20 +408,27 @@ export default function ProductsPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className='h-32 text-center text-muted-foreground'>
+                <TableCell colSpan={8} className='h-32 text-center text-muted-foreground'>
                   <Loader2 className='h-6 w-6 animate-spin mx-auto mb-2' />
                   Đang tải dữ liệu...
                 </TableCell>
               </TableRow>
             ) : products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className='h-32 text-center text-muted-foreground'>
+                <TableCell colSpan={8} className='h-32 text-center text-muted-foreground'>
                   Không tìm thấy sản phẩm nào.
                 </TableCell>
               </TableRow>
             ) : (
               products.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow key={product.id} data-state={selectedIds.has(product.id) && 'selected'}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(product.id)}
+                      onCheckedChange={(checked) => handleSelectOne(product.id, checked as boolean)}
+                      aria-label={`Select product ${product.id}`}
+                    />
+                  </TableCell>
                   <TableCell className='text-center'>
                     <div className='w-12 h-12 rounded-lg border border-slate-100 bg-slate-50 overflow-hidden mx-auto flex items-center justify-center'>
                       {product.imageUrl ? (
