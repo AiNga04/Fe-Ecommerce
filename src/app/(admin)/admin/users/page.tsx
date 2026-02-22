@@ -275,11 +275,10 @@ export default function UsersPage() {
 
               <Button
                 asChild
-                size='sm'
-                className='gap-2 shadow-sm bg-slate-900 hover:bg-slate-800 transition-all hover:shadow-md'
+                className='gap-2 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20'
               >
                 <Link href='/admin/users/create'>
-                  <PlusCircle className='h-4 w-4' />
+                  <Plus className='h-4 w-4' />
                   <span className='hidden sm:inline'>Thêm người dùng</span>
                   <span className='sm:hidden'>Thêm mới</span>
                 </Link>
