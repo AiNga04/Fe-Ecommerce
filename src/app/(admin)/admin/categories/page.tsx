@@ -145,7 +145,7 @@ export default function CategoriesPage() {
           onClick={handleCreate}
           className='bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 transition-all hover:scale-105 active:scale-95'
         >
-          <Plus className='mr-2 h-4 w-4' /> Thêm Danh Mục
+          <Plus className='h-4 w-4' /> Thêm Danh Mục
         </Button>
       </div>
 

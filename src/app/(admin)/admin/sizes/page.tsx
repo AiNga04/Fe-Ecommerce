@@ -93,7 +93,7 @@ export default function SizesPage() {
           onClick={handleCreate}
           className='bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20'
         >
-          <Plus className='mr-2 h-4 w-4' /> Thêm Kích Thước
+          <Plus className='h-4 w-4' /> Thêm Kích Thước
         </Button>
       </div>
 

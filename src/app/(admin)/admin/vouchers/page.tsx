@@ -147,7 +147,7 @@ export default function VouchersPage() {
           onClick={handleCreate}
           className='bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20'
         >
-          <Plus className='mr-2 h-4 w-4' /> Tạo Voucher Mới
+          <Plus className='h-4 w-4' /> Tạo Voucher Mới
         </Button>
       </div>
 

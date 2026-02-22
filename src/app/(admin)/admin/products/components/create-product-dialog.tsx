@@ -172,7 +172,7 @@ export function CreateProductDialog({ trigger }: CreateProductDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button className='gap-2 bg-slate-900 hover:bg-slate-800 text-white shadow-md transition-all hover:shadow-lg rounded-full px-6'>
+          <Button className='bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20'>
             <Plus className='h-4 w-4' /> Thêm sản phẩm
           </Button>
         )}
