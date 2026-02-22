@@ -72,6 +72,17 @@ export const productService = {
       },
     })
   },
+  updateGalleryImage: (productId: number | string, imageId: number | string, data: FormData) => {
+    return http.put<IBackendRes<GalleryImage>>(
+      `${PRODUCT_PATH}/${productId}/gallery/${imageId}`,
+      data,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+  },
   deleteGalleryImage: (productId: number | string, imageId: number | string) => {
     return http.delete<IBackendRes<void>>(`${PRODUCT_PATH}/${productId}/gallery/${imageId}`)
   },

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { productService } from '@/services/product'
 import { UpdateProductDialog } from '../components/update-product-dialog'
+import { GalleryManager } from '../components/gallery-manager'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -244,37 +245,8 @@ export default function ProductDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Gallery Grid */}
-          <Card>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <ImageIcon className='w-5 h-5' />
-                Thư viện ảnh ({product.gallery?.length || 0})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {product.gallery && product.gallery.length > 0 ? (
-                <div className='grid grid-cols-4 sm:grid-cols-5 gap-4'>
-                  {product.gallery.map((img) => (
-                    <div
-                      key={img.id}
-                      className='aspect-square rounded-lg border overflow-hidden bg-slate-50 relative group cursor-pointer'
-                    >
-                      <img
-                        src={getImageUrl(img.url)}
-                        alt={`Gallery ${img.id}`}
-                        className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className='text-center py-6 text-muted-foreground text-sm'>
-                  Chưa có ảnh nào trong thư viện.
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Gallery Manager */}
+          <GalleryManager productId={product.id} initialGallery={product.gallery} />
 
           {/* Size Guide */}
           {product.sizeGuide && (
