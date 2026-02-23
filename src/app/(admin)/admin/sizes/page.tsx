@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Search, Pencil, Trash2, Loader2, SquareDashedMousePointer } from 'lucide-react'
 import { sizeService } from '@/services/size'
@@ -17,6 +17,20 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,6 +45,8 @@ import { toast } from 'sonner'
 
 export default function SizesPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedSize, setSelectedSize] = useState<Size | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -47,11 +63,27 @@ export default function SizesPage() {
   const sizes = sizesData?.data?.data || []
 
   // Client-side filtering
-  const filteredSizes = sizes.filter(
-    (size) =>
-      size.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      size.code.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredSizes = useMemo(
+    () =>
+      sizes.filter(
+        (size: Size) =>
+          size.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          size.code.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [sizes, searchTerm],
   )
+
+  // Client-side pagination
+  const totalPages = Math.ceil(filteredSizes.length / pageSize)
+  const paginatedSizes = useMemo(
+    () => filteredSizes.slice(page * pageSize, (page + 1) * pageSize),
+    [filteredSizes, page, pageSize],
+  )
+
+  // Reset page when search changes
+  React.useEffect(() => {
+    setPage(0)
+  }, [searchTerm, pageSize])
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => sizeService.delete(id),
@@ -129,7 +161,7 @@ export default function SizesPage() {
                   Đang tải dữ liệu...
                 </TableCell>
               </TableRow>
-            ) : filteredSizes.length === 0 ? (
+            ) : paginatedSizes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className='h-32 text-center text-muted-foreground'>
                   <div className='flex flex-col items-center justify-center'>
@@ -139,7 +171,7 @@ export default function SizesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredSizes.map((size) => (
+              paginatedSizes.map((size: Size) => (
                 <TableRow key={size.id}>
                   <TableCell className='font-medium'>#{size.id}</TableCell>
                   <TableCell>
@@ -174,6 +206,64 @@ export default function SizesPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className='flex flex-col-reverse md:flex-row items-center justify-between gap-4'>
+        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+          <span>Hiển thị</span>
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value))
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className='h-8 w-[70px]'>
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent side='top'>
+              {[10, 20, 50].map((s) => (
+                <SelectItem key={s} value={s.toString()}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>kích thước mỗi trang</span>
+        </div>
+
+        {totalPages > 0 && (
+          <div className='flex items-center gap-4'>
+            <div className='text-sm text-muted-foreground'>
+              Trang {page + 1} / {totalPages}
+            </div>
+            <Pagination className='justify-end w-auto'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page > 0) setPage(page - 1)
+                    }}
+                    className={page === 0 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page < totalPages - 1) setPage(page + 1)
+                    }}
+                    className={page >= totalPages - 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       <SizeDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} size={selectedSize} />

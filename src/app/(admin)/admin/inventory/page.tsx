@@ -26,6 +26,20 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
@@ -35,7 +49,7 @@ import { inventoryService } from '@/services/inventory'
 
 export default function InventoryPage() {
   const [page, setPage] = useState(0)
-  const [size, setSize] = useState(20)
+  const [pageSize, setPageSize] = useState(20)
 
   // Filters
   const [productIdStr, setProductIdStr] = useState('')
@@ -54,8 +68,9 @@ export default function InventoryPage() {
 
   // Data fetching
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['inventory-logs', productId, fromDate, toDate, page, size],
-    queryFn: () => inventoryService.getAuditLogs({ productId, fromDate, toDate, page, size }),
+    queryKey: ['inventory-logs', productId, fromDate, toDate, page, pageSize],
+    queryFn: () =>
+      inventoryService.getAuditLogs({ productId, fromDate, toDate, page, size: pageSize }),
   })
 
   const logs = Array.isArray(data?.data?.data) ? data.data.data : []
@@ -67,7 +82,7 @@ export default function InventoryPage() {
     try {
       const blob = await inventoryService.exportExcel({ productId, fromDate, toDate })
       const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
+      const a = document.createElement('a') as HTMLAnchorElement
       a.href = url
       a.download = `inventory_audit_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
       document.body.appendChild(a)
@@ -304,29 +319,62 @@ export default function InventoryPage() {
             )}
           </TableBody>
         </Table>
+      </div>
 
-        {/* Pagination placeholder */}
-        {totalPages > 1 && (
-          <div className='p-4 border-t flex justify-end gap-2 items-center bg-slate-50'>
-            <Button
-              variant='outline'
-              size='sm'
-              disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-            >
-              Trước
-            </Button>
-            <span className='text-sm text-slate-600 mx-4'>
-              Trang {page + 1} / {totalPages}
-            </span>
-            <Button
-              variant='outline'
-              size='sm'
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            >
-              Sau
-            </Button>
+      {/* Pagination */}
+      <div className='flex flex-col-reverse md:flex-row items-center justify-between gap-4 mt-4'>
+        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+          <span>Hiển thị</span>
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value))
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className='h-8 w-[70px]'>
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent side='top'>
+              {[10, 20, 50].map((s) => (
+                <SelectItem key={s} value={s.toString()}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>dòng mỗi trang</span>
+        </div>
+
+        {totalPages > 0 && (
+          <div className='flex items-center gap-4'>
+            <div className='text-sm text-muted-foreground'>
+              Trang {page + 1} / {totalPages || 1}
+            </div>
+            <Pagination className='justify-end w-auto'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page > 0) setPage(page - 1)
+                    }}
+                    className={page === 0 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page < totalPages - 1) setPage(page + 1)
+                    }}
+                    className={page >= totalPages - 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
       </div>

@@ -17,6 +17,13 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -265,8 +272,31 @@ export default function CategoriesPage() {
       </div>
 
       {/* Pagination */}
-      {pagination && (
-        <div className='flex items-center justify-end'>
+      <div className='flex flex-col-reverse md:flex-row items-center justify-between gap-4 mt-4'>
+        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+          <span>Hiển thị</span>
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value))
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className='h-8 w-[70px]'>
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent side='top'>
+              {[10, 20, 50].map((s) => (
+                <SelectItem key={s} value={s.toString()}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>danh mục mỗi trang</span>
+        </div>
+
+        {pagination && (
           <div className='flex items-center gap-4'>
             <div className='text-sm text-muted-foreground'>
               Trang {page + 1} / {pagination.totalPages || 1}
@@ -300,8 +330,8 @@ export default function CategoriesPage() {
               </PaginationContent>
             </Pagination>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <CategoryDialog
         open={isDialogOpen}
