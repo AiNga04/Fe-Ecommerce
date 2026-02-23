@@ -236,17 +236,17 @@ export default function OrderDetailPage() {
     <div className='flex flex-col gap-6 w-full mx-auto pb-10'>
       {/* 1. HEADER */}
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-4 flex-wrap'>
           <Button
             variant='outline'
             size='icon'
-            className='rounded-full w-10 h-10 border-slate-200 shadow-sm'
+            className='rounded-full shrink-0 w-10 h-10 border-slate-200 shadow-sm'
             onClick={() => router.back()}
           >
             <ChevronLeft className='w-5 h-5 text-slate-600' />
           </Button>
-          <div className='flex items-center gap-3'>
-            <h1 className='text-2xl font-bold tracking-tight text-slate-900'>
+          <div className='flex items-center gap-3 flex-wrap'>
+            <h1 className='text-xl md:text-2xl font-bold tracking-tight text-slate-900'>
               Đơn hàng {order.code || `#${order.id}`}
             </h1>
             <Badge
@@ -257,8 +257,12 @@ export default function OrderDetailPage() {
             </Badge>
           </div>
         </div>
-        <div className='flex items-center gap-3'>
-          <Button variant='outline' className='bg-white rounded-md shadow-sm hidden sm:flex'>
+        <div className='flex flex-wrap sm:flex-nowrap items-center gap-3 w-full md:w-auto'>
+          <Button
+            variant='outline'
+            className='bg-white rounded-md shadow-sm flex-1 sm:flex-none justify-center'
+            onClick={() => window.open(`/admin/orders/${orderId}/print`, '_blank')}
+          >
             <Printer className='w-4 h-4 mr-2' />
             In hóa đơn
           </Button>
@@ -267,8 +271,8 @@ export default function OrderDetailPage() {
             onValueChange={handleStatusChange}
             disabled={allowedNextStatuses.length === 0 || updateStatusMutation.isPending}
           >
-            <SelectTrigger className='w-[180px] rounded-md bg-white shadow-sm font-medium'>
-              <SelectValue placeholder='Cập nhật trạng thái' />
+            <SelectTrigger className='w-full sm:w-[180px] flex-1 sm:flex-none rounded-md bg-white shadow-sm font-medium'>
+              <SelectValue placeholder='Cập nhật' />
             </SelectTrigger>
             <SelectContent className='rounded-md'>
               {/* Only show current status and allowed transitions */}
@@ -463,37 +467,43 @@ export default function OrderDetailPage() {
             </CardHeader>
             <div className='divide-y divide-slate-100'>
               {order.items?.map((item: any) => (
-                <div key={`${item.productId}-${item.size}`} className='p-4 flex gap-4 items-center'>
-                  {/* Thumbnail */}
-                  <div className='h-20 w-20 shrink-0 rounded-md border border-slate-100 bg-slate-50 overflow-hidden relative'>
-                    {item.image ? (
-                      <img
-                        src={getImageUrl(item.image)}
-                        alt={item.productName}
-                        className='object-cover w-full h-full'
-                      />
-                    ) : (
-                      <div className='absolute inset-0 flex items-center justify-center text-slate-300'>
-                        <ImageIcon className='w-6 h-6' />
+                <div
+                  key={`${item.productId}-${item.size}`}
+                  className='p-4 flex flex-col sm:flex-row gap-4 sm:items-center'
+                >
+                  <div className='flex gap-4 items-start sm:items-center flex-1 min-w-0'>
+                    {/* Thumbnail */}
+                    <div className='h-20 w-20 shrink-0 rounded-md border border-slate-100 bg-slate-50 overflow-hidden relative'>
+                      {item.image ? (
+                        <img
+                          src={getImageUrl(item.image)}
+                          alt={item.productName}
+                          className='object-cover w-full h-full'
+                        />
+                      ) : (
+                        <div className='absolute inset-0 flex items-center justify-center text-slate-300'>
+                          <ImageIcon className='w-6 h-6' />
+                        </div>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className='flex-1 min-w-0'>
+                      <h4 className='text-base font-semibold text-slate-900 truncate'>
+                        {item.productName}
+                      </h4>
+                      <p className='text-sm text-slate-500 mt-0.5'>Kích cỡ: {item.size}</p>
+                      <div className='flex items-center gap-4 mt-2 text-sm text-slate-600'>
+                        <span className='font-medium text-slate-800'>
+                          {formatCurrency(item.unitPrice || 0)}
+                        </span>
+                        <span className='text-slate-400'>x</span>
+                        <span className='font-medium'>{item.quantity}</span>
                       </div>
-                    )}
-                  </div>
-                  {/* Info */}
-                  <div className='flex-1 min-w-0'>
-                    <h4 className='text-base font-semibold text-slate-900 truncate'>
-                      {item.productName}
-                    </h4>
-                    <p className='text-sm text-slate-500 mt-0.5'>Kích cỡ: {item.size}</p>
-                    <div className='flex items-center gap-4 mt-2 text-sm text-slate-600'>
-                      <span className='font-medium text-slate-800'>
-                        {formatCurrency(item.unitPrice || 0)}
-                      </span>
-                      <span className='text-slate-400'>x</span>
-                      <span className='font-medium'>{item.quantity}</span>
                     </div>
                   </div>
                   {/* Subtotal */}
-                  <div className='text-right shrink-0'>
+                  <div className='text-left sm:text-right shrink-0 mt-2 sm:mt-0 pl-24 sm:pl-0'>
+                    <p className='text-xs text-slate-500 sm:hidden mb-1'>Thành tiền</p>
                     <p className='font-bold text-slate-900 text-lg'>
                       {formatCurrency(item.subtotal || (item.unitPrice || 0) * item.quantity)}
                     </p>
