@@ -79,49 +79,7 @@ export function UpdateProductDialog({ product, open, onOpenChange }: UpdateProdu
     },
   })
 
-  // Initialize form when product changes
-  useEffect(() => {
-    if (product && open) {
-      setValue('name', product.name)
-      setValue('description', product.description || '')
-      setValue('price', product.price)
-
-      // Handle Category
-      const catId = typeof product.category === 'object' ? String(product.category?.id) : '' // If string, we might not have ID easily unless we match name, but typically it returns object in detail/list if populated.
-      // If it's a string, we might need to rely on the backend sending distinct ID or handle it.
-      // Based on previous files, list returns object.
-
-      setValue('categoryId', catId)
-
-      // Handle Size Guide
-      setValue('sizeGuideId', product.sizeGuide?.id ? String(product.sizeGuide.id) : '')
-
-      // Handle Sizes
-      const currentSizeIds = product.variants?.map((v) => v.sizeId) || []
-      setValue('sizeIds', currentSizeIds)
-
-      // Handle Image
-      if (product.imageUrl) {
-        setPreviewImage(getImageUrl(product.imageUrl))
-      } else {
-        setPreviewImage(null)
-      }
-      setValue('image', undefined) // Reset file input
-    }
-  }, [product, open, setValue])
-
-  // Watch for new image selection
-  const imageFileList = watch('image')
-  useEffect(() => {
-    if (imageFileList && imageFileList.length > 0) {
-      const file = imageFileList[0]
-      const url = URL.createObjectURL(file)
-      setPreviewImage(url)
-      return () => URL.revokeObjectURL(url)
-    }
-  }, [imageFileList])
-
-  // Queries
+  // Queries (declared before useEffect that depends on categories)
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn: () => categoryService.list({ size: 1000 }),
@@ -142,6 +100,57 @@ export function UpdateProductDialog({ product, open, onOpenChange }: UpdateProdu
     enabled: open,
   })
   const sizeGuides = sizeGuidesData?.data?.data || []
+
+  // Initialize form when product changes
+  useEffect(() => {
+    if (product && open) {
+      setValue('name', product.name)
+      setValue('description', product.description || '')
+      setValue('price', product.price)
+
+      // Handle Category — if it's an object with id, set directly
+      if (typeof product.category === 'object' && product.category?.id) {
+        setValue('categoryId', String(product.category.id))
+      }
+
+      // Handle Size Guide
+      setValue('sizeGuideId', product.sizeGuide?.id ? String(product.sizeGuide.id) : '')
+
+      // Handle Sizes
+      const currentSizeIds = product.variants?.map((v) => v.sizeId) || []
+      setValue('sizeIds', currentSizeIds)
+
+      // Handle Image
+      if (product.imageUrl) {
+        setPreviewImage(getImageUrl(product.imageUrl))
+      } else {
+        setPreviewImage(null)
+      }
+      setValue('image', undefined) // Reset file input
+    }
+  }, [product, open, setValue])
+
+  // Match category name to ID once categories are loaded (API returns category as string)
+  useEffect(() => {
+    if (product && open && typeof product.category === 'string' && categoriesData?.data?.data) {
+      const cats = categoriesData.data.data
+      const matched = cats.find((c: any) => c.name === product.category)
+      if (matched) {
+        setValue('categoryId', String(matched.id))
+      }
+    }
+  }, [product, open, categoriesData, setValue])
+
+  // Watch for new image selection
+  const imageFileList = watch('image')
+  useEffect(() => {
+    if (imageFileList && imageFileList.length > 0) {
+      const file = imageFileList[0]
+      const url = URL.createObjectURL(file)
+      setPreviewImage(url)
+      return () => URL.revokeObjectURL(url)
+    }
+  }, [imageFileList])
 
   // Mutation
   const updateMutation = useMutation({
