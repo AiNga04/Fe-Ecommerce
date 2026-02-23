@@ -189,7 +189,7 @@ export default function OrderDetailPage() {
   const isConfirmed = currentStatus === 'CONFIRMED' || isShipping
 
   return (
-    <div className='flex flex-col gap-6 max-w-6xl mx-auto pb-10'>
+    <div className='flex flex-col gap-6 w-full mx-auto pb-10'>
       {/* 1. HEADER */}
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div className='flex items-center gap-4'>
@@ -388,7 +388,7 @@ export default function OrderDetailPage() {
             </div>
           </Card>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1 gap-6'>
             {/* Payment Details Card */}
             <Card className='rounded-xl shadow-sm border-slate-200 h-fit'>
               <CardHeader className='pb-4'>

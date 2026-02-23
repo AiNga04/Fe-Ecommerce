@@ -266,7 +266,7 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                   defaultValue={type}
                   value={watch('type')}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Chọn loại giảm giá' />
                   </SelectTrigger>
                   <SelectContent>

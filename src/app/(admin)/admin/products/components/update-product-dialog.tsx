@@ -322,7 +322,7 @@ export function UpdateProductDialog({ product, open, onOpenChange }: UpdateProdu
                       >
                         <SelectTrigger
                           id='category'
-                          className='h-10 border-slate-200 focus:border-blue-500 focus:ring-blue-500'
+                          className='w-full h-10 border-slate-200 focus:border-blue-500 focus:ring-blue-500'
                         >
                           <SelectValue placeholder='Chọn danh mục' />
                         </SelectTrigger>
@@ -434,7 +434,7 @@ export function UpdateProductDialog({ product, open, onOpenChange }: UpdateProdu
                       >
                         <SelectTrigger
                           id='sizeGuide'
-                          className='h-10 border-slate-200 focus:border-purple-500 focus:ring-purple-500'
+                          className='w-full h-10 border-slate-200 focus:border-purple-500 focus:ring-purple-500'
                         >
                           <SelectValue placeholder='Chọn bảng size' />
                         </SelectTrigger>
