@@ -221,39 +221,40 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='sm:max-w-2xl bg-white p-0 overflow-hidden gap-0 rounded-2xl shadow-2xl'>
-        {/* Header decoration */}
-        <div className='bg-blue-600 p-6 text-white'>
-          <div className='flex items-center gap-4'>
-            <div className='p-3 bg-white/20 rounded-xl backdrop-blur-sm'>
-              <FileJson className='h-8 w-8 text-white' />
+      <DialogContent className='sm:max-w-2xl bg-white p-6 gap-6 rounded-xl shadow-lg'>
+        <DialogHeader>
+          <div className='flex items-center gap-3'>
+            <div className='p-2 bg-slate-100 rounded-lg text-slate-600'>
+              <FileJson className='h-5 w-5' />
             </div>
             <div>
-              <DialogTitle className='text-xl font-bold'>Tạo Người Dùng Hàng Loạt</DialogTitle>
-              <DialogDescription className='text-blue-100 mt-1'>
-                Nhập dữ liệu người dùng nhanh chóng qua file Excel/CSV hoặc mã JSON.
+              <DialogTitle className='text-lg font-semibold text-slate-900'>
+                Tạo Người Dùng Hàng Loạt
+              </DialogTitle>
+              <DialogDescription className='text-sm text-slate-500 mt-1'>
+                Nhập dữ liệu người dùng qua file Excel/CSV hoặc mã JSON.
               </DialogDescription>
             </div>
           </div>
-        </div>
+        </DialogHeader>
 
-        <div className='p-6'>
+        <div>
           <Tabs
             defaultValue='file'
             value={activeTab}
             onValueChange={setActiveTab}
             className='w-full'
           >
-            <TabsList className='grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6'>
+            <TabsList className='grid w-full grid-cols-2 bg-slate-50 p-1 mb-6'>
               <TabsTrigger
                 value='file'
-                className='rounded-lg data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all'
+                className='rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all'
               >
                 <Upload className='mr-2 h-4 w-4' /> Tải file Excel/CSV
               </TabsTrigger>
               <TabsTrigger
                 value='json'
-                className='rounded-lg data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm transition-all'
+                className='rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all'
               >
                 <FileJson className='mr-2 h-4 w-4' /> Dán mã JSON
               </TabsTrigger>
@@ -261,13 +262,13 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
 
             <TabsContent value='file' className='space-y-4 focus-visible:outline-none'>
               <div
-                className='group relative border-2 border-dashed border-slate-200 rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300'
+                className='group relative border-2 border-dashed border-slate-200 rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-all duration-200'
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className='p-4 bg-blue-50 text-blue-500 rounded-full mb-4 group-hover:scale-110 group-hover:bg-blue-100 transition-transform'>
-                  <FileUp className='h-8 w-8' />
+                <div className='p-3 bg-slate-100 text-slate-600 rounded-full mb-4'>
+                  <FileUp className='h-6 w-6' />
                 </div>
-                <div className='font-semibold text-slate-900 text-lg mb-1'>
+                <div className='font-medium text-slate-800 text-base mb-1.5'>
                   Nhấn để tải lên hoặc kéo thả file
                 </div>
                 <div className='text-sm text-slate-500'>
@@ -324,7 +325,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
                   <Button
                     onClick={() => mutate({ users: parsedUsers })}
                     disabled={isPending}
-                    className='bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200 shadow-lg'
+                    className='bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
                   >
                     {isPending ? (
                       <>
@@ -339,7 +340,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
             </TabsContent>
 
             <TabsContent value='json' className='space-y-4 focus-visible:outline-none'>
-              <div className='relative'>
+              <div className='relative mt-2'>
                 <Textarea
                   placeholder={`[
   {
@@ -355,19 +356,16 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
     "city": "HO_CHI_MINH"
   }
 ]`}
-                  className='h-[350px] font-mono text-sm border-slate-200 focus:border-purple-500 focus:ring-purple-500 bg-slate-50'
+                  className='h-[350px] font-mono text-sm border-slate-200 focus:border-slate-300 focus:ring-slate-300 bg-slate-50 rounded-lg'
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
                 />
-                <div className='absolute bottom-3 right-3 text-xs text-slate-400 pointer-events-none'>
-                  JSON Array Format
-                </div>
               </div>
-              <DialogFooter>
+              <div className='flex justify-end pt-2'>
                 <Button
                   onClick={handleJsonSubmit}
                   disabled={isPending || !jsonInput.trim()}
-                  className='w-full bg-purple-600 hover:bg-purple-700 text-white shadow-purple-200 shadow-lg'
+                  className='bg-slate-900 hover:bg-slate-800 text-white shadow-sm md:w-auto w-full'
                 >
                   {isPending ? (
                     <>
@@ -377,7 +375,7 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
                     'Import từ JSON'
                   )}
                 </Button>
-              </DialogFooter>
+              </div>
             </TabsContent>
           </Tabs>
 
