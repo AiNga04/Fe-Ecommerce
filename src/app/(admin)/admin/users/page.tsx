@@ -86,13 +86,25 @@ export default function UsersPage() {
 
   // Search Params State
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [filterRole, setFilterRole] = useState<string>('ALL')
   const [filterStatus, setFilterStatus] = useState<string>('ALL')
+
+  // Debounce search
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setPage(0)
+  }, [viewDeleted, debouncedSearch, filterRole, filterStatus, pageSize])
 
   const criteria: UserSearchCriteria = {
     page,
     size: pageSize,
-    firstName: searchTerm || undefined,
+    firstName: debouncedSearch || undefined,
     role: filterRole !== 'ALL' ? filterRole : undefined,
     status: filterStatus !== 'ALL' ? filterStatus : undefined,
   }
@@ -213,10 +225,7 @@ export default function UsersPage() {
   })
   // End Selection
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setPage(0)
-  }
+  // Removed handleSearch as we now use debounced search
 
   return (
     <div className='flex flex-col gap-6 relative'>
@@ -376,7 +385,7 @@ export default function UsersPage() {
       />
 
       <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-lg border shadow-sm'>
-        <form onSubmit={handleSearch} className='relative flex-1 w-full md:max-w-sm'>
+        <div className='relative flex-1 w-full md:max-w-sm'>
           <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
           <Input
             type='search'
@@ -385,7 +394,7 @@ export default function UsersPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </form>
+        </div>
 
         <div className='flex gap-2 w-full md:w-auto'>
           <Select value={filterRole} onValueChange={setFilterRole}>
@@ -427,7 +436,7 @@ export default function UsersPage() {
                   aria-label='Select all'
                 />
               </TableHead>
-              <TableHead className='w-[80px]'>ID</TableHead>
+              <TableHead className='w-[80px] text-center'>Avatar</TableHead>
               <TableHead>Thông tin</TableHead>
               <TableHead>Liên hệ</TableHead>
               <TableHead>Vai trò</TableHead>
@@ -459,37 +468,41 @@ export default function UsersPage() {
                       aria-label={`Select user ${user.id}`}
                     />
                   </TableCell>
-                  <TableCell className='font-medium'>#{user.id}</TableCell>
-                  <TableCell>
-                    <div className='flex items-center gap-3'>
-                      <div className='h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-700 overflow-hidden border border-slate-200'>
-                        {user.avatarUrl ? (
-                          <img
-                            src={getImageUrl(user.avatarUrl)}
-                            alt=''
-                            className='h-full w-full object-cover'
-                          />
-                        ) : (
-                          <span>
-                            {user.firstName ? user.firstName.substring(0, 1).toUpperCase() : 'U'}
-                          </span>
-                        )}
-                      </div>
-                      <div className='flex flex-col'>
-                        <span className='font-medium text-sm'>
-                          {user.lastName} {user.firstName}
-                        </span>
-                        <span className='text-xs text-muted-foreground flex items-center gap-1'>
-                          {user.gender === Gender.FEMALE
-                            ? 'Nữ'
-                            : user.gender === Gender.MALE
-                              ? 'Nam'
-                              : 'Khác'}
-                          {user.dateOfBirth && (
-                            <span>• {new Date(user.dateOfBirth).toLocaleDateString()}</span>
+                  <TableCell className='text-center'>
+                    <div className='w-12 h-12 rounded-lg border border-slate-100 bg-slate-50 overflow-hidden mx-auto flex items-center justify-center text-lg font-semibold text-slate-400'>
+                      {user.avatarUrl ? (
+                        <img
+                          src={getImageUrl(user.avatarUrl)}
+                          alt=''
+                          className='h-full w-full object-cover'
+                        />
+                      ) : (
+                        <span>
+                          {user.firstName ? (
+                            user.firstName.substring(0, 1).toUpperCase()
+                          ) : (
+                            <UserCog className='w-5 h-5' />
                           )}
                         </span>
-                      </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className='flex flex-col'>
+                      <span className='font-medium text-slate-900'>
+                        {user.lastName} {user.firstName}
+                      </span>
+                      <span className='text-xs text-muted-foreground flex items-center gap-1 mt-0.5 line-clamp-1'>
+                        ID: #{user.id} •{' '}
+                        {user.gender === Gender.FEMALE
+                          ? 'Nữ'
+                          : user.gender === Gender.MALE
+                            ? 'Nam'
+                            : 'Khác'}
+                        {user.dateOfBirth && (
+                          <span> • {new Date(user.dateOfBirth).toLocaleDateString()}</span>
+                        )}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>

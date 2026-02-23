@@ -11,20 +11,17 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
-  Shield,
   Clock,
   User as UserIcon,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
   Edit,
-  Trash2,
-  Undo2,
   Camera,
   Save,
   CalendarIcon,
   KeyRound,
+  Shield,
+  XCircle,
+  Calendar,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { userService } from '@/services/user'
@@ -41,22 +38,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Gender, Role, City, UserUpdateRequest, UserStatus } from '@/types/user'
 import { CITIES } from '@/constants/locations'
 import { getImageUrl } from '@/lib/utils'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 
 export default function UserDetailPage() {
   const params = useParams()
@@ -201,9 +186,7 @@ export default function UserDetailPage() {
                 </Badge>
               </h1>
               <p className='text-sm text-muted-foreground flex items-center gap-2'>
-                ID: #{user.id}
-                <span className='w-1 h-1 rounded-full bg-slate-300'></span>
-                <span className='truncate max-w-[200px]'>{user.email}</span>
+                Mã người dùng: #{user.id}
               </p>
             </div>
           </div>
@@ -222,7 +205,7 @@ export default function UserDetailPage() {
           <div className='md:col-span-1 space-y-6'>
             <Card>
               <CardContent className='p-6'>
-                <div className='aspect-square rounded-full border-4 border-slate-50 overflow-hidden bg-slate-50 relative mb-6 mx-auto w-48 h-48 shadow-sm'>
+                <div className='aspect-square rounded-lg border overflow-hidden bg-slate-50 relative mb-4'>
                   {user.avatarUrl ? (
                     <img
                       src={getImageUrl(user.avatarUrl)}
@@ -236,60 +219,58 @@ export default function UserDetailPage() {
                   )}
                 </div>
 
-                <div className='space-y-4 text-center'>
-                  <div>
+                <div className='space-y-4'>
+                  <div className='p-4 bg-slate-50 rounded-lg border text-center'>
                     <h3 className='font-bold text-lg text-slate-900'>
                       {user.lastName} {user.firstName}
                     </h3>
                     <p className='text-sm text-muted-foreground'>{user.email}</p>
+
+                    <div className='flex flex-wrap justify-center gap-2 mt-3'>
+                      {user.roles &&
+                        user.roles.map((role: string) => (
+                          <Badge
+                            key={role}
+                            variant='outline'
+                            className='border-indigo-100 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-100'
+                          >
+                            {role}
+                          </Badge>
+                        ))}
+                    </div>
                   </div>
 
-                  <div className='flex flex-wrap justify-center gap-2'>
-                    {user.roles &&
-                      user.roles.map((role) => (
-                        <Badge
-                          key={role}
-                          variant='outline'
-                          className='border-indigo-100 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-100'
-                        >
-                          {role}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-
-                <Separator className='my-6' />
-
-                <div className='space-y-3 text-sm'>
-                  <div className='flex justify-between items-center py-2 border-b border-slate-50 last:border-0'>
-                    <span className='text-muted-foreground flex items-center gap-2'>
-                      <Phone className='w-4 h-4' /> Điện thoại
-                    </span>
-                    <span className='font-medium'>{user.phone || '---'}</span>
-                  </div>
-                  <div className='flex justify-between items-center py-2 border-b border-slate-50 last:border-0'>
-                    <span className='text-muted-foreground flex items-center gap-2'>
-                      <UserIcon className='w-4 h-4' /> Giới tính
-                    </span>
-                    <span className='font-medium'>
-                      {user.gender === Gender.MALE
-                        ? 'Nam'
-                        : user.gender === Gender.FEMALE
-                          ? 'Nữ'
-                          : user.gender === Gender.OTHER
-                            ? 'Khác'
-                            : '---'}
-                    </span>
-                  </div>
-                  <div className='flex justify-between items-center py-2 border-b border-slate-50 last:border-0'>
-                    <span className='text-muted-foreground flex items-center gap-2'>
-                      <Calendar className='w-4 h-4' /> Ngày sinh
-                    </span>
-                    <span className='font-medium'>
-                      {user.dateOfBirth
-                        ? new Date(user.dateOfBirth).toLocaleDateString('vi-VN')
-                        : '---'}
-                    </span>
+                  <div className='bg-white rounded-lg border p-4 space-y-3 text-sm'>
+                    <div className='flex justify-between items-center py-2 border-b border-slate-50 last:border-0'>
+                      <span className='text-muted-foreground flex items-center gap-2'>
+                        <Phone className='w-4 h-4' /> Điện thoại
+                      </span>
+                      <span className='font-medium'>{user.phone || '---'}</span>
+                    </div>
+                    <div className='flex justify-between items-center py-2 border-b border-slate-50 last:border-0'>
+                      <span className='text-muted-foreground flex items-center gap-2'>
+                        <UserIcon className='w-4 h-4' /> Giới tính
+                      </span>
+                      <span className='font-medium'>
+                        {user.gender === Gender.MALE
+                          ? 'Nam'
+                          : user.gender === Gender.FEMALE
+                            ? 'Nữ'
+                            : user.gender === Gender.OTHER
+                              ? 'Khác'
+                              : '---'}
+                      </span>
+                    </div>
+                    <div className='flex justify-between items-center py-2 border-b border-slate-50 last:border-0'>
+                      <span className='text-muted-foreground flex items-center gap-2'>
+                        <Calendar className='w-4 h-4' /> Ngày sinh
+                      </span>
+                      <span className='font-medium'>
+                        {user.dateOfBirth
+                          ? new Date(user.dateOfBirth).toLocaleDateString('vi-VN')
+                          : '---'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -298,7 +279,7 @@ export default function UserDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className='text-base font-semibold flex items-center gap-2'>
-                  <Clock className='w-4 h-4' /> Hoạt động hệ thống
+                  <Clock className='w-4 h-4' /> Thông tin hệ thống
                 </CardTitle>
               </CardHeader>
               <CardContent className='text-sm space-y-3'>
@@ -309,7 +290,7 @@ export default function UserDetailPage() {
                   </span>
                 </div>
                 <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Cập nhật gần nhất</span>
+                  <span className='text-muted-foreground'>Cập nhật lần cuối</span>
                   <span>
                     {user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('vi-VN') : 'N/A'}
                   </span>
@@ -378,7 +359,7 @@ export default function UserDetailPage() {
     )
   }
 
-  // --- Edit Mode UI (Redesigned) ---
+  // --- Edit Mode UI ---
   return (
     <div className='pb-10 w-full mx-auto'>
       {/* Header */}
@@ -392,10 +373,8 @@ export default function UserDetailPage() {
           <ChevronLeft className='h-5 w-5 text-slate-600' />
         </Button>
         <div>
-          <h1 className='text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-blue-700 to-indigo-700'>
-            Chỉnh sửa thông tin
-          </h1>
-          <p className='text-sm md:text-base text-slate-500 font-medium'>
+          <h1 className='text-2xl font-bold tracking-tight text-slate-900'>Chỉnh sửa thông tin</h1>
+          <p className='text-sm text-muted-foreground mt-1'>
             Cập nhật hồ sơ cho {user.lastName} {user.firstName}
           </p>
         </div>
@@ -464,20 +443,13 @@ export default function UserDetailPage() {
         {/* Main Grid: 2 Columns for Info */}
         <div className='grid gap-6 md:grid-cols-2 lg:items-start'>
           {/* Account Info */}
-          <Card className='border-0 shadow-lg shadow-blue-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
-            <div className='h-2 bg-linear-to-r from-blue-500 to-cyan-500' />
-            <CardHeader className='pb-4 flex-none'>
-              <CardTitle className='text-xl flex items-center gap-3'>
-                <div className='p-2.5 rounded-xl bg-blue-50 text-blue-600 shadow-inner'>
-                  <KeyRound className='h-5 w-5' />
-                </div>
-                Thông tin tài khoản
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-base font-semibold flex items-center gap-2'>
+                <KeyRound className='h-5 w-5' /> Thông tin tài khoản
               </CardTitle>
-              <CardDescription className='min-h-[20px]'>
-                Thông tin đăng nhập bắt buộc cho người dùng.
-              </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-5 flex-1'>
+            <CardContent className='space-y-5'>
               <div className='grid grid-cols-2 gap-4 pb-1.5'>
                 <div className='space-y-2'>
                   <Label htmlFor='lastName' className='text-slate-700 font-medium'>
@@ -531,20 +503,13 @@ export default function UserDetailPage() {
           </Card>
 
           {/* Personal Info */}
-          <Card className='border-0 shadow-lg shadow-emerald-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
-            <div className='h-2 bg-linear-to-r from-emerald-500 to-teal-500' />
-            <CardHeader className='pb-4 flex-none'>
-              <CardTitle className='text-xl flex items-center gap-3'>
-                <div className='p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shadow-inner'>
-                  <UserIcon className='h-5 w-5' />
-                </div>
-                Thông tin cá nhân
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-base font-semibold flex items-center gap-2'>
+                <UserIcon className='h-5 w-5' /> Thông tin liên hệ
               </CardTitle>
-              <CardDescription className='min-h-[20px]'>
-                Hồ sơ chi tiết và thông tin liên hệ.
-              </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-5 flex-1'>
+            <CardContent className='space-y-5'>
               <div className='grid grid-cols-2 gap-4 pb-1.5'>
                 <div className='space-y-2'>
                   <Label className='text-slate-700 font-medium'>Giới tính</Label>
@@ -641,18 +606,11 @@ export default function UserDetailPage() {
         </div>
 
         {/* Roles Section - Full Width */}
-        <Card className='border-0 shadow-lg shadow-purple-500/5 overflow-hidden ring-1 ring-slate-200/50'>
-          <div className='h-2 bg-linear-to-r from-purple-500 to-fuchsia-500' />
-          <CardHeader className='pb-4'>
-            <CardTitle className='text-xl flex items-center gap-3'>
-              <div className='p-2.5 rounded-xl bg-purple-50 text-purple-600 shadow-inner'>
-                <Shield className='h-5 w-5' />
-              </div>
-              Phân quyền truy cập
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-base font-semibold flex items-center gap-2'>
+              <Shield className='h-5 w-5' /> Phân quyền truy cập
             </CardTitle>
-            <CardDescription>
-              Lựa chọn vai trò phù hợp để cấp quyền hạn tương ứng trên hệ thống cho người dùng này.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
@@ -669,7 +627,7 @@ export default function UserDetailPage() {
                         htmlFor={`role-${role}`}
                         className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer h-full ${
                           isChecked
-                            ? 'border-purple-200 bg-purple-50 shadow-sm'
+                            ? 'border-slate-800 bg-slate-50 shadow-sm'
                             : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
                         }`}
                       >
@@ -683,12 +641,12 @@ export default function UserDetailPage() {
                               field.onChange(currentRoles.filter((r) => r !== role))
                             }
                           }}
-                          className='mt-1 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
+                          className='mt-1 data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900'
                         />
                         <div className='flex-1'>
                           <div
                             className={`font-semibold text-sm mb-1 ${
-                              isChecked ? 'text-purple-900' : 'text-slate-700'
+                              isChecked ? 'text-slate-900' : 'text-slate-700'
                             }`}
                           >
                             {role}

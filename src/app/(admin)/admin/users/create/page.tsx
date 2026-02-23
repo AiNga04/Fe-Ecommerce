@@ -89,10 +89,8 @@ export default function CreateUserPage() {
           </Link>
         </Button>
         <div>
-          <h1 className='text-xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-blue-700 to-indigo-700'>
-            Thêm người dùng mới
-          </h1>
-          <p className='text-sm md:text-base text-slate-500 font-medium'>
+          <h1 className='text-2xl font-bold tracking-tight text-slate-900'>Thêm người dùng mới</h1>
+          <p className='text-sm text-muted-foreground mt-1'>
             Thiết lập hồ sơ người dùng để cấp quyền truy cập vào hệ thống.
           </p>
         </div>
@@ -102,20 +100,13 @@ export default function CreateUserPage() {
         {/* Main Grid: 2 Columns for Info */}
         <div className='grid gap-6 md:grid-cols-2 lg:items-start'>
           {/* Account Info */}
-          <Card className='border-0 shadow-lg shadow-blue-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
-            <div className='h-2 bg-linear-to-r from-blue-500 to-cyan-500' />
-            <CardHeader className='pb-4 flex-none'>
-              <CardTitle className='text-xl flex items-center gap-3'>
-                <div className='p-2.5 rounded-xl bg-blue-50 text-blue-600 shadow-inner'>
-                  <KeyRound className='h-5 w-5' />
-                </div>
-                Thông tin tài khoản
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-base font-semibold flex items-center gap-2'>
+                <KeyRound className='h-5 w-5' /> Thông tin tài khoản
               </CardTitle>
-              <CardDescription className='min-h-[20px]'>
-                Thông tin đăng nhập bắt buộc cho người dùng.
-              </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-5 flex-1'>
+            <CardContent className='space-y-5'>
               <div className='grid grid-cols-2 gap-4 pb-1.5'>
                 <div className='space-y-2'>
                   <Label htmlFor='lastName' className='text-slate-700 font-medium'>
@@ -196,20 +187,13 @@ export default function CreateUserPage() {
           </Card>
 
           {/* Personal Info */}
-          <Card className='border-0 shadow-lg shadow-emerald-500/5 overflow-hidden ring-1 ring-slate-200/50 h-full flex flex-col'>
-            <div className='h-2 bg-linear-to-r from-emerald-500 to-teal-500' />
-            <CardHeader className='pb-4 flex-none'>
-              <CardTitle className='text-xl flex items-center gap-3'>
-                <div className='p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shadow-inner'>
-                  <User className='h-5 w-5' />
-                </div>
-                Thông tin cá nhân
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-base font-semibold flex items-center gap-2'>
+                <User className='h-5 w-5' /> Thông tin cá nhân
               </CardTitle>
-              <CardDescription className='min-h-[20px]'>
-                Hồ sơ chi tiết và thông tin liên hệ.
-              </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-5 flex-1'>
+            <CardContent className='space-y-5'>
               <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
                   <Label className='text-slate-700 font-medium'>Giới tính</Label>
@@ -306,18 +290,11 @@ export default function CreateUserPage() {
         </div>
 
         {/* Roles Section - Full Width */}
-        <Card className='border-0 shadow-lg shadow-purple-500/5 overflow-hidden ring-1 ring-slate-200/50'>
-          <div className='h-2 bg-linear-to-r from-purple-500 to-fuchsia-500' />
-          <CardHeader className='pb-4'>
-            <CardTitle className='text-xl flex items-center gap-3'>
-              <div className='p-2.5 rounded-xl bg-purple-50 text-purple-600 shadow-inner'>
-                <Shield className='h-5 w-5' />
-              </div>
-              Phân quyền truy cập
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-base font-semibold flex items-center gap-2'>
+              <Shield className='h-5 w-5' /> Phân quyền truy cập
             </CardTitle>
-            <CardDescription>
-              Lựa chọn vai trò phù hợp để cấp quyền hạn tương ứng trên hệ thống cho người dùng này.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
@@ -334,7 +311,7 @@ export default function CreateUserPage() {
                         htmlFor={`role-${role}`}
                         className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer h-full ${
                           isChecked
-                            ? 'border-purple-200 bg-purple-50 shadow-sm'
+                            ? 'border-slate-800 bg-slate-50 shadow-sm'
                             : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
                         }`}
                       >
@@ -348,12 +325,12 @@ export default function CreateUserPage() {
                               field.onChange(currentRoles.filter((r) => r !== role))
                             }
                           }}
-                          className='mt-1 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600'
+                          className='mt-1 data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900'
                         />
                         <div className='flex-1'>
                           <div
                             className={`font-semibold text-sm mb-1 ${
-                              isChecked ? 'text-purple-900' : 'text-slate-700'
+                              isChecked ? 'text-slate-900' : 'text-slate-700'
                             }`}
                           >
                             {role}
