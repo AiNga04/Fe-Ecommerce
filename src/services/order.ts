@@ -28,6 +28,9 @@ export const orderService = {
   getOrderById: (id: number | string) => {
     return http.get<IBackendRes<Order>>(`${ORDER_PATH}/${id}`)
   },
+  getAdminOrderById: (id: number | string) => {
+    return http.get<IBackendRes<Order>>(`${ORDER_PATH}/admin/${id}`)
+  },
   getOrders: (params?: OrderSearchParams) => {
     return http.get<IBackendRes<Order[]>>(`${ORDER_PATH}/admin`, { params })
   },
