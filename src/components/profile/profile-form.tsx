@@ -7,7 +7,7 @@ import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { User, UserUpdateRequest, Gender } from '@/types/user'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, Save, X, UserCircle } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -95,17 +95,26 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
   }
 
   return (
-    <div className='bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative'>
-      <div className='flex justify-between items-center mb-6'>
-        <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-          Thông tin tài khoản
-        </h2>
+    <div className='bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden'>
+      {/* Header */}
+      <div className='px-6 md:px-8 py-5 flex justify-between items-center border-b border-slate-100'>
+        <div className='flex items-center gap-3'>
+          <div className='p-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100'>
+            <UserCircle className='w-5 h-5 text-blue-600' />
+          </div>
+          <div>
+            <h2 className='text-lg font-bold text-slate-900'>Thông tin tài khoản</h2>
+            <p className='text-xs text-muted-foreground'>Quản lý thông tin cá nhân của bạn</p>
+          </div>
+        </div>
         <Button
           variant={isEditing ? 'ghost' : 'outline'}
           size='sm'
           onClick={toggleEdit}
           disabled={isUpdating}
-          className='gap-2'
+          className={`gap-2 transition-all ${
+            isEditing ? 'text-slate-500 hover:text-slate-700' : 'border-slate-200 hover:bg-slate-50'
+          }`}
         >
           {isEditing ? (
             <>
@@ -119,76 +128,105 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
         </Button>
       </div>
 
-      <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
-        <div className='space-y-4'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <label className='font-bold text-xs uppercase text-gray-500'>Họ</label>
+      {/* Form Body */}
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <div className='px-6 md:px-8 py-6 space-y-5'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div className='space-y-1.5'>
+              <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+                Họ
+              </label>
               <Input
                 placeholder='Nhập họ'
                 {...form.register('lastName')}
                 disabled={!isEditing}
-                className={!isEditing ? 'bg-gray-50 border-none px-0 shadow-none' : ''}
+                className={
+                  !isEditing
+                    ? 'bg-slate-50 border-transparent shadow-none text-slate-700'
+                    : 'border-slate-200 focus:border-slate-400'
+                }
               />
               {form.formState.errors.lastName && (
-                <p className='text-sm text-red-500'>{form.formState.errors.lastName.message}</p>
+                <p className='text-xs text-red-500'>{form.formState.errors.lastName.message}</p>
               )}
             </div>
 
-            <div className='space-y-2'>
-              <label className='font-bold text-xs uppercase text-gray-500'>Tên</label>
+            <div className='space-y-1.5'>
+              <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+                Tên
+              </label>
               <Input
                 placeholder='Nhập tên'
                 {...form.register('firstName')}
                 disabled={!isEditing}
-                className={!isEditing ? 'bg-gray-50 border-none px-0 shadow-none' : ''}
+                className={
+                  !isEditing
+                    ? 'bg-slate-50 border-transparent shadow-none text-slate-700'
+                    : 'border-slate-200 focus:border-slate-400'
+                }
               />
               {form.formState.errors.firstName && (
-                <p className='text-sm text-red-500'>{form.formState.errors.firstName.message}</p>
+                <p className='text-xs text-red-500'>{form.formState.errors.firstName.message}</p>
               )}
             </div>
           </div>
 
-          <div className='space-y-2'>
-            <label className='font-bold text-xs uppercase text-gray-500'>Email</label>
+          <div className='space-y-1.5'>
+            <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+              Email
+            </label>
             <Input
               placeholder='example@gmail.com'
               {...form.register('email')}
               disabled
-              className='bg-gray-50 border-none px-0 shadow-none'
+              className='bg-slate-50 border-transparent shadow-none text-slate-500'
             />
           </div>
 
-          <div className='space-y-2'>
-            <label className='font-bold text-xs uppercase text-gray-500'>Số điện thoại</label>
+          <div className='space-y-1.5'>
+            <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+              Số điện thoại
+            </label>
             <Input
               placeholder='Chưa cập nhật'
               {...form.register('phone')}
               disabled={!isEditing}
-              className={!isEditing ? 'bg-gray-50 border-none px-0 shadow-none' : ''}
+              className={
+                !isEditing
+                  ? 'bg-slate-50 border-transparent shadow-none text-slate-700'
+                  : 'border-slate-200 focus:border-slate-400'
+              }
             />
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <label className='font-bold text-xs uppercase text-gray-500'>Ngày sinh</label>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div className='space-y-1.5'>
+              <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+                Ngày sinh
+              </label>
               <Input
                 type={isEditing ? 'date' : 'text'}
                 placeholder='Chưa cập nhật'
                 {...form.register('dateOfBirth')}
                 disabled={!isEditing}
-                className={!isEditing ? 'bg-gray-50 border-none px-0 shadow-none' : ''}
+                className={
+                  !isEditing
+                    ? 'bg-slate-50 border-transparent shadow-none text-slate-700'
+                    : 'border-slate-200 focus:border-slate-400'
+                }
               />
             </div>
 
-            <div className='space-y-2'>
-              <label className='font-bold text-xs uppercase text-gray-500'>Giới tính</label>
+            <div className='space-y-1.5'>
+              <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+                Giới tính
+              </label>
               {isEditing ? (
                 <Select
                   onValueChange={(val) => form.setValue('gender', val)}
                   defaultValue={form.watch('gender')}
                 >
-                  <SelectTrigger className='w-full'>
+                  <SelectTrigger className='w-full border-slate-200'>
                     <SelectValue placeholder='Chọn giới tính' />
                   </SelectTrigger>
                   <SelectContent>
@@ -204,33 +242,44 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
                       ? 'Nam'
                       : form.watch('gender') === 'FEMALE'
                         ? 'Nữ'
-                        : 'Khác'
+                        : form.watch('gender') === 'OTHER'
+                          ? 'Khác'
+                          : ''
                   }
                   disabled
-                  className='bg-gray-50 border-none px-0 shadow-none'
+                  className='bg-slate-50 border-transparent shadow-none text-slate-700'
                   placeholder='Chưa cập nhật'
                 />
               )}
             </div>
           </div>
 
-          <div className='space-y-2'>
-            <label className='font-bold text-xs uppercase text-gray-500'>Địa chỉ</label>
+          <div className='space-y-1.5'>
+            <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+              Địa chỉ
+            </label>
             <Input
               placeholder='Chưa cập nhật'
               {...form.register('address')}
               disabled={!isEditing}
-              className={!isEditing ? 'bg-gray-50 border-none px-0 shadow-none' : ''}
+              className={
+                !isEditing
+                  ? 'bg-slate-50 border-transparent shadow-none text-slate-700'
+                  : 'border-slate-200 focus:border-slate-400'
+              }
             />
           </div>
-          <div className='space-y-2'>
-            <label className='font-bold text-xs uppercase text-gray-500'>Thành phố</label>
+
+          <div className='space-y-1.5'>
+            <label className='font-semibold text-xs uppercase tracking-wider text-slate-400'>
+              Thành phố
+            </label>
             {isEditing ? (
               <Select
                 onValueChange={(val) => form.setValue('city', val)}
                 defaultValue={form.watch('city')}
               >
-                <SelectTrigger className='w-full'>
+                <SelectTrigger className='w-full border-slate-200'>
                   <SelectValue placeholder='Chọn thành phố' />
                 </SelectTrigger>
                 <SelectContent>
@@ -250,23 +299,29 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
                   ''
                 }
                 disabled={!isEditing}
-                className={!isEditing ? 'bg-gray-50 border-none px-0 shadow-none' : ''}
+                className='bg-slate-50 border-transparent shadow-none text-slate-700'
               />
             )}
           </div>
         </div>
 
+        {/* Footer */}
         {isEditing && (
-          <div className='flex gap-2 pt-2'>
+          <div className='px-6 md:px-8 py-4 border-t border-slate-100 bg-slate-50/50 flex gap-3'>
             <Button
               type='submit'
-              className='bg-black hover:bg-gray-800 text-white font-medium px-6 h-11 rounded-lg gap-2'
+              className='bg-slate-900 hover:bg-slate-800 text-white font-medium px-6 h-10 rounded-lg gap-2 shadow-sm'
               disabled={isUpdating}
             >
               <Save className='w-4 h-4' />
               {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
             </Button>
-            <Button type='button' variant='ghost' onClick={toggleEdit} className='h-11 rounded-lg'>
+            <Button
+              type='button'
+              variant='ghost'
+              onClick={toggleEdit}
+              className='h-10 rounded-lg text-slate-500'
+            >
               Hủy
             </Button>
           </div>

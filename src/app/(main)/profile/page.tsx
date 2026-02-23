@@ -105,8 +105,7 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Right Content */}
-        <div className='md:col-span-8 lg:col-span-9'>
+        <div className='md:col-span-8 lg:col-span-9 space-y-6'>
           <ProfileForm user={user} onSubmit={handleUpdateProfile} isUpdating={isUpdating} />
           <ChangePasswordForm />
         </div>

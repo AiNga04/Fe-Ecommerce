@@ -1,14 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Plus, Edit2, MapPin, Trash2, CheckCircle } from 'lucide-react'
+import { Plus, Edit2, MapPin, Trash2, CheckCircle, MapPinned, Phone, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { addressService } from '@/services/address'
 import { userService } from '@/services/user'
 import { Address, AddressRequest } from '@/types/address'
-import { User } from '@/types/user'
+import { User as UserType } from '@/types/user'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
 import { AddressFormDialog, AddressFormData } from '@/components/profile/address-form-dialog'
 import {
@@ -25,7 +26,7 @@ import { CITIES } from '@/constants/locations'
 
 export default function AddressPage() {
   const [addresses, setAddresses] = useState<Address[]>([])
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
 
@@ -120,8 +121,6 @@ export default function AddressPage() {
       const response = await addressService.setDefault(id)
       if (response.data.success) {
         toast.success('Đã đặt làm địa chỉ mặc định')
-        // Refresh list or manually update state
-        // Manual update is faster: set all default=false, then set target default=true
         setAddresses((prev) =>
           prev.map((addr) => ({
             ...addr,
@@ -143,20 +142,7 @@ export default function AddressPage() {
   const handleFormSubmit = async (data: AddressFormData) => {
     setIsSubmitting(true)
     try {
-      // Construct fullAddress: detail, ward, district, province
-      // We need to resolve Province Label for full address? Or just use the value?
-      // User payload example: "Thủ Đức, TP.HCM" (District, ProvinceLabel).
-      // Let's format it: `${detail}, ${ward}, ${district}, ${provinceLabel}`
       const provinceLabel = getProvinceLabel(data.province)
-      // Usually backend handles fullAddress construction, but user provided it in payload.
-      // So let's construct it.
-      const fullAddress = `${data.district}, ${provinceLabel}` // Following user example "Thủ Đức, TP.HCM" style approx.
-      // Or cleaner: `${data.detailAddress}, ${data.ward}, ${data.district}, ${provinceLabel}`
-      // User's example:
-      // fullAddress: "Thủ Đức, TP.HCM" (Short)
-      // detailAddress: "123/4 Nguyễn Thị Định"
-      // ward: "Hiệp Bình Chánh"
-      // Let's create a full descriptive string.
       const constructedFullAddress = `${data.detailAddress}, ${data.ward}, ${data.district}, ${provinceLabel}`
 
       const payload = {
@@ -176,7 +162,6 @@ export default function AddressPage() {
           editingAddress ? 'Cập nhật địa chỉ thành công' : 'Thêm địa chỉ mới thành công',
         )
         setIsDialogOpen(false)
-        // Reload addresses to be safe and get correct server-side data
         const addrRes = await addressService.getMyAddresses()
         if (addrRes.data.success && addrRes.data.data) {
           setAddresses(addrRes.data.data)
@@ -211,100 +196,130 @@ export default function AddressPage() {
 
         {/* Right Content */}
         <div className='md:col-span-8 lg:col-span-9'>
-          <div className='bg-white p-8 rounded-2xl shadow-sm border border-slate-100 min-h-[500px] relative'>
-            <div className='flex justify-between items-center mb-8'>
-              <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                <MapPin className='w-5 h-5' />
-                Địa chỉ
-              </h2>
+          <div className='bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden'>
+            {/* Header */}
+            <div className='px-6 md:px-8 py-5 flex justify-between items-center border-b border-slate-100'>
+              <div className='flex items-center gap-3'>
+                <div className='p-2.5 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100'>
+                  <MapPin className='w-5 h-5 text-emerald-600' />
+                </div>
+                <div>
+                  <h2 className='text-lg font-bold text-slate-900'>Sổ địa chỉ</h2>
+                  <p className='text-xs text-muted-foreground'>
+                    {addresses.length > 0
+                      ? `${addresses.length} địa chỉ đã lưu`
+                      : 'Quản lý địa chỉ giao hàng'}
+                  </p>
+                </div>
+              </div>
               <Button
-                size='icon'
-                className='rounded-full bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-sm'
+                size='sm'
                 onClick={handleAddAddress}
+                className='gap-2 bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
               >
-                <Plus className='w-5 h-5' />
+                <Plus className='w-4 h-4' /> Thêm mới
               </Button>
             </div>
 
-            <div className='grid grid-cols-1 gap-4'>
-              {addresses.map((addr, index) => (
-                <div
-                  key={addr.id}
-                  className='border rounded-xl p-6 relative group hover:border-gray-400 transition-colors bg-white'
-                >
-                  <div className='flex justify-between items-start'>
-                    <div>
-                      <div className='flex items-center gap-3 mb-2'>
-                        <h3 className='font-bold text-gray-900 text-lg'>
-                          {addr.id === 1 || addr.default
-                            ? 'Địa chỉ mặc định'
-                            : `Địa chỉ ${index + 1}`}
-                        </h3>
-                        {addr.default && (
-                          <span className='bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1'>
-                            <CheckCircle className='w-3 h-3' /> Default
-                          </span>
-                        )}
-                      </div>
-
-                      <div className='space-y-1 text-sm text-gray-600'>
-                        <p>
-                          <span className='font-semibold text-gray-900'>Người nhận:</span>{' '}
-                          {addr.receiverName}
-                        </p>
-                        <p>
-                          <span className='font-semibold text-gray-900'>SĐT:</span>{' '}
-                          {addr.receiverPhone}
-                        </p>
-                        <p>
-                          <span className='font-semibold text-gray-900'>Địa chỉ:</span>{' '}
-                          {addr.detailAddress}, {addr.ward}
-                        </p>
-                        <p className='pl-[52px]'>
-                          {addr.district}, {getProvinceLabel(addr.province)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className='flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'>
-                      <div className='flex gap-2'>
-                        <Button
-                          variant='outline'
-                          size='sm'
-                          onClick={() => handleEditAddress(addr)}
-                          className='h-8 w-8 p-0'
-                        >
-                          <Edit2 className='w-3.5 h-3.5' />
-                        </Button>
-                        {!addr.default && (
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            onClick={() => handleDeleteClick(addr.id)}
-                            className='h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200'
-                          >
-                            <Trash2 className='w-3.5 h-3.5' />
-                          </Button>
-                        )}
-                      </div>
-                      {!addr.default && (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => handleSetDefault(addr.id)}
-                          className='text-xs h-6 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50'
-                        >
-                          Đặt làm mặc định
-                        </Button>
-                      )}
-                    </div>
+            {/* Content */}
+            <div className='p-6 md:p-8'>
+              {addresses.length === 0 ? (
+                <div className='text-center py-16 px-4'>
+                  <div className='bg-slate-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100'>
+                    <MapPinned className='w-10 h-10 text-slate-300' />
                   </div>
+                  <h3 className='text-lg font-semibold text-slate-900 mb-2'>Chưa có địa chỉ nào</h3>
+                  <p className='text-muted-foreground text-sm mb-4'>
+                    Hãy thêm địa chỉ giao hàng để đặt hàng nhanh hơn.
+                  </p>
+                  <Button variant='outline' onClick={handleAddAddress} className='gap-2'>
+                    <Plus className='w-4 h-4' /> Thêm địa chỉ đầu tiên
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                <div className='space-y-4'>
+                  {addresses.map((addr, index) => (
+                    <div
+                      key={addr.id}
+                      className={`border rounded-xl p-5 relative group transition-all duration-200 hover:shadow-md ${
+                        addr.default
+                          ? 'border-emerald-200 bg-emerald-50/30'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className='flex justify-between items-start gap-4'>
+                        <div className='flex-1 min-w-0'>
+                          {/* Title + Badge */}
+                          <div className='flex items-center gap-2.5 mb-3'>
+                            <h3 className='font-semibold text-slate-900'>
+                              {addr.default ? 'Địa chỉ mặc định' : `Địa chỉ ${index + 1}`}
+                            </h3>
+                            {addr.default && (
+                              <Badge
+                                variant='outline'
+                                className='bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-semibold gap-1'
+                              >
+                                <CheckCircle className='w-3 h-3' /> Mặc định
+                              </Badge>
+                            )}
+                          </div>
 
-              {addresses.length === 0 && (
-                <div className='text-center py-12 text-gray-500'>
-                  Chưa có địa chỉ nào. Hãy thêm địa chỉ mới!
+                          {/* Info Grid */}
+                          <div className='space-y-2 text-sm'>
+                            <div className='flex items-center gap-2 text-slate-700'>
+                              <User className='w-3.5 h-3.5 text-slate-400 flex-shrink-0' />
+                              <span className='font-medium'>{addr.receiverName}</span>
+                            </div>
+                            <div className='flex items-center gap-2 text-slate-600'>
+                              <Phone className='w-3.5 h-3.5 text-slate-400 flex-shrink-0' />
+                              <span>{addr.receiverPhone}</span>
+                            </div>
+                            <div className='flex items-start gap-2 text-slate-600'>
+                              <MapPin className='w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5' />
+                              <span>
+                                {addr.detailAddress}, {addr.ward}, {addr.district},{' '}
+                                {getProvinceLabel(addr.province)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className='flex flex-col items-end gap-2 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'>
+                          <div className='flex gap-1.5'>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              onClick={() => handleEditAddress(addr)}
+                              className='h-8 w-8 p-0 border-slate-200 hover:bg-slate-50'
+                            >
+                              <Edit2 className='w-3.5 h-3.5 text-slate-600' />
+                            </Button>
+                            {!addr.default && (
+                              <Button
+                                variant='outline'
+                                size='sm'
+                                onClick={() => handleDeleteClick(addr.id)}
+                                className='h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 border-slate-200'
+                              >
+                                <Trash2 className='w-3.5 h-3.5' />
+                              </Button>
+                            )}
+                          </div>
+                          {!addr.default && (
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              onClick={() => handleSetDefault(addr.id)}
+                              className='text-[11px] h-7 px-2.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium'
+                            >
+                              Đặt mặc định
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -333,7 +348,7 @@ export default function AddressPage() {
             <AlertDialogAction
               onClick={confirmDelete}
               disabled={isDeleting}
-              className='bg-red-500 hover:bg-red-600'
+              className='bg-red-600 hover:bg-red-700'
             >
               {isDeleting ? 'Đang xóa...' : 'Xóa'}
             </AlertDialogAction>
