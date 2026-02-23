@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { productService } from '@/services/product'
 import { UpdateProductDialog } from '../components/update-product-dialog'
+import { AdjustProductStockDialog } from '../components/adjust-product-stock-dialog'
 import { GalleryManager } from '../components/gallery-manager'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,6 +29,7 @@ import {
   ArrowLeft,
   Edit,
   Globe,
+  Archive,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
@@ -207,11 +209,20 @@ export default function ProductDetailPage() {
 
           {/* Variants */}
           <Card>
-            <CardHeader>
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-3'>
               <CardTitle className='flex items-center gap-2'>
                 <Package className='w-5 h-5' />
                 Biến thể & Tồn kho
               </CardTitle>
+              <AdjustProductStockDialog productId={Number(id)} variants={product.variants || []}>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  className='gap-2 shrink-0 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700'
+                >
+                  <Archive className='h-4 w-4' /> Điều chỉnh
+                </Button>
+              </AdjustProductStockDialog>
             </CardHeader>
             <CardContent>
               {product.variants && product.variants.length > 0 ? (

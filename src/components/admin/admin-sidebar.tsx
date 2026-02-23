@@ -4,18 +4,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Users,
-  Settings,
-  LogOut,
-  Ruler,
-  Proportions,
-  Layers,
-  TicketPercent,
+  Archive,
   ChevronLeft,
   ChevronRight,
+  Layers,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Proportions,
+  Ruler,
+  Settings,
+  ShoppingCart,
+  TicketPercent,
+  Users,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/services/auth'
@@ -54,6 +55,11 @@ const sidebarItems = [
     title: 'Đơn hàng',
     href: '/admin/orders',
     icon: ShoppingCart,
+  },
+  {
+    title: 'Tồn kho',
+    href: '/admin/inventory',
+    icon: Archive,
   },
   {
     title: 'Bảng Size',
