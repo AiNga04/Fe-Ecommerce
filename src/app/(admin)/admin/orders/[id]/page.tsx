@@ -34,6 +34,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getImageUrl } from '@/lib/utils'
+import { shipmentService } from '@/services/shipment'
+import { userService } from '@/services/user'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 // Status Definitions
 const STATUS_STYLES: Record<string, { label: string; bg: string; text: string }> = {
@@ -46,8 +50,8 @@ const STATUS_STYLES: Record<string, { label: string; bg: string; text: string }>
 
 const NEXT_STATUS_MAP: Record<string, string[]> = {
   PENDING: ['CONFIRMED', 'CANCELED'],
-  CONFIRMED: ['SHIPPING', 'CANCELED'],
-  SHIPPING: ['DELIVERED'],
+  CONFIRMED: [],
+  SHIPPING: [],
   DELIVERED: [],
   CANCELED: [],
 }
@@ -144,8 +148,48 @@ export default function OrderDetailPage() {
       })
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
     },
-    onError: () => toast.error('Cập nhật thất bại'),
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Cập nhật thất bại'
+      toast.error(message)
+    },
   })
+
+  // State for Assign Shipper
+  const [selectedShipperId, setSelectedShipperId] = useState<string>('')
+  const [trackingCode, setTrackingCode] = useState<string>('')
+
+  // Query for Shippers list (only fetch if order is unassigned)
+  const isAssigned = !!order?.shippingCarrier || !!order?.shippingTrackingCode
+  const { data: shippersData, isLoading: isLoadingShippers } = useQuery({
+    queryKey: ['admin-shippers'],
+    queryFn: () => userService.getShippers({ page: 0, size: 100 }),
+    enabled: (localStatus || order?.status) === 'CONFIRMED' && !isAssigned,
+  })
+
+  const shippers = shippersData?.data?.data || []
+
+  // Mutation for Assigning Shipper
+  const assignShipperMutation = useMutation({
+    mutationFn: () =>
+      shipmentService.assignShipper(orderId, {
+        shipperId: Number(selectedShipperId),
+        carrierCode: trackingCode,
+      }),
+    onSuccess: () => {
+      toast.success('Gán shipper thành công')
+      queryClient.invalidateQueries({ queryKey: ['admin-order', orderId] })
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Gán shipper thất bại'
+      toast.error(message)
+    },
+  })
+
+  const handleAssignShipper = () => {
+    if (!selectedShipperId) return
+    assignShipperMutation.mutate()
+  }
 
   if (isLoading) {
     return (
@@ -334,6 +378,77 @@ export default function OrderDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Shipment Assignment Card */}
+          {(currentStatus === 'CONFIRMED' || isAssigned) && (
+            <Card className='rounded-xl shadow-sm border-slate-200 mt-6'>
+              <CardHeader className='pb-4'>
+                <CardTitle className='text-base font-semibold flex items-center gap-2'>
+                  <Truck className='w-5 h-5 text-slate-400' />
+                  Giao Vận
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isAssigned ? (
+                  <div className='space-y-3 text-sm'>
+                    <div>
+                      <p className='text-xs text-slate-500'>Trạng thái</p>
+                      <Badge
+                        variant='outline'
+                        className='mt-1 bg-green-50 text-green-600 border-green-200'
+                      >
+                        Đã Gán Shipper
+                      </Badge>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='space-y-4'>
+                    <div className='space-y-2'>
+                      <Label htmlFor='shipper-select'>Chọn Shipper</Label>
+                      <Select
+                        value={selectedShipperId}
+                        onValueChange={setSelectedShipperId}
+                        disabled={isLoadingShippers || assignShipperMutation.isPending}
+                      >
+                        <SelectTrigger id='shipper-select' className='w-full'>
+                          <SelectValue
+                            placeholder={isLoadingShippers ? 'Đang tải...' : 'Chọn shipper...'}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {shippers.map((s: any) => (
+                            <SelectItem key={s.id} value={s.id.toString()}>
+                              {s.firstName} {s.lastName} - {s.phone}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className='space-y-2'>
+                      <Label htmlFor='tracking-code'>Mã vận đơn (nếu có)</Label>
+                      <Input
+                        id='tracking-code'
+                        placeholder='Ví dụ: GHN-123456'
+                        value={trackingCode}
+                        onChange={(e) => setTrackingCode(e.target.value)}
+                        disabled={assignShipperMutation.isPending}
+                      />
+                    </div>
+                    <Button
+                      onClick={handleAssignShipper}
+                      disabled={!selectedShipperId || assignShipperMutation.isPending}
+                      className='w-full mt-2'
+                    >
+                      {assignShipperMutation.isPending ? (
+                        <Loader2 className='w-4 h-4 animate-spin mr-2' />
+                      ) : null}
+                      Xác nhận Gán
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* RIGHT COLUMN: 4. ITEMS, 5. SUMMARY, 6. PAYMENT */}

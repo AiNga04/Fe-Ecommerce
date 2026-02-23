@@ -35,8 +35,6 @@ export const orderService = {
     return http.get<IBackendRes<Order[]>>(`${ORDER_PATH}/admin`, { params })
   },
   updateOrderStatus: (id: number | string, status: string) => {
-    return http.put<IBackendRes<Order>>(`${ORDER_PATH}/${id}/status`, null, {
-      params: { status },
-    })
+    return http.patch<IBackendRes<Order>>(`${ORDER_PATH}/${id}/status`, { status })
   },
 }
