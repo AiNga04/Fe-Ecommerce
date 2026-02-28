@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { Eye, EyeOff, Facebook, Mail } from 'lucide-react'
+import { Eye, EyeOff, Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,6 +20,7 @@ import { useAuthStore } from '@/store/auth'
 import type { LoginResponse } from '@/schemas/auth/login'
 import { cn, getValidRedirectUrl } from '@/lib/utils'
 import { Role } from '@/constants/enum/role'
+import Image from 'next/image'
 
 const loginSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -27,17 +28,6 @@ const loginSchema = z.object({
 })
 
 type LoginFormValues = z.infer<typeof loginSchema>
-
-type SocialButton = {
-  label: string
-  icon: React.ElementType
-  variant?: 'ghost' | 'outline'
-}
-
-const socialButtons: SocialButton[] = [
-  { label: 'Đăng nhập với Google', icon: Mail, variant: 'outline' },
-  { label: 'Đăng nhập với Facebook', icon: Facebook },
-]
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -66,17 +56,13 @@ export function LoginForm() {
 
       toast.success(data.message || 'Đăng nhập thành công')
 
-      // ✅ Ưu tiên 1: redirectUrl (nếu hợp lệ)
       const redirectUrl = getValidRedirectUrl(searchParams)
-
       if (redirectUrl) {
         window.location.href = redirectUrl
         return
       }
 
-      // ✅ Ưu tiên 2: role-based redirect
       const roles = payload.user.roles ?? []
-
       if (roles.includes(Role.ADMIN)) {
         window.location.href = Routers.ADMIN
       } else if (roles.includes(Role.STAFF)) {
@@ -89,51 +75,57 @@ export function LoginForm() {
     } catch (error: any) {
       const message =
         error?.response?.data?.message || error?.message || 'Đăng nhập thất bại, thử lại'
-
       toast.error(message)
     }
   }
 
-  const socials = socialButtons
-
   return (
-    <div className='w-full max-w-lg mx-auto space-y-8'>
-      {/* Header - Only visible on mobile/tablet */}
-      <div className='md:hidden space-y-2 text-center'>
-        <h1 className='text-2xl font-semibold text-gray-900'>Chào mừng trở lại</h1>
-        <p className='text-sm text-gray-600'>Đăng nhập vào tài khoản của bạn</p>
+    <div className='w-full max-w-md mx-auto lg:mx-0'>
+      {/* Header for Mobile only */}
+      <div className='lg:hidden space-y-4 mb-8 text-center'>
+        <h1 className='text-4xl font-bold tracking-tight text-slate-900'>Chào Mừng Trở Lại</h1>
+        <p className='text-lg text-slate-500'>Đăng nhập vào tài khoản của bạn</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
         <div className='space-y-2'>
-          <label className='text-sm font-medium text-gray-800'>Email</label>
-          <Input placeholder='Nhập địa chỉ email của bạn' type='email' {...register('email')} />
-          {errors.email && <p className='text-sm text-destructive'>{errors.email.message}</p>}
+          <label className='text-base font-bold text-slate-900'>Email</label>
+          <Input
+            placeholder='Nhập địa chỉ email của bạn'
+            type='email'
+            {...register('email')}
+            className='h-14 bg-slate-100/80 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-1 focus-visible:ring-slate-200 text-base px-5'
+          />
+          {errors.email && (
+            <p className='text-sm text-red-500 font-medium'>{errors.email.message}</p>
+          )}
         </div>
 
         <div className='space-y-2'>
-          <label className='text-sm font-medium text-gray-800'>Mật khẩu</label>
+          <label className='text-base font-bold text-slate-900'>Mật khẩu</label>
           <div className='relative'>
             <Input
               type={showPassword ? 'text' : 'password'}
               placeholder='Nhập mật khẩu của bạn'
               {...register('password')}
+              className='h-14 bg-slate-100/80 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-1 focus-visible:ring-slate-200 text-base px-5 pr-12'
             />
             <button
               type='button'
               onClick={() => setShowPassword(!showPassword)}
-              className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition'
+              className='absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 transition'
             >
               {showPassword ? <EyeOff className='size-5' /> : <Eye className='size-5' />}
             </button>
           </div>
-          {errors.password && <p className='text-sm text-destructive'>{errors.password.message}</p>}
+          {errors.password && (
+            <p className='text-sm text-red-500 font-medium'>{errors.password.message}</p>
+          )}
         </div>
 
         <Button
           type='submit'
-          className='w-full py-6 text-base font-semibold'
-          size='lg'
+          className='w-full h-14 text-lg font-bold bg-slate-900 hover:bg-black text-white rounded-xl shadow-lg transition-all active:scale-[0.98]'
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
@@ -141,39 +133,43 @@ export function LoginForm() {
       </form>
 
       {/* Divider */}
-      <div className='flex items-center gap-4'>
-        <div className='flex-1 h-px bg-border'></div>
-        <span className='text-sm text-muted-foreground'>Hoặc</span>
-        <div className='flex-1 h-px bg-border'></div>
+      <div className='relative my-10 text-center'>
+        <div className='absolute inset-0 flex items-center'>
+          <div className='w-full border-t border-slate-200'></div>
+        </div>
+        <span className='relative bg-white px-4 text-sm font-medium text-slate-400 uppercase tracking-widest'>
+          Hoặc
+        </span>
       </div>
 
       {/* Social Login */}
-      <div className='grid gap-3'>
-        {socials.map((social) => {
-          const Icon = social.icon
-          return (
-            <Button
-              key={social.label}
-              type='button'
-              variant={social.variant ?? 'secondary'}
-              className={cn(
-                'w-full justify-center gap-2 py-5 text-base hover:bg-muted/80',
-                social.variant === 'outline' && 'bg-white border-2',
-                social.label.includes('Google') && 'text-blue-600 hover:text-blue-700',
-                social.label.includes('Facebook') &&
-                  'bg-blue-600 text-white hover:bg-blue-700 hover:text-white',
-              )}
-            >
-              <Icon className='size-5' />
-              {social.label}
-            </Button>
-          )
-        })}
+      <div className='space-y-4'>
+        <Button
+          variant='outline'
+          className='w-full h-14 justify-center gap-3 rounded-xl border-slate-200 text-slate-900 font-bold hover:bg-slate-50 transition-all'
+        >
+          <Image
+            src='https://www.svgrepo.com/show/475656/google-color.svg'
+            width={20}
+            height={20}
+            alt='Google'
+          />
+          Tiếp tục với Google
+        </Button>
+        <Button className='w-full h-14 justify-center gap-3 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-bold transition-all shadow-md'>
+          <svg className='w-5 h-5 fill-current' viewBox='0 0 24 24'>
+            <path d='M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' />
+          </svg>
+          Tiếp tục với Facebook
+        </Button>
       </div>
 
-      <p className='text-center text-sm text-gray-600'>
+      <p className='mt-10 text-center text-base font-medium text-slate-500'>
         Chưa có tài khoản?{' '}
-        <Link href={Routers.REGISTER} className='font-medium text-primary hover:underline'>
+        <Link
+          href={Routers.REGISTER}
+          className='text-slate-900 border-b-2 border-slate-900 font-bold hover:text-black hover:border-black transition-all pb-0.5 ml-1'
+        >
           Đăng ký ngay
         </Link>
       </p>

@@ -37,18 +37,18 @@ export function Footer() {
             <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Mua sắm</h4>
             <ul className='space-y-3 text-sm text-zinc-300'>
               {[
-                'Thời trang nữ',
-                'Thời trang nam',
-                'Phụ kiện nổi bật',
-                'Sale Off',
-                'Bộ sưu tập mới',
+                { label: 'Thời trang nữ', href: '/category/nu' },
+                { label: 'Thời trang nam', href: '/category/nam' },
+                { label: 'Phụ kiện nổi bật', href: '/category/phu-kien' },
+                { label: 'Sale Off', href: '/promotions' },
+                { label: 'Bộ sưu tập mới', href: '/products' },
               ].map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <Link
-                    href='#'
+                    href={item.href}
                     className='hover:text-white hover:translate-x-1 transition-all duration-200 inline-block font-medium'
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -60,18 +60,18 @@ export function Footer() {
             <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Hỗ trợ</h4>
             <ul className='space-y-3 text-sm text-zinc-300'>
               {[
-                'Hướng dẫn mua hàng',
-                'Chính sách đổi trả',
-                'Vận chuyển & Giao nhận',
-                'Bảo mật thông tin',
-                'Câu hỏi thường gặp',
+                { label: 'Hướng dẫn mua hàng', href: '/guides' },
+                { label: 'Chính sách đổi trả', href: '/policies' },
+                { label: 'Liên hệ chúng tôi', href: '/contact' },
+                { label: 'Bảo mật thông tin', href: '/policies/privacy' },
+                { label: 'Câu hỏi thường gặp', href: '/faq' },
               ].map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <Link
-                    href='#'
+                    href={item.href}
                     className='hover:text-white hover:translate-x-1 transition-all duration-200 inline-block font-medium'
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -84,7 +84,7 @@ export function Footer() {
             <ul className='space-y-4 text-sm text-zinc-300 font-medium'>
               <li className='flex items-start gap-3'>
                 <MapPin className='h-5 w-5 text-white shrink-0' />
-                <span>123 Đường Fashion, Quận 1, TP. Hồ Chí Minh</span>
+                <span>Vincom Center, Quận 1, TP. Hồ Chí Minh</span>
               </li>
               <li className='flex items-center gap-3'>
                 <Phone className='h-5 w-5 text-white shrink-0' />
@@ -104,13 +104,13 @@ export function Footer() {
         <div className='flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-400 font-medium'>
           <p>© 2026 ZYNA FASHION. All rights reserved.</p>
           <div className='flex gap-6'>
-            <Link href='#' className='hover:text-white transition-colors'>
+            <Link href='/terms' className='hover:text-white transition-colors'>
               Điều khoản
             </Link>
-            <Link href='#' className='hover:text-white transition-colors'>
+            <Link href='/policies/privacy' className='hover:text-white transition-colors'>
               Bảo mật
             </Link>
-            <Link href='#' className='hover:text-white transition-colors'>
+            <Link href='/cookie-policy' className='hover:text-white transition-colors'>
               Cookie
             </Link>
           </div>

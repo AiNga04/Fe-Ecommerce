@@ -17,6 +17,7 @@ import {
   ShoppingCart,
   TicketPercent,
   Users,
+  MessageSquare,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/services/auth'
@@ -75,6 +76,11 @@ const sidebarItems = [
     title: 'Mã giảm giá',
     href: '/admin/vouchers',
     icon: TicketPercent,
+  },
+  {
+    title: 'Hỗ trợ',
+    href: '/admin/support',
+    icon: MessageSquare,
   },
   {
     title: 'Người dùng',
