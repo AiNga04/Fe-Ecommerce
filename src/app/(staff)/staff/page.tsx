@@ -1,27 +1,29 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+'use client'
+
+import { DashboardStats } from './components/dashboard-stats'
+import { OrderStatusChart } from './components/order-status-chart'
+import { TopProducts } from './components/top-products'
+import { LowStockAlerts } from './components/low-stock-alerts'
+import { InventoryAuditLogs } from './components/inventory-audit-logs'
 
 export default function StaffDashboard() {
   return (
-    <div className='p-8'>
-      <h1 className='text-3xl font-bold mb-6'>Staff Dashboard</h1>
-      <p className='mb-4'>Chào mừng Staff. Khu vực xử lý đơn hàng và sản phẩm.</p>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <div className='p-6 border rounded-lg shadow-sm bg-white'>
-          <h3 className='font-semibold text-lg mb-2'>Quản lý Đơn hàng</h3>
-          <p className='text-muted-foreground text-sm mb-4'>Xử lý và cập nhật trạng thái đơn</p>
-          <Button variant='outline'>Truy cập</Button>
-        </div>
-        <div className='p-6 border rounded-lg shadow-sm bg-white'>
-          <h3 className='font-semibold text-lg mb-2'>Quản lý Kho</h3>
-          <p className='text-muted-foreground text-sm mb-4'>Kiểm kê và nhập kho</p>
-          <Button variant='outline'>Truy cập</Button>
-        </div>
+    <div className='flex flex-col gap-6 pb-10 w-full'>
+      <div>
+        <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
+        <p className='text-muted-foreground'>Tổng quan về hoạt động kho hàng và đơn hàng.</p>
       </div>
-      <div className='mt-8'>
-        <Button asChild>
-          <Link href='/'>Về Trang chủ</Link>
-        </Button>
+
+      <DashboardStats />
+
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-7'>
+        <OrderStatusChart />
+        <TopProducts />
+      </div>
+
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-7'>
+        <LowStockAlerts />
+        <InventoryAuditLogs />
       </div>
     </div>
   )
