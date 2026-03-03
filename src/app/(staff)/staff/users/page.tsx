@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { userService } from '@/services/user'
-import { User, UserStatus } from '@/types/user'
+import { User, UserStatus, Gender } from '@/types/user'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,22 +23,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Search, Activity, Mail, Phone, RefreshCcw, ShieldAlert } from 'lucide-react'
+import {
+  Search,
+  Activity,
+  Mail,
+  Phone,
+  RefreshCcw,
+  ShieldAlert,
+  Filter,
+  User as UserIcon,
+  Calendar,
+  Info,
+  Eye,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { getImageUrl } from '@/lib/utils'
+import { getImageUrl, cn } from '@/lib/utils'
 import { UserAuditLogsDialog } from '@/components/staff/users/audit-logs-dialog'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { format } from 'date-fns'
 
 export default function StaffUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('active')
   const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalPages, setTotalPages] = useState(0)
 
-  // Audit logs dialog state
+  // Filters
+  const [roleFilter, setRoleFilter] = useState('ALL')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+
   const [auditDialog, setAuditDialog] = useState<{
     isOpen: boolean
     userId: number | null
@@ -51,21 +75,19 @@ export default function StaffUsersPage() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true)
-      // Map search to email as fallback search
       const params = {
         page,
-        size: 10,
-        email: search || undefined,
-        status: activeTab === 'deleted' ? UserStatus.DELETED : undefined,
+        size: pageSize,
+        lastName: search || undefined, // Simple lastName search for now based on 'Tìm theo tên'
+        role: roleFilter !== 'ALL' ? roleFilter : undefined,
+        status: statusFilter !== 'ALL' ? statusFilter : undefined,
       }
 
-      const res =
-        activeTab === 'active'
-          ? await userService.searchUsers(params)
-          : await userService.getDeletedUsers(params)
+      const res = await userService.searchUsers(params)
 
       if (res.data.success) {
         setUsers(res.data.data || [])
+        setTotalPages(res.data.pagination?.totalPages || 0)
       }
     } catch (error) {
       console.error('Fetch users error:', error)
@@ -77,10 +99,11 @@ export default function StaffUsersPage() {
 
   useEffect(() => {
     fetchUsers()
-  }, [activeTab, page])
+  }, [page, roleFilter, statusFilter])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
+    setPage(0)
     fetchUsers()
   }
 
@@ -88,24 +111,26 @@ export default function StaffUsersPage() {
     switch (status) {
       case UserStatus.ACTIVE:
         return (
-          <Badge className='bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none'>
-            Hoạt động
+          <Badge className='bg-emerald-500 text-white hover:bg-emerald-600 border-none px-3 rounded-full'>
+            Đang hoạt động
           </Badge>
         )
       case UserStatus.DISABLED:
         return (
-          <Badge className='bg-slate-100 text-slate-700 hover:bg-slate-100 border-none'>
+          <Badge className='bg-slate-400 text-white hover:bg-slate-500 border-none px-3 rounded-full'>
             Đã vô hiệu
           </Badge>
         )
       case UserStatus.DELETED:
         return (
-          <Badge className='bg-rose-100 text-rose-700 hover:bg-rose-100 border-none'>Đã xóa</Badge>
+          <Badge className='bg-rose-500 text-white hover:bg-rose-600 border-none px-3 rounded-full'>
+            Đã xóa
+          </Badge>
         )
       case UserStatus.PENDING:
         return (
-          <Badge className='bg-amber-100 text-amber-700 hover:bg-amber-100 border-none'>
-            Chờ xử lý
+          <Badge className='bg-amber-400 text-white hover:bg-amber-500 border-none px-3 rounded-full'>
+            Chờ xác minh
           </Badge>
         )
       default:
@@ -113,15 +138,16 @@ export default function StaffUsersPage() {
     }
   }
 
-  const handleRestore = async (id: number) => {
-    try {
-      const res = await userService.restoreUser(id)
-      if (res.data.success) {
-        toast.success('Khôi phục người dùng thành công')
-        fetchUsers()
-      }
-    } catch (error) {
-      toast.error('Không thể khôi phục người dùng')
+  const getGenderLabel = (gender?: Gender) => {
+    switch (gender) {
+      case Gender.MALE:
+        return 'Nam'
+      case Gender.FEMALE:
+        return 'Nữ'
+      case Gender.OTHER:
+        return 'Khác'
+      default:
+        return 'Khác'
     }
   }
 
@@ -129,185 +155,270 @@ export default function StaffUsersPage() {
     <div className='space-y-6'>
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Quản lý Người dùng</h1>
-          <p className='text-slate-500 text-sm'>
-            Theo dõi và quản lý tài khoản người dùng trong hệ thống (Staff View)
+          <h1 className='text-3xl font-extrabold tracking-tight text-slate-900'>
+            Khách hàng & Người dùng
+          </h1>
+          <p className='text-slate-500 text-sm mt-1'>
+            Tra cứu thông tin tài khoản người dùng trong hệ thống
           </p>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-        <div className='flex items-center justify-between mb-4'>
-          <TabsList className='bg-slate-100 p-1'>
-            <TabsTrigger
-              value='active'
-              className='data-[state=active]:bg-white data-[state=active]:shadow-sm'
-            >
-              Người dùng
-            </TabsTrigger>
-            <TabsTrigger
-              value='deleted'
-              className='data-[state=active]:bg-white data-[state=active]:shadow-sm'
-            >
-              Đã xóa tạm thời
-            </TabsTrigger>
-          </TabsList>
+      <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm'>
+        <form onSubmit={handleSearch} className='relative flex-1 group'>
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors' />
+          <Input
+            placeholder='Tìm theo tên...'
+            className='pl-10 h-11 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-lg'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </form>
 
-          <form onSubmit={handleSearch} className='flex items-center gap-2'>
-            <div className='relative w-64'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400' />
-              <Input
-                placeholder='Tìm theo email...'
-                className='pl-10 h-9 bg-white'
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <Button type='submit' size='sm' className='bg-blue-600 hover:bg-blue-700 h-9'>
-              Tìm
-            </Button>
-          </form>
+        <div className='flex items-center gap-3 w-full md:w-auto'>
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className='h-11 w-full md:w-[180px] bg-white border-slate-200 rounded-lg'>
+              <SelectValue placeholder='Tất cả vai trò' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='ALL'>Tất cả vai trò</SelectItem>
+              <SelectItem value='USER'>Khách hàng</SelectItem>
+              <SelectItem value='STAFF'>Nhân viên</SelectItem>
+              <SelectItem value='SHIPPER'>Giao hàng</SelectItem>
+              <SelectItem value='ADMIN'>Quản trị viên</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className='h-11 w-full md:w-[180px] bg-white border-slate-200 rounded-lg'>
+              <SelectValue placeholder='Tất cả trạng thái' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
+              <SelectItem value='ACTIVE'>Đang hoạt động</SelectItem>
+              <SelectItem value='PENDING'>Chờ xác minh</SelectItem>
+              <SelectItem value='DISABLED'>Đã vô hiệu</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant='outline'
+            onClick={() => {
+              setSearch('')
+              setRoleFilter('ALL')
+              setStatusFilter('ALL')
+            }}
+            className='h-11 px-4 text-slate-500'
+          >
+            Làm mới
+          </Button>
         </div>
+      </div>
 
-        <TabsContent value='active' className='mt-0'>
-          <Card className='shadow-sm border-slate-200'>
-            <CardContent className='p-0'>
-              {isLoading && !users.length ? (
-                <div className='py-20 flex justify-center'>
-                  <LoadingOverlay visible={true} />
-                </div>
-              ) : (
-                <div className='rounded-md overflow-hidden'>
-                  <Table>
-                    <TableHeader className='bg-slate-50/50'>
-                      <TableRow>
-                        <TableHead className='font-bold'>Người dùng</TableHead>
-                        <TableHead className='font-bold'>Liên hệ</TableHead>
-                        <TableHead className='font-bold'>Vai trò</TableHead>
-                        <TableHead className='font-bold'>Trạng thái</TableHead>
-                        <TableHead className='text-right font-bold'>Hành động</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map((user) => (
-                        <TableRow key={user.id} className='hover:bg-slate-50/30 transition-colors'>
-                          <TableCell>
-                            <div className='flex items-center gap-3'>
-                              <Avatar className='h-9 w-9 border border-slate-100'>
-                                <AvatarImage src={getImageUrl(user.avatarUrl)} />
-                                <AvatarFallback className='bg-slate-100 text-slate-500 font-bold'>
-                                  {user.firstName?.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className='font-medium text-slate-900'>
-                                  {user.lastName} {user.firstName}
-                                </div>
-                                <div className='text-xs text-slate-400'>ID: {user.id}</div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className='flex flex-col gap-1'>
-                              <div className='flex items-center text-xs text-slate-600 gap-1.5'>
-                                <Mail className='w-3 h-3 text-slate-400' /> {user.email}
-                              </div>
-                              <div className='flex items-center text-xs text-slate-600 gap-1.5'>
-                                <Phone className='w-3 h-3 text-slate-400' /> {user.phone || 'N/A'}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className='flex flex-wrap gap-1'>
-                              {user.roles?.map((role, idx) => (
-                                <Badge
-                                  key={idx}
-                                  variant='outline'
-                                  className='bg-blue-50 text-blue-700 border-blue-100 text-[10px]'
-                                >
-                                  {role}
-                                </Badge>
-                              )) || <Badge variant='outline'>USER</Badge>}
-                            </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(user.status)}</TableCell>
-                          <TableCell className='text-right'>
-                            <Button
-                              variant='ghost'
-                              size='sm'
-                              className='text-slate-500 hover:text-blue-600 hover:bg-blue-50'
-                              onClick={() =>
-                                setAuditDialog({
-                                  isOpen: true,
-                                  userId: user.id,
-                                  userName: `${user.lastName} ${user.firstName}`,
-                                })
-                              }
-                            >
-                              <Activity className='w-4 h-4 mr-1.5' />
-                              Nhật ký
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {!users.length && (
-                    <div className='py-12 text-center text-slate-400'>
-                      Không tìm thấy người dùng nào
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value='deleted' className='mt-0'>
-          <Card className='shadow-sm border-slate-200'>
-            <CardContent className='p-0'>
+      <Card className='shadow-md border-slate-200 overflow-hidden rounded-xl'>
+        <CardContent className='p-0'>
+          {isLoading && !users.length ? (
+            <div className='py-32 flex justify-center'>
+              <LoadingOverlay visible={true} />
+            </div>
+          ) : (
+            <div className='overflow-x-auto'>
               <Table>
-                <TableHeader className='bg-slate-50/50'>
-                  <TableRow>
-                    <TableHead className='font-bold'>Người dùng</TableHead>
-                    <TableHead className='font-bold'>Email</TableHead>
-                    <TableHead className='text-right font-bold'>Thao tác</TableHead>
+                <TableHeader className='bg-slate-50/50 border-b border-slate-100'>
+                  <TableRow className='hover:bg-transparent'>
+                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4 pl-6'>
+                      Avatar
+                    </TableHead>
+                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
+                      Thông tin
+                    </TableHead>
+                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
+                      Liên hệ
+                    </TableHead>
+                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
+                      Vai trò
+                    </TableHead>
+                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4 text-center'>
+                      Trạng thái
+                    </TableHead>
+                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
+                      Ngày tham gia
+                    </TableHead>
+                    <TableHead className='text-right font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4 pr-6'>
+                      Hành động
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className='font-medium'>
-                        {user.lastName} {user.firstName}
+                    <TableRow
+                      key={user.id}
+                      className='hover:bg-slate-50/50 transition-colors border-b border-slate-50 group'
+                    >
+                      <TableCell className='py-4 pl-6'>
+                        <Avatar className='h-12 w-12 border-2 border-white shadow-sm ring-1 ring-slate-100'>
+                          <AvatarImage src={getImageUrl(user.avatarUrl)} />
+                          <AvatarFallback className='bg-slate-100 text-slate-500 font-bold'>
+                            {user.firstName?.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
                       </TableCell>
-                      <TableCell className='text-slate-500 text-sm'>{user.email}</TableCell>
-                      <TableCell className='text-right'>
-                        <Button
-                          variant='outline'
-                          size='sm'
-                          className='text-emerald-600 border-emerald-200 hover:bg-emerald-50'
-                          onClick={() => handleRestore(user.id)}
-                        >
-                          <RefreshCcw className='w-3 h-3 mr-1.5' />
-                          Khôi phục
-                        </Button>
+                      <TableCell className='py-4'>
+                        <div className='flex flex-col gap-0.5'>
+                          <span className='font-bold text-slate-900 group-hover:text-blue-600 transition-colors'>
+                            {user.lastName} {user.firstName}
+                          </span>
+                          <span className='text-[11px] text-slate-400 font-medium flex items-center gap-1.5'>
+                            ID: #{user.id} <span className='text-slate-200'>•</span>{' '}
+                            {getGenderLabel(user.gender)}
+                            {user.dateOfBirth && (
+                              <>
+                                <span className='text-slate-200'>•</span>{' '}
+                                {format(new Date(user.dateOfBirth), 'dd/MM/yyyy')}
+                              </>
+                            )}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className='py-4'>
+                        <div className='flex flex-col gap-0.5 text-xs'>
+                          <span className='text-slate-600 flex items-center gap-1.5'>
+                            {user.email}
+                          </span>
+                          <span className='text-slate-400'>
+                            {user.phone || 'Chưa cập nhật SĐT'}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className='py-4'>
+                        <div className='flex flex-wrap gap-1'>
+                          {user.roles?.map((role, idx) => (
+                            <Badge
+                              key={idx}
+                              variant='outline'
+                              className='bg-transparent text-[10px] font-bold py-0 h-5 px-2 text-slate-500 border-slate-200'
+                            >
+                              {role}
+                            </Badge>
+                          )) || <Badge variant='outline'>USER</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell className='py-4 text-center'>
+                        {getStatusBadge(user.status)}
+                      </TableCell>
+                      <TableCell className='py-4'>
+                        <span className='text-sm text-slate-500 font-medium'>
+                          {format(new Date(user.createdAt), 'dd/MM/yyyy')}
+                        </span>
+                      </TableCell>
+                      <TableCell className='text-right py-4 pr-6'>
+                        <div className='flex items-center justify-end gap-1'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            asChild
+                            className='h-9 px-3 text-slate-500 hover:text-blue-600 hover:bg-blue-50 font-bold text-xs gap-1.5'
+                          >
+                            <Link href={`/staff/users/${user.id}`}>
+                              <Eye className='w-3.5 h-3.5' />
+                              Chi tiết
+                            </Link>
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='h-9 px-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 font-bold text-xs gap-1.5'
+                            onClick={() =>
+                              setAuditDialog({
+                                isOpen: true,
+                                userId: user.id,
+                                userName: `${user.lastName} ${user.firstName}`,
+                              })
+                            }
+                          >
+                            <Activity className='w-3.5 h-3.5' />
+                            Nhật ký
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {!users.length && (
-                    <TableRow>
-                      <TableCell colSpan={3} className='py-12 text-center text-slate-400 italic'>
-                        <ShieldAlert className='w-8 h-8 mx-auto mb-2 opacity-20' />
-                        Danh sách người dùng đã xóa trống
-                      </TableCell>
-                    </TableRow>
-                  )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              {users.length === 0 && !isLoading && (
+                <div className='py-20 text-center flex flex-col items-center justify-center text-slate-400'>
+                  <UserIcon className='w-16 h-16 mb-4 opacity-10' />
+                  <p className='text-lg font-medium'>Không tìm thấy người dùng nào</p>
+                  <p className='text-sm italic'>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className='flex flex-col-reverse md:flex-row items-center justify-between gap-4 mt-6'>
+        <div className='flex items-center gap-2 text-sm text-slate-500'>
+          <span>Hiển thị</span>
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value))
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className='h-8 w-[70px] bg-white'>
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent side='top'>
+              {[10, 20, 50].map((s) => (
+                <SelectItem key={s} value={s.toString()}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>người dùng mỗi trang</span>
+        </div>
+
+        {totalPages > 0 && (
+          <div className='flex items-center gap-4'>
+            <div className='text-sm text-slate-500 font-medium'>
+              Trang {page + 1} / {totalPages}
+            </div>
+            <Pagination className='justify-end w-auto mx-0'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page > 0) setPage(page - 1)
+                    }}
+                    className={
+                      page === 0 ? 'pointer-events-none opacity-50' : 'bg-white border-slate-200'
+                    }
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    href='#'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (page < totalPages - 1) setPage(page + 1)
+                    }}
+                    className={
+                      page >= totalPages - 1
+                        ? 'pointer-events-none opacity-50'
+                        : 'bg-white border-slate-200'
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+      </div>
 
       <UserAuditLogsDialog
         isOpen={auditDialog.isOpen}

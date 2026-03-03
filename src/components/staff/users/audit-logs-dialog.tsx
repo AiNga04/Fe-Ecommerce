@@ -85,7 +85,7 @@ export function UserAuditLogsDialog({
               <p className='text-sm text-slate-500 animate-pulse'>Đang tải dữ liệu...</p>
             </div>
           ) : logs.length > 0 ? (
-            <div className='relative space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-100 before:via-slate-100 before:to-transparent'>
+            <div className='relative space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-blue-100 before:via-slate-100 before:to-transparent'>
               {logs.map((log) => (
                 <div key={log.id} className='relative flex items-start gap-4 group'>
                   <div className='absolute left-0 mt-1.5 w-10 h-10 flex items-center justify-center rounded-full bg-white border-2 border-slate-100 shadow-sm z-10 group-hover:border-blue-200 transition-colors'>

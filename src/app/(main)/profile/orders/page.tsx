@@ -294,7 +294,7 @@ export default function OrderHistoryPage() {
             <div className='p-6 md:p-8 pb-0'>
               <div className='flex items-center justify-between mb-6'>
                 <div className='flex items-center gap-3'>
-                  <div className='p-2.5 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-100'>
+                  <div className='p-2.5 bg-linear-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-100'>
                     <Package className='w-6 h-6 text-yellow-600' />
                   </div>
                   <div>
@@ -395,7 +395,7 @@ export default function OrderHistoryPage() {
                       <div className='px-5 divide-y divide-slate-100'>
                         {order.items.map((item, idx) => (
                           <div key={idx} className='py-4 flex gap-4'>
-                            <div className='relative w-16 h-16 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex-shrink-0'>
+                            <div className='relative w-16 h-16 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 shrink-0'>
                               <Image
                                 src={getImageUrl(item.image)}
                                 alt={item.productName}
