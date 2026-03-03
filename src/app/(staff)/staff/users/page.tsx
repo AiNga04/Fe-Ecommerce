@@ -126,10 +126,10 @@ export default function StaffUsersPage() {
   }
 
   return (
-    <div className='p-6 space-y-6'>
+    <div className='space-y-6'>
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div>
-          <h1 className='text-2xl font-bold text-slate-900'>Quản lý Người dùng</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>Quản lý Người dùng</h1>
           <p className='text-slate-500 text-sm'>
             Theo dõi và quản lý tài khoản người dùng trong hệ thống (Staff View)
           </p>

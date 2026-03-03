@@ -37,4 +37,7 @@ export const orderService = {
   updateOrderStatus: (id: number | string, status: string) => {
     return http.patch<IBackendRes<Order>>(`${ORDER_PATH}/${id}/status`, { status })
   },
+  confirmReceived: (id: number | string) => {
+    return http.post<IBackendRes<Order>>(`${ORDER_PATH}/my/${id}/confirm-received`, {})
+  },
 }

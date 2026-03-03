@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useAuthSession } from '@/hooks/use-auth-session'
 import Routers from '@/constants/routers'
+import { ProductReviewsList } from '@/components/reviews/product-reviews-list'
 
 interface ProductDetailClientProps {
   product: Product
@@ -170,7 +171,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 key={img.id}
                 onClick={() => setSelectedImage(img.url)}
                 className={cn(
-                  'relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border transition-all',
+                  'relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border transition-all',
                   selectedImage === img.url
                     ? 'border-primary ring-2 ring-primary ring-offset-2'
                     : 'border-transparent hover:border-gray-300 opacity-70 hover:opacity-100',
@@ -309,6 +310,11 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             {product.description}
           </div>
         </div>
+      </div>
+
+      {/* Reviews Section - Full Width Below */}
+      <div className='md:col-span-2'>
+        <ProductReviewsList productId={product.id} productName={product.name} />
       </div>
     </div>
   )

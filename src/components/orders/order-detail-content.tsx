@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { OrderReviewsDisplay } from '@/components/reviews/order-reviews-display'
 import {
   Select,
   SelectContent,
@@ -519,6 +520,11 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
               ))}
             </div>
           </Card>
+
+          {/* Review Module Panel */}
+          {order.status === 'COMPLETED' && (
+            <OrderReviewsDisplay order={order} basePath={basePath} />
+          )}
 
           <div className='grid grid-cols-1 gap-6'>
             {/* Payment Details Card */}

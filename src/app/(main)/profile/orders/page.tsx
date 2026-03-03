@@ -10,6 +10,7 @@ import { Order } from '@/types/order'
 import { User } from '@/types/user'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
+import { reviewService } from '@/services/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,6 +21,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -27,7 +38,17 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { formatCurrency, getImageUrl, cn } from '@/lib/utils'
-import { Calendar, Package, CreditCard, MapPin, Loader2, ShoppingBag } from 'lucide-react'
+import {
+  Calendar,
+  Package,
+  CreditCard,
+  MapPin,
+  Loader2,
+  ShoppingBag,
+  CheckCircle,
+  MessageSquare,
+} from 'lucide-react'
+import { OrderReviewDialog } from '@/components/reviews/order-review-dialog'
 
 const STATUS_TABS = [
   { label: 'Tất cả', value: 'ALL' },
@@ -42,6 +63,8 @@ const STATUS_TABS = [
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [user, setUser] = useState<User | null>(null)
+  // Track which order items have been reviewed: key is `${orderId}-${productId}`
+  const [reviewedItems, setReviewedItems] = useState<Set<string>>(new Set())
 
   // Pagination
   const [page, setPage] = useState(0)
@@ -54,6 +77,14 @@ export default function OrderHistoryPage() {
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [confirmId, setConfirmId] = useState<number | null>(null)
+
+  // Review Dialog State
+  const [reviewOrderInfo, setReviewOrderInfo] = useState<{
+    orderId: number
+    productId: number
+    productName: string
+  } | null>(null)
 
   const fetchData = async () => {
     try {
@@ -99,11 +130,47 @@ export default function OrderHistoryPage() {
 
       if (orderRes.data.success) {
         // @ts-ignore
-        setOrders(orderRes.data.data || [])
+        const fetchedOrders = orderRes.data.data || []
+        setOrders(fetchedOrders)
         // @ts-ignore
         setTotalPages(orderRes.data.pagination?.totalPages || 1)
         // @ts-ignore
         setTotalElements(orderRes.data.pagination?.totalElements || 0)
+
+        // Fetch review statuses for COMPLETED orders
+        const completedOrders = fetchedOrders.filter((o: any) => o.status === 'COMPLETED')
+        if (completedOrders.length > 0) {
+          const newReviewedItems = new Set<string>()
+
+          // Collect all unique product IDs from completed orders to minimize API calls
+          const productIds = new Set<number>()
+          completedOrders.forEach((o: any) => {
+            o.items.forEach((item: any) => productIds.add(item.productId))
+          })
+
+          // Fetch user's reviews for these products
+          await Promise.all(
+            Array.from(productIds).map(async (productId) => {
+              try {
+                const reviewRes = await reviewService.getMyReviewsByProduct(productId, 0, 100)
+                if (reviewRes.data.success && reviewRes.data.data?.content) {
+                  // Mark the specific order items as reviewed
+                  reviewRes.data.data.content.forEach((rev: any) => {
+                    if (rev.orderId) {
+                      newReviewedItems.add(`${rev.orderId}-${rev.productId}`)
+                    }
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to fetch reviews for product', productId)
+              }
+            }),
+          )
+
+          setReviewedItems(newReviewedItems)
+        } else {
+          setReviewedItems(new Set())
+        }
       }
     } catch (error) {
       console.error('Fetch data error:', error)
@@ -137,6 +204,26 @@ export default function OrderHistoryPage() {
       toast.error('Có lỗi xảy ra khi tải ảnh lên')
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleConfirmReceived = async () => {
+    if (!confirmId) return
+    setIsProcessing(true)
+    try {
+      const res = await orderService.confirmReceived(confirmId)
+      if (res.data.success) {
+        toast.success('Đã xác nhận nhận hàng thành công')
+        fetchData()
+      } else {
+        toast.error(res.data.message || 'Xác nhận thất bại')
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Có lỗi xảy ra khi xác nhận')
+    } finally {
+      setIsProcessing(false)
+      setConfirmId(null)
     }
   }
 
@@ -288,7 +375,20 @@ export default function OrderHistoryPage() {
                             })}
                           </div>
                         </div>
-                        <div>{getPaymentBadge(order.paymentStatus)}</div>
+                        <div className='flex items-center gap-3'>
+                          {getPaymentBadge(order.paymentStatus)}
+                          {order.status === 'DELIVERED' && (
+                            <Button
+                              size='sm'
+                              variant='outline'
+                              className='bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 h-8'
+                              onClick={() => setConfirmId(order.id)}
+                            >
+                              <CheckCircle className='w-3.5 h-3.5 mr-1' />
+                              Đã nhận hàng
+                            </Button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Order Items */}
@@ -316,13 +416,44 @@ export default function OrderHistoryPage() {
                                 <span>{item.quantity}</span>
                               </div>
                             </div>
-                            <div className='text-right flex-shrink-0'>
+                            <div className='text-right shrink-0'>
                               <div className='font-semibold text-slate-900 text-sm'>
                                 {formatCurrency(item.unitPrice)}
                               </div>
                               {item.quantity > 1 && (
                                 <div className='text-[11px] text-slate-400 mt-0.5'>
                                   = {formatCurrency(item.subtotal)}
+                                </div>
+                              )}
+                              {order.status === 'COMPLETED' && (
+                                <div className='mt-2 text-right'>
+                                  {reviewedItems.has(`${order.id}-${item.productId}`) ? (
+                                    <Button
+                                      size='sm'
+                                      variant='outline'
+                                      className='h-7 text-xs bg-slate-50 text-slate-500 border-slate-200 opacity-80 cursor-default'
+                                      disabled
+                                    >
+                                      <CheckCircle className='w-3 h-3 mr-1' />
+                                      Đã đánh giá
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size='sm'
+                                      variant='outline'
+                                      className='h-7 text-xs border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                                      onClick={() =>
+                                        setReviewOrderInfo({
+                                          orderId: order.id,
+                                          productId: item.productId,
+                                          productName: item.productName,
+                                        })
+                                      }
+                                    >
+                                      <MessageSquare className='w-3 h-3 mr-1' />
+                                      Đánh giá
+                                    </Button>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -452,6 +583,43 @@ export default function OrderHistoryPage() {
                 )}
               </div>
             </div>
+
+            {/* Confirm Dialog */}
+            <AlertDialog
+              open={!!confirmId}
+              onOpenChange={(open: boolean) => !open && setConfirmId(null)}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Xác nhận đã nhận hàng?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Vui lòng chỉ xác nhận khi bạn đã nhận được hàng và hàng hóa ở tình trạng nguyên
+                    vẹn. Đơn hàng sẽ được chuyển sang trạng thái <strong>Hoàn thành</strong>.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Chưa nhận được</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleConfirmReceived}
+                    className='bg-green-600 hover:bg-green-700 text-white'
+                  >
+                    {isProcessing ? 'Đang xử lý...' : 'Đã nhận được hàng'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Review Dialog */}
+            {reviewOrderInfo && (
+              <OrderReviewDialog
+                open={!!reviewOrderInfo}
+                onOpenChange={(open: boolean) => !open && setReviewOrderInfo(null)}
+                orderId={reviewOrderInfo.orderId}
+                productId={reviewOrderInfo.productId}
+                productName={reviewOrderInfo.productName}
+                onReviewSuccess={fetchData}
+              />
+            )}
           </div>
         </div>
       </div>
