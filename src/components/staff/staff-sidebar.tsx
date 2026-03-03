@@ -2,122 +2,223 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
-  ShoppingBag,
+  Layers,
   Package,
-  ClipboardList,
-  Users,
-  Ticket,
-  Star,
+  ShoppingCart,
+  Archive,
+  Ruler,
+  Proportions,
+  TicketPercent,
   MessageSquare,
+  Users,
+  Star,
+  Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Menu,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useSidebarStore } from '@/store/use-sidebar-store'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { authService } from '@/services/auth'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
-const NAV_ITEMS = [
+const sidebarItems = [
   {
-    label: 'Bảng điều khiển',
-    icon: LayoutDashboard,
+    title: 'Dashboard',
     href: '/staff/dashboard',
-    permission: 'DASHBOARD_READ',
+    icon: LayoutDashboard,
   },
-  { label: 'Đơn hàng', icon: ShoppingBag, href: '/staff/orders', permission: 'ORDER_READ' },
-  { label: 'Sản phẩm', icon: Package, href: '/staff/products', permission: 'PRODUCT_READ' },
   {
-    label: 'Kho hàng',
-    icon: ClipboardList,
-    href: '/staff/inventory',
-    permission: 'INVENTORY_READ',
+    title: 'Danh mục',
+    href: '/staff/categories',
+    icon: Layers,
   },
-  { label: 'Người dùng', icon: Users, href: '/staff/users', permission: 'USER_READ' },
-  { label: 'Khuyến mãi', icon: Ticket, href: '/staff/vouchers', permission: 'VOUCHER_READ' },
-  { label: 'Đánh giá', icon: Star, href: '/staff/reviews', permission: 'REVIEW_MANAGE' },
-  { label: 'Hỗ trợ', icon: MessageSquare, href: '/staff/support', permission: 'SUPPORT_READ' },
+  {
+    title: 'Sản phẩm',
+    href: '/staff/products',
+    icon: Package,
+  },
+  {
+    title: 'Đơn hàng',
+    href: '/staff/orders',
+    icon: ShoppingCart,
+  },
+  {
+    title: 'Tồn kho',
+    href: '/staff/inventory',
+    icon: Archive,
+  },
+  {
+    title: 'Bảng Size',
+    href: '/staff/size-guides',
+    icon: Ruler,
+  },
+  {
+    title: 'Kích thước',
+    href: '/staff/sizes',
+    icon: Proportions,
+  },
+  {
+    title: 'Mã giảm giá',
+    href: '/staff/vouchers',
+    icon: TicketPercent,
+  },
+  {
+    title: 'Hỗ trợ',
+    href: '/staff/support',
+    icon: MessageSquare,
+  },
+  {
+    title: 'Đánh giá',
+    href: '/staff/reviews',
+    icon: Star,
+  },
+  {
+    title: 'Người dùng',
+    href: '/staff/users',
+    icon: Users,
+  },
+  {
+    title: 'Cài đặt',
+    href: '/staff/settings',
+    icon: Settings,
+  },
 ]
 
-export function StaffSidebar() {
+interface StaffSidebarProps {
+  className?: string
+  onNavigate?: () => void
+  forceExpanded?: boolean
+}
+
+export function StaffSidebar({ className, onNavigate, forceExpanded = false }: StaffSidebarProps) {
   const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = React.useState(false)
+  const router = useRouter()
+  const { isCollapsed: storeCollapsed, toggleSidebar } = useSidebarStore()
+
+  // If forceExpanded is true, always treat as expanded (not collapsed)
+  const isCollapsed = forceExpanded ? false : storeCollapsed
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout()
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Logout failed', error)
+      router.push('/auth/login')
+    }
+  }
 
   return (
-    <aside
+    <div
       className={cn(
-        'flex flex-col h-screen bg-slate-900 text-slate-300 transition-all duration-300 z-50 sticky top-0',
+        'flex flex-col h-full border-r bg-slate-900 text-slate-100 transition-all duration-300',
         isCollapsed ? 'w-20' : 'w-64',
+        forceExpanded ? 'w-full' : '', // Ensure full width if forced (e.g. in Sheet)
+        className,
       )}
     >
-      {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b border-slate-800 h-16'>
+      <div
+        className={cn(
+          'flex items-center h-16 px-4',
+          isCollapsed ? 'justify-center' : 'justify-between',
+        )}
+      >
         {!isCollapsed && (
-          <div className='flex items-center gap-2 px-2'>
-            <div className='w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center'>
-              <span className='text-white font-bold text-xl'>Z</span>
-            </div>
-            <span className='font-bold text-white tracking-wider'>ZYNA STAFF</span>
-          </div>
+          <h1 className='text-xl font-bold tracking-tight text-white whitespace-nowrap'>
+            ZYNA <span className='text-blue-500'>STAFF</span>
+          </h1>
         )}
         <Button
           variant='ghost'
-          size='sm'
-          className='p-1 hover:text-white hover:bg-slate-800'
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          size='icon'
+          onClick={toggleSidebar}
+          className='text-slate-400 hover:text-white hover:bg-slate-800 hidden md:flex'
         >
-          {isCollapsed ? <ChevronRight className='w-5 h-5' /> : <ChevronLeft className='w-5 h-5' />}
+          {isCollapsed ? <ChevronRight className='h-5 w-5' /> : <ChevronLeft className='h-5 w-5' />}
         </Button>
       </div>
 
-      {/* Nav Items */}
-      <nav className='flex-1 overflow-y-auto py-4 space-y-1 px-3'>
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname.startsWith(item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative',
-                isActive
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                  : 'hover:bg-slate-800 hover:text-white',
-              )}
-            >
-              <item.icon
+      <nav className='flex-1 px-3 space-y-2 overflow-y-auto py-4'>
+        <TooltipProvider delayDuration={0}>
+          {sidebarItems.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+
+            const LinkContent = (
+              <Link
+                href={item.href}
+                onClick={onNavigate}
                 className={cn(
-                  'w-5 h-5 shrink-0',
-                  isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-400',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800',
+                  isCollapsed && 'justify-center px-0',
                 )}
-              />
-              {!isCollapsed && <span className='text-sm font-medium'>{item.label}</span>}
-              {isCollapsed && (
-                <div className='absolute left-full ml-4 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50'>
-                  {item.label}
-                </div>
-              )}
-            </Link>
-          )
-        })}
+              >
+                <item.icon className='h-5 w-5 shrink-0' />
+                {!isCollapsed && <span>{item.title}</span>}
+              </Link>
+            )
+
+            if (isCollapsed) {
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>{LinkContent}</TooltipTrigger>
+                  <TooltipContent side='right' className='bg-slate-900 text-white border-slate-700'>
+                    {item.title}
+                  </TooltipContent>
+                </Tooltip>
+              )
+            }
+
+            return <div key={item.href}>{LinkContent}</div>
+          })}
+        </TooltipProvider>
       </nav>
 
-      {/* Footer */}
-      <div className='p-4 border-t border-slate-800 flex flex-col gap-2'>
-        <Button
-          variant='ghost'
-          className={cn(
-            'flex items-center gap-3 w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800 px-3',
-            isCollapsed && 'justify-center p-2',
-          )}
-          onClick={() => (window.location.href = '/')}
-        >
-          <LogOut className='w-5 h-5' />
-          {!isCollapsed && <span className='text-sm font-medium'>Quay lại Web</span>}
-        </Button>
+      <div className='p-4 border-t border-slate-800'>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              className={cn(
+                'flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-red-400 transition-colors w-full',
+                isCollapsed ? 'justify-center' : 'text-left',
+              )}
+            >
+              <LogOut className='h-5 w-5 shrink-0' />
+              {!isCollapsed && <span>Đăng xuất</span>}
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Bạn có chắc chắn muốn đăng xuất?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bạn sẽ cần đăng nhập lại để truy cập vào hệ thống dành cho nhân viên.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Hủy</AlertDialogCancel>
+              <AlertDialogAction onClick={handleLogout}>Đăng xuất</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-    </aside>
+    </div>
   )
 }

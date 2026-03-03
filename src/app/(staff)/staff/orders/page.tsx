@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { orderService } from '@/services/order'
-import { Order, OrderStatus } from '@/types/order'
+import { Order } from '@/types/order'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

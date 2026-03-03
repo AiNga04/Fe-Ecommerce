@@ -27,6 +27,8 @@ import {
   Percent,
   Truck,
   MoreVertical,
+  Clock,
+  CheckCircle2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { LoadingOverlay } from '@/components/common/loading-overlay'

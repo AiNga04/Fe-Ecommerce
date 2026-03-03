@@ -58,7 +58,7 @@ export default function StaffProductsPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await categoryService.getAll()
+        const res = await categoryService.list()
         if (res.data.success) {
           setCategories(res.data.data || [])
         }
