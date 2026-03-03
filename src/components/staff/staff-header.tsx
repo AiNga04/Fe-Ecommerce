@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { Menu } from 'lucide-react'
@@ -53,20 +54,23 @@ export function StaffHeader() {
 
       <div className='flex items-center gap-4'>
         {user ? (
-          <>
+          <Link
+            href='/staff/profile'
+            className='flex items-center gap-3 hover:bg-slate-50 p-1 rounded-lg transition-colors group'
+          >
             <div className='text-right hidden md:block'>
-              <p className='text-sm font-medium'>
+              <p className='text-sm font-medium group-hover:text-blue-600 transition-colors'>
                 {user.lastName} {user.firstName}
               </p>
               <p className='text-xs text-muted-foreground'>{user.email}</p>
             </div>
-            <Avatar>
+            <Avatar className='group-hover:ring-2 group-hover:ring-blue-100 transition-all'>
               <AvatarImage src={getImageUrl(user.avatarUrl)} alt={user.firstName} />
               <AvatarFallback>
                 {user.firstName ? user.firstName.substring(0, 2).toUpperCase() : 'U'}
               </AvatarFallback>
             </Avatar>
-          </>
+          </Link>
         ) : (
           <div className='h-8 w-8 rounded-full bg-slate-100 animate-pulse' />
         )}

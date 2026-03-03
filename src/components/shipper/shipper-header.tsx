@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { Menu, Bell } from 'lucide-react'
@@ -61,20 +62,23 @@ export function ShipperHeader() {
         </Button>
 
         {user ? (
-          <>
+          <Link
+            href='/shipper/profile'
+            className='flex items-center gap-3 hover:bg-orange-50 p-1.5 rounded-xl transition-colors group'
+          >
             <div className='text-right hidden sm:block'>
-              <p className='text-sm font-bold text-slate-700'>
+              <p className='text-sm font-bold text-slate-700 group-hover:text-orange-600 transition-colors'>
                 {user.lastName} {user.firstName}
               </p>
               <span className='text-xs text-slate-400 font-bold'>{user?.email}</span>
             </div>
-            <Avatar className='border-2 border-slate-100 h-9 w-9'>
+            <Avatar className='border-2 border-slate-100 h-9 w-9 group-hover:ring-2 group-hover:ring-orange-100 transition-all'>
               <AvatarImage src={getImageUrl(user.avatarUrl)} alt={user.firstName} />
               <AvatarFallback className='bg-orange-100 text-orange-600 font-bold'>
                 {user.firstName ? user.firstName.substring(0, 2).toUpperCase() : 'S'}
               </AvatarFallback>
             </Avatar>
-          </>
+          </Link>
         ) : (
           <div className='h-9 w-9 rounded-full bg-slate-100 animate-pulse' />
         )}

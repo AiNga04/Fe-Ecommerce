@@ -94,6 +94,11 @@ const sidebarItems = [
     icon: Users,
   },
   {
+    title: 'Hồ sơ',
+    href: '/admin/profile',
+    icon: Users,
+  },
+  {
     title: 'Cài đặt',
     href: '/admin/settings',
     icon: Settings,
