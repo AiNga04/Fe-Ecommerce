@@ -40,7 +40,9 @@ export function OrderReviewsDisplay({ order, basePath }: OrderReviewsDisplayProp
       let allReviews: any[] = []
       results.forEach((res) => {
         if (res.data?.success && res.data?.data?.reviews) {
-          allReviews = [...allReviews, ...res.data.data.reviews]
+          const reviewsData = res.data.data.reviews
+          const reviewsArray = Array.isArray(reviewsData) ? reviewsData : reviewsData.content || []
+          allReviews = [...allReviews, ...reviewsArray]
         }
       })
 

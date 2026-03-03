@@ -427,7 +427,8 @@ export default function OrderHistoryPage() {
                               )}
                               {order.status === 'COMPLETED' && (
                                 <div className='mt-2 text-right'>
-                                  {reviewedItems.has(`${order.id}-${item.productId}`) ? (
+                                  {item.isReviewed ||
+                                  reviewedItems.has(`${order.id}-${item.productId}`) ? (
                                     <Button
                                       size='sm'
                                       variant='outline'

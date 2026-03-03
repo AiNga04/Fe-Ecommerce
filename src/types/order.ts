@@ -6,6 +6,7 @@ export interface OrderItem {
   subtotal: number
   size: string
   image: string
+  isReviewed?: boolean
 }
 
 export interface Order {
