@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { productService } from '@/services/product'
 import { UpdateProductDialog } from '../components/update-product-dialog'
 import { AdjustProductStockDialog } from '@/components/products/adjust-product-stock-dialog'
+import { PriceHistoryDialog } from '@/components/products/price-history-dialog'
 import { GalleryManager } from '../components/gallery-manager'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +24,7 @@ import {
   Loader2,
   Package,
   Calendar,
+  History,
   Tag,
   ImageIcon,
   Ruler,
@@ -40,6 +42,7 @@ export default function ProductDetailPage() {
   const router = useRouter()
   const id = params.id as string
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
+  const [isPriceHistoryOpen, setIsPriceHistoryOpen] = useState(false)
 
   const { data: productData, isLoading } = useQuery({
     queryKey: ['product', id],
@@ -73,11 +76,19 @@ export default function ProductDetailPage() {
   return (
     <div className='w-full mx-auto pb-10 space-y-6'>
       {product && (
-        <UpdateProductDialog
-          product={product}
-          open={isUpdateDialogOpen}
-          onOpenChange={setIsUpdateDialogOpen}
-        />
+        <>
+          <UpdateProductDialog
+            product={product}
+            open={isUpdateDialogOpen}
+            onOpenChange={setIsUpdateDialogOpen}
+          />
+          <PriceHistoryDialog
+            productId={product.id}
+            productName={product.name}
+            isOpen={isPriceHistoryOpen}
+            onClose={() => setIsPriceHistoryOpen(false)}
+          />
+        </>
       )}
 
       {/* Header Actions */}
@@ -102,6 +113,13 @@ export default function ProductDetailPage() {
           </div>
         </div>
         <div className='flex gap-2'>
+          <Button
+            onClick={() => setIsPriceHistoryOpen(true)}
+            variant='outline'
+            className='border-blue-200 text-blue-600 hover:bg-blue-50 shadow-sm gap-2'
+          >
+            <History className='w-4 h-4' /> Lịch sử giá
+          </Button>
           <Button
             onClick={() => setIsUpdateDialogOpen(true)}
             className='bg-blue-600 hover:bg-blue-700 text-white shadow-sm gap-2'
