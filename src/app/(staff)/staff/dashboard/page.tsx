@@ -1,109 +1,89 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import {
-  dashboardService,
-  RevenueDashboardResponse,
-  OrderStatResponse,
-  UserStatResponse,
-  TopProductResponse,
-  LowStockResponse,
-  DailyOrderStatResponse,
-} from '@/services/dashboard'
-import { DashboardStats } from '@/components/staff/dashboard/stats-cards'
-import { RevenueChart } from '@/components/staff/dashboard/revenue-chart'
-import { OrdersChart } from '@/components/staff/dashboard/orders-chart'
-import { TopProductsTable } from '@/components/staff/dashboard/top-products'
-import { LowStockTable } from '@/components/staff/dashboard/low-stock'
-import { LoadingOverlay } from '@/components/common/loading-overlay'
-import { toast } from 'sonner'
-import { RefreshCcw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { subDays, formatISO } from 'date-fns'
+import { DateRange } from 'react-day-picker'
+
+import { DashboardStats } from '@/app/(admin)/admin/components/dashboard-stats'
+import { RevenueChart } from '@/app/(admin)/admin/components/revenue-chart'
+import { DailyOrdersChart } from '@/app/(admin)/admin/components/daily-orders-chart'
+import { OrderStatusChart } from '@/app/(admin)/admin/components/order-status-chart'
+import { TopProducts } from '@/app/(admin)/admin/components/top-products'
+import { LowStockAlerts } from '@/app/(admin)/admin/components/low-stock-alerts'
+import { PriceChanges } from '@/app/(admin)/admin/components/price-changes'
+import { UserAuditLogs } from '@/app/(admin)/admin/components/user-audit-logs'
+import { InventoryAuditLogs } from '@/app/(admin)/admin/components/inventory-audit-logs'
+import { DateRangeFilter } from '@/components/shipper/date-range-filter'
 
 export default function StaffDashboardPage() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [revenueData, setRevenueData] = useState<RevenueDashboardResponse | null>(null)
-  const [orderStats, setOrderStats] = useState<OrderStatResponse | null>(null)
-  const [userStats, setUserStats] = useState<UserStatResponse | null>(null)
-  const [topProducts, setTopProducts] = useState<TopProductResponse[]>([])
-  const [lowStock, setLowStock] = useState<LowStockResponse[]>([])
-  const [dailyOrders, setDailyOrders] = useState<DailyOrderStatResponse[]>([])
+  const today = new Date()
 
-  const fetchDashboardData = async () => {
-    try {
-      setIsLoading(true)
-      const [revRes, orderRes, userRes, topRes, lowRes, dailyRes] = await Promise.all([
-        dashboardService.getRevenueStats(),
-        dashboardService.getOrderStats(),
-        dashboardService.getUserStats(),
-        dashboardService.getTopSellingProducts(5),
-        dashboardService.getLowStockProducts(10),
-        dashboardService.getDailyOrderStats(),
-      ])
+  // State quản lý khoảng thời gian (DatePicker Range)
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: subDays(today, 30),
+    to: today,
+  })
 
-      if (revRes.data.success) setRevenueData(revRes.data.data || null)
-      if (orderRes.data.success) setOrderStats(orderRes.data.data || null)
-      if (userRes.data.success) setUserStats(userRes.data.data || null)
-      if (topRes.data.success) setTopProducts(topRes.data.data || [])
-      if (lowRes.data.success) setLowStock(lowRes.data.data || [])
-      if (dailyRes.data.success) setDailyOrders(dailyRes.data.data || [])
-    } catch (error) {
-      console.error('Fetch dashboard error:', error)
-      toast.error('Có lỗi xảy ra khi tải dữ liệu thống kê')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Định dạng lại ngày để truyền API (Mặc định lấy ngày hôm nay nếu người dùng xóa trắng DatePicker)
+  const safeFrom = date?.from || today
+  const safeTo = date?.to || today
 
-  useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
-  if (isLoading && !revenueData) {
-    return <LoadingOverlay visible={true} />
-  }
+  const fromIso = formatISO(safeFrom, { representation: 'date' })
+  const toIso = formatISO(safeTo, { representation: 'date' })
 
   return (
-    <div className='p-6 space-y-8 animate-in fade-in duration-500'>
-      <div className='flex items-center justify-between'>
+    <div className='flex flex-col gap-6 pb-10'>
+      <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4'>
         <div>
-          <h1 className='text-2xl font-bold text-slate-900 tracking-tight'>Bảng điều khiển</h1>
-          <p className='text-slate-500 text-sm'>Tổng quan về hoạt động kinh doanh hôm nay</p>
+          <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
+          <p className='text-muted-foreground'>
+            Tổng quan về tình hình kinh doanh và hoạt động của hệ thống.
+          </p>
         </div>
-        <Button
-          variant='outline'
-          size='sm'
-          className='text-slate-500 border-slate-200'
-          onClick={fetchDashboardData}
-          disabled={isLoading}
-        >
-          <RefreshCcw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
-          Làm mới
-        </Button>
+
+        {/* Bộ chọn thời gian (DateRangePicker) */}
+        <div className='flex items-center gap-2'>
+          <span className='text-sm font-medium text-muted-foreground whitespace-nowrap hidden sm:inline'>
+            Thời gian:
+          </span>
+          <DateRangeFilter
+            date={date}
+            setDate={setDate}
+            className='w-full sm:w-auto min-w-[300px]'
+          />
+        </div>
       </div>
 
-      <DashboardStats
-        revenue={revenueData?.totalRevenue || 0}
-        growthRate={revenueData?.growthRate || 0}
-        totalOrders={orderStats?.totalOrders || 0}
-        totalUsers={userStats?.totalUsers || 0}
-        newUsersToday={userStats?.newUsersToday || 0}
-        lowStockCount={lowStock.length}
-      />
+      {/* Row 1: Thẻ KPI thống kê tổng quan */}
+      <DashboardStats from={fromIso} to={toIso} />
 
-      <div className='grid gap-6 lg:grid-cols-2'>
-        <RevenueChart data={revenueData?.dailyStats || []} />
-        <OrdersChart data={dailyOrders} />
+      {/* Row 2: Biểu đồ doanh thu & Biểu đồ Đơn hàng (2 cột bằng nhau) */}
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2'>
+        <div className='col-span-1'>
+          <RevenueChart from={fromIso} to={toIso} />
+        </div>
+        <div className='col-span-1'>
+          <DailyOrdersChart from={fromIso} to={toIso} />
+        </div>
       </div>
 
-      <div className='grid gap-6 lg:grid-cols-2'>
-        <TopProductsTable products={topProducts} />
-        <LowStockTable products={lowStock} />
+      {/* Row 3: Biểu đồ trạng thái đơn hàng & Sản phẩm bán chạy */}
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-7'>
+        <OrderStatusChart />
+        <TopProducts />
+      </div>
+
+      {/* Row 4: Cảnh báo sắp hết hàng & Thay đổi giá */}
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-7'>
+        <LowStockAlerts />
+        <PriceChanges />
+      </div>
+
+      {/* Row 5: Nhật ký hoạt động (Audit Logs) */}
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-7'>
+        <InventoryAuditLogs />
+        <UserAuditLogs />
       </div>
     </div>
   )
-}
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ')
 }
