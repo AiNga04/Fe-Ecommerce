@@ -1,27 +1,85 @@
 'use client'
 
-import { Menu, Bell } from 'lucide-react'
+import React, { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import { Menu, Bell } from 'lucide-react'
+import { ShipperSidebar } from './shipper-sidebar'
+import { useQuery } from '@tanstack/react-query'
+import { authService } from '@/services/auth'
+import { getImageUrl } from '@/lib/utils'
 
-interface ShipperHeaderProps {
-  onMenuClick: () => void
-}
+/**
+ * Header cho khu vực Shipper
+ * @description Hiển thị Navbar trên cùng, chứa nút mở menu (mobile) và thông tin user đang đăng nhập
+ */
+export function ShipperHeader() {
+  const [open, setOpen] = useState(false)
 
-export function ShipperHeader({ onMenuClick }: ShipperHeaderProps) {
+  const { data: userResponse } = useQuery({
+    queryKey: ['me'],
+    queryFn: authService.me,
+    staleTime: 1000 * 60 * 5,
+  })
+
+  const user = userResponse?.data?.data
+
   return (
-    <header className='sticky top-0 z-30 flex items-center justify-between h-16 px-4 bg-white border-b lg:px-8'>
+    <header className='h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-30'>
       <div className='flex items-center gap-4'>
-        <Button variant='ghost' size='icon' className='lg:hidden' onClick={onMenuClick}>
-          <Menu className='w-5 h-5' />
-        </Button>
-        <h1 className='text-lg font-semibold lg:text-xl'>Shipper Portal</h1>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant='ghost' size='icon' className='md:hidden'>
+              <Menu className='h-5 w-5' />
+            </Button>
+          </SheetTrigger>
+
+          <SheetContent side='left' className='p-0 w-72 border-r-0 bg-slate-900 text-slate-100'>
+            <SheetTitle className='sr-only'>Menu</SheetTitle>
+            <ShipperSidebar
+              className='border-none'
+              onNavigate={() => setOpen(false)}
+              forceExpanded={true}
+            />
+          </SheetContent>
+        </Sheet>
+        <div className='font-medium text-sm text-muted-foreground hidden md:block italic'>
+          Khu vực giao hàng
+        </div>
+        <div className='font-medium text-sm text-orange-600 md:hidden font-bold italic'>
+          ZYNA SHIPPER
+        </div>
       </div>
 
-      <div className='flex items-center gap-2'>
-        <Button variant='ghost' size='icon' className='relative'>
+      <div className='flex items-center gap-4'>
+        <Button
+          variant='ghost'
+          size='icon'
+          className='relative text-slate-500 hover:text-orange-600 hover:bg-orange-50'
+        >
           <Bell className='w-5 h-5' />
           <span className='absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white' />
         </Button>
+
+        {user ? (
+          <>
+            <div className='text-right hidden sm:block'>
+              <p className='text-sm font-bold text-slate-700'>
+                {user.lastName} {user.firstName}
+              </p>
+              <p className='text-xs text-slate-500 font-medium'>{user.email}</p>
+            </div>
+            <Avatar className='border-2 border-slate-100 h-9 w-9'>
+              <AvatarImage src={getImageUrl(user.avatarUrl)} alt={user.firstName} />
+              <AvatarFallback className='bg-orange-100 text-orange-600 font-bold'>
+                {user.firstName ? user.firstName.substring(0, 2).toUpperCase() : 'S'}
+              </AvatarFallback>
+            </Avatar>
+          </>
+        ) : (
+          <div className='h-9 w-9 rounded-full bg-slate-100 animate-pulse' />
+        )}
       </div>
     </header>
   )

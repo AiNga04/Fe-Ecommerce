@@ -54,7 +54,7 @@ export default function ShipperDashboardPage() {
   }
 
   return (
-    <div className='space-y-8'>
+    <div className='space-y-6'>
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500'>
         <div>
           <h2 className='text-2xl font-bold tracking-tight'>Thống kê của tôi</h2>
