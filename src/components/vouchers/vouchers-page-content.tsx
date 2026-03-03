@@ -12,6 +12,11 @@ import {
   TicketPercent,
   Loader2,
   Eye,
+  Percent,
+  Truck,
+  Tag,
+  Clock,
+  Calendar as CalendarIcon,
 } from 'lucide-react'
 import { voucherService } from '@/services/voucher'
 import { Voucher, VoucherStatus, VoucherType } from '@/types/voucher'
@@ -53,6 +58,7 @@ import {
 import { VoucherDialog } from './voucher-dialog'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { cn } from '@/lib/utils'
 
 interface VouchersPageContentProps {
   basePath: 'admin' | 'staff'
@@ -181,7 +187,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
             <TableRow>
               <TableHead className='w-[150px]'>Mã Voucher</TableHead>
               <TableHead className='min-w-[200px]'>Tên chương trình</TableHead>
-              <TableHead>Loại / Giá trị</TableHead>
+              <TableHead>Loại & Giá trị</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Thời hạn</TableHead>
               <TableHead>Đã dùng</TableHead>
@@ -220,33 +226,59 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className='flex items-center gap-2'>
-                      <Badge variant='outline' className='text-xs'>
-                        {getTypeLabel(voucher.type)}
-                      </Badge>
-                      <span className='font-semibold'>
-                        {voucher.type === VoucherType.PERCENTAGE
-                          ? `${voucher.discountValue}%`
-                          : voucher.type === VoucherType.FREESHIP
-                            ? 'Tối đa ' + voucher.discountValue?.toLocaleString() + 'đ'
-                            : voucher.discountValue?.toLocaleString() + 'đ'}
-                      </span>
+                    <div className='flex items-center gap-3 py-1'>
+                      <div
+                        className={cn(
+                          'h-10 w-10 rounded-xl flex items-center justify-center shrink-0',
+                          voucher.type === VoucherType.PERCENTAGE
+                            ? 'bg-blue-50'
+                            : voucher.type === VoucherType.FREESHIP
+                              ? 'bg-indigo-50'
+                              : 'bg-emerald-50',
+                        )}
+                      >
+                        {voucher.type === VoucherType.PERCENTAGE ? (
+                          <Percent className='h-5 w-5 text-blue-600' />
+                        ) : voucher.type === VoucherType.FREESHIP ? (
+                          <Truck className='h-5 w-5 text-indigo-600' />
+                        ) : (
+                          <Tag className='h-5 w-5 text-emerald-600' />
+                        )}
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className='font-bold text-slate-900 text-base flex items-baseline gap-0.5'>
+                          {voucher.type === VoucherType.PERCENTAGE
+                            ? `${voucher.discountValue}%`
+                            : voucher.discountValue?.toLocaleString()}
+                          {voucher.type !== VoucherType.PERCENTAGE && (
+                            <span className='text-xs font-semibold underline decoration-2 underline-offset-2'>
+                              ₫
+                            </span>
+                          )}
+                        </span>
+                        <span className='text-[10px] text-slate-400 font-medium'>
+                          Đơn tối thiểu {voucher.minOrderValue?.toLocaleString() || '0'} ₫
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>{getStatusBadge(voucher.status)}</TableCell>
-                  <TableCell className='text-sm text-muted-foreground'>
-                    <div className='flex flex-col text-xs'>
-                      <span>
-                        {voucher.startDate
-                          ? format(new Date(voucher.startDate), 'dd/MM/yyyy')
-                          : 'Tùy ý'}
-                      </span>
-                      <span className='text-center w-4 rotate-90 sm:rotate-0'>→</span>
-                      <span>
-                        {voucher.endDate
-                          ? format(new Date(voucher.endDate), 'dd/MM/yyyy')
-                          : 'Vô hạn'}
-                      </span>
+                  <TableCell>
+                    <div className='flex flex-col gap-1 py-1'>
+                      <div className='flex items-center gap-1.5 text-[11px] text-slate-500 font-medium'>
+                        <Clock className='h-3.5 w-3.5' />
+                        <span>
+                          {voucher.startDate
+                            ? format(new Date(voucher.startDate), 'dd/MM/yy')
+                            : '--'}
+                        </span>
+                      </div>
+                      <div className='flex items-center gap-1.5 text-[11px] text-rose-500 font-bold'>
+                        <CalendarIcon className='h-3.5 w-3.5' />
+                        <span>
+                          {voucher.endDate ? format(new Date(voucher.endDate), 'dd/MM/yy') : '--'}
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>

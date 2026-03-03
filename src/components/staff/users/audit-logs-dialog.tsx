@@ -1,7 +1,13 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { userService } from '@/services/user'
 import { UserAuditLog } from '@/types/user'
 import { format } from 'date-fns'
@@ -57,18 +63,26 @@ export function UserAuditLogsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className='sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col p-0'>
-        <DialogHeader className='p-6 pb-2 border-b'>
-          <DialogTitle className='flex items-center gap-2 text-xl'>
-            <Activity className='w-5 h-5 text-blue-600' />
-            Nhật ký hoạt động: <span className='text-slate-900'>{userName}</span>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className='sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-white max-h-[90vh] flex flex-col'>
+        <div className='bg-slate-900 p-6 text-white relative overflow-hidden shrink-0'>
+          <div className='absolute top-0 right-0 p-4 opacity-10'>
+            <Activity className='h-32 w-32 -mr-6 -mt-6' />
+          </div>
+          <div className='relative z-10'>
+            <DialogTitle className='text-xl font-bold flex items-center gap-2'>
+              Nhật ký hoạt động: <span className='text-blue-400'>{userName}</span>
+            </DialogTitle>
+            <DialogDescription className='text-slate-400 mt-1'>
+              Theo dõi toàn bộ lịch sử thao tác của người dùng #{userId} trên hệ thống
+            </DialogDescription>
+          </div>
+        </div>
 
-        <div className='flex-1 overflow-y-auto p-6 space-y-6'>
+        <div className='flex-1 overflow-y-auto p-6 space-y-6 min-h-[300px]'>
           {isLoading ? (
-            <div className='py-20 flex justify-center items-center'>
-              <Loader2 className='w-8 h-8 animate-spin text-blue-600' />
+            <div className='py-24 flex flex-col justify-center items-center gap-3'>
+              <Loader2 className='w-10 h-10 animate-spin text-blue-600' />
+              <p className='text-sm text-slate-500 animate-pulse'>Đang tải dữ liệu...</p>
             </div>
           ) : logs.length > 0 ? (
             <div className='relative space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-100 before:via-slate-100 before:to-transparent'>
@@ -109,17 +123,25 @@ export function UserAuditLogsDialog({
               ))}
             </div>
           ) : (
-            <div className='py-20 flex flex-col justify-center items-center text-slate-400 space-y-2 italic'>
-              <Info className='w-8 h-8 opacity-20' />
+            <div className='py-20 flex flex-col justify-center items-center text-slate-400 space-y-3 italic'>
+              <div className='h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center'>
+                <Info className='w-8 h-8 opacity-20' />
+              </div>
               <p>Chưa ghi nhận hoạt động nào cho người dùng này</p>
             </div>
           )}
         </div>
 
-        <div className='p-4 bg-slate-50 border-t text-center'>
+        <div className='p-4 bg-slate-50 border-t shrink-0 flex justify-between items-center px-6'>
           <p className='text-[11px] text-slate-400 uppercase tracking-widest font-bold'>
-            End of activity log
+            END OF ACTIVITY LOG
           </p>
+          <button
+            onClick={onClose}
+            className='text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors'
+          >
+            Đóng
+          </button>
         </div>
       </DialogContent>
     </Dialog>

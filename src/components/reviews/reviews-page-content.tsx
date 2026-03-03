@@ -30,6 +30,16 @@ import { toast } from 'sonner'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -49,6 +59,25 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
   const [activeTab, setActiveTab] = useState('all')
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+
+  // Confirmation dialogs state
+  const [hideConfirm, setHideConfirm] = useState<{
+    isOpen: boolean
+    reviewId: number | null
+    isHidden: boolean
+  }>({
+    isOpen: false,
+    reviewId: null,
+    isHidden: false,
+  })
+
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    reviewId: number | null
+  }>({
+    isOpen: false,
+    reviewId: null,
+  })
 
   const fetchReviews = async () => {
     try {
@@ -85,28 +114,35 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
     fetchReviews()
   }, [activeTab, page])
 
-  const handleToggleHide = async (id: number, currentHidden: boolean) => {
+  const handleToggleHide = async () => {
+    if (!hideConfirm.reviewId) return
     try {
-      const res = currentHidden ? await reviewService.unhide(id) : await reviewService.hide(id)
+      const res = hideConfirm.isHidden
+        ? await reviewService.unhide(hideConfirm.reviewId)
+        : await reviewService.hide(hideConfirm.reviewId)
       if (res.data.success) {
-        toast.success(currentHidden ? 'Đã hiển thị đánh giá' : 'Đã ẩn đánh giá')
+        toast.success(hideConfirm.isHidden ? 'Đã hiển thị đánh giá' : 'Đã ẩn đánh giá')
         fetchReviews()
       }
     } catch (error) {
       toast.error('Thao tác thất bại')
+    } finally {
+      setHideConfirm({ ...hideConfirm, isOpen: false })
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này vĩnh viễn?')) return
+  const handleDelete = async () => {
+    if (!deleteConfirm.reviewId) return
     try {
-      const res = await reviewService.delete(id)
+      const res = await reviewService.delete(deleteConfirm.reviewId)
       if (res.data.success) {
         toast.success('Đã xóa đánh giá thành công')
         fetchReviews()
       }
     } catch (error) {
       toast.error('Không thể xóa đánh giá')
+    } finally {
+      setDeleteConfirm({ ...deleteConfirm, isOpen: false })
     }
   }
 
@@ -263,7 +299,13 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
                                 size='icon'
                                 className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
                                 title={review.hidden ? 'Bỏ ẩn' : 'Ẩn đánh giá'}
-                                onClick={() => handleToggleHide(review.id, review.hidden)}
+                                onClick={() =>
+                                  setHideConfirm({
+                                    isOpen: true,
+                                    reviewId: review.id,
+                                    isHidden: review.hidden,
+                                  })
+                                }
                               >
                                 {review.hidden ? (
                                   <Eye className='w-4 h-4' />
@@ -276,7 +318,12 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
                                 size='icon'
                                 className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50'
                                 title='Xóa vĩnh viễn'
-                                onClick={() => handleDelete(review.id)}
+                                onClick={() =>
+                                  setDeleteConfirm({
+                                    isOpen: true,
+                                    reviewId: review.id,
+                                  })
+                                }
                               >
                                 <Trash2 className='w-4 h-4' />
                               </Button>
@@ -347,6 +394,59 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
           </CardContent>
         </Card>
       </Tabs>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog
+        open={hideConfirm.isOpen}
+        onOpenChange={(isOpen) => setHideConfirm({ ...hideConfirm, isOpen })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {hideConfirm.isHidden ? 'Hiển thị đánh giá?' : 'Ẩn đánh giá này?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {hideConfirm.isHidden
+                ? 'Đánh giá này sẽ được hiển thị công khai trên trang chi tiết sản phẩm.'
+                : 'Đánh giá này sẽ bị ẩn khỏi khách hàng nhưng vẫn được lưu trong hệ thống quản trị.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleToggleHide}
+              className={
+                hideConfirm.isHidden
+                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                  : 'bg-slate-900 hover:bg-slate-800'
+              }
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={deleteConfirm.isOpen}
+        onOpenChange={(isOpen) => setDeleteConfirm({ ...deleteConfirm, isOpen })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className='text-rose-600'>Xóa vĩnh viễn đánh giá?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Đánh giá và các hình ảnh đi kèm sẽ bị xóa hoàn toàn
+              khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className='bg-rose-600 hover:bg-rose-700'>
+              Xác nhận xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
