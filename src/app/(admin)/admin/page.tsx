@@ -46,9 +46,6 @@ export default function AdminDashboard() {
 
         {/* Bộ chọn thời gian (DateRangePicker) */}
         <div className='flex items-center gap-2'>
-          <span className='text-sm font-medium text-muted-foreground whitespace-nowrap hidden sm:inline'>
-            Thời gian:
-          </span>
           <DateRangeFilter
             date={date}
             setDate={setDate}
