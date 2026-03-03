@@ -1,88 +1,122 @@
 'use client'
 
-import { User, Phone, Mail, MapPin, ShieldCheck, LogOut } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { userService } from '@/services/user'
+import { User, UserUpdateRequest, UserUpdateProfileRequest } from '@/types/user'
+import { ShipperProfileSidebar } from '@/components/shipper/shipper-profile-sidebar'
+import { ProfileForm } from '@/components/profile/profile-form'
+import { ChangePasswordForm } from '@/components/profile/change-password-form'
+import { LoadingOverlay } from '@/components/common/loading-overlay'
 
 export default function ShipperProfilePage() {
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const fetchUser = async () => {
+    try {
+      const response = await userService.getMyInfo()
+      if (response.data.success && response.data.data) {
+        setUser(response.data.data)
+      } else {
+        toast.error('Failed to load user data')
+      }
+    } catch (error) {
+      console.error('Fetch user error:', error)
+      toast.error('Could not fetch user profile')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchUser()
+  }, [])
+
+  const handleUpdateProfile = async (data: UserUpdateRequest): Promise<boolean> => {
+    if (!user) return false
+
+    setIsUpdating(true)
+    try {
+      const payload: UserUpdateProfileRequest = {
+        firstName: data.firstName || user.firstName || '',
+        lastName: data.lastName || user.lastName || '',
+        phone: data.phone,
+        address: data.address,
+        city: data.city as string,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender ? data.gender.toString() : undefined,
+      }
+
+      const response = await userService.updateMyInfo(payload)
+      if (response.data.success && response.data.data) {
+        toast.success(response.data.message || 'Cập nhật hồ sơ thành công')
+        setUser(response.data.data)
+        return true
+      } else {
+        toast.error(response.data.message || 'Cập nhật hồ sơ thất bại')
+        return false
+      }
+    } catch (error) {
+      console.error('Update user error:', error)
+      toast.error('Có lỗi xảy ra khi cập nhật hồ sơ')
+      return false
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleAvatarUpload = async (file: File) => {
+    setIsUploading(true)
+    try {
+      const response = await userService.updateMyAvatar(file)
+      if (response.data.success && response.data.data) {
+        toast.success(response.data.message || 'Cập nhật ảnh đại diện thành công')
+        setUser(response.data.data)
+      } else {
+        toast.error(response.data.message || 'Cập nhật ảnh đại diện thất bại')
+      }
+    } catch (error) {
+      console.error('Avatar upload error:', error)
+      toast.error('Có lỗi xảy ra khi tải ảnh lên')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
+
   return (
-    <div className='w-full space-y-6'>
-      <div className='flex items-center gap-4'>
-        <h2 className='text-2xl font-bold'>Hồ sơ của tôi</h2>
+    <div className='w-full space-y-8 animate-in fade-in duration-500'>
+      <div>
+        <h2 className='text-3xl font-bold tracking-tight text-slate-900'>Hồ sơ của tôi</h2>
+        <p className='text-sm text-slate-500 font-medium'>
+          Quản lý thông tin cá nhân và cài đặt tài khoản bảo mật.
+        </p>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-        <Card className='md:col-span-1 border-none shadow-sm'>
-          <CardContent className='pt-8 pb-8 flex flex-col items-center text-center'>
-            <Avatar className='w-24 h-24 mb-4 border-4 border-orange-50'>
-              <AvatarFallback className='bg-orange-100 text-orange-600 font-black text-2xl'>
-                SP
-              </AvatarFallback>
-            </Avatar>
-            <h3 className='font-bold text-xl'>Shipper Partner</h3>
-            <p className='text-sm text-muted-foreground'>Thành viên ZYNA Fashion</p>
-            <div className='mt-4 inline-flex items-center px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-100'>
-              <ShieldCheck className='w-3 h-3 mr-1' />
-              Đã xác minh
-            </div>
-          </CardContent>
-        </Card>
+      <div className='grid grid-cols-1 md:grid-cols-12 gap-8'>
+        {/* Left Sidebar */}
+        <div className='md:col-span-4 lg:col-span-3'>
+          <ShipperProfileSidebar
+            user={user}
+            activeTab='account'
+            onAvatarUpload={handleAvatarUpload}
+            isUploading={isUploading}
+          />
+        </div>
 
-        <Card className='md:col-span-2 border-none shadow-sm'>
-          <CardHeader>
-            <CardTitle className='text-lg'>Thông tin cá nhân</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-6'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
-              <div className='space-y-1'>
-                <p className='text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2'>
-                  <User className='w-3 h-3' /> Họ và tên
-                </p>
-                <p className='font-medium'>Shipper Partner</p>
-              </div>
-              <div className='space-y-1'>
-                <p className='text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2'>
-                  <Phone className='w-3 h-3' /> Số điện thoại
-                </p>
-                <p className='font-medium'>0123 456 789</p>
-              </div>
-              <div className='space-y-1'>
-                <p className='text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2'>
-                  <Mail className='w-3 h-3' /> Email
-                </p>
-                <p className='font-medium text-blue-600'>shipper@zyna.vn</p>
-              </div>
-              <div className='space-y-1'>
-                <p className='text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2'>
-                  <MapPin className='w-3 h-3' /> Khu vực hoạt động
-                </p>
-                <p className='font-medium'>Hồ Chí Minh, Việt Nam</p>
-              </div>
-            </div>
-
-            <div className='pt-6 border-t flex justify-end gap-3'>
-              <Button variant='outline'>Đổi mật khẩu</Button>
-              <Button className='bg-orange-600 hover:bg-orange-700'>Chỉnh sửa hồ sơ</Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className='md:col-span-8 lg:col-span-9 space-y-6'>
+          <ProfileForm user={user} onSubmit={handleUpdateProfile} isUpdating={isUpdating} />
+          <ChangePasswordForm />
+        </div>
       </div>
-
-      <Card className='border-none shadow-sm bg-red-50'>
-        <CardContent className='p-4 flex items-center justify-between'>
-          <div>
-            <p className='font-bold text-red-900'>Đăng xuất khỏi hệ thống</p>
-            <p className='text-xs text-red-700'>
-              Bạn sẽ cần đăng nhập lại để xem các đơn hàng mới.
-            </p>
-          </div>
-          <Button variant='destructive' size='sm'>
-            <LogOut className='w-4 h-4 mr-2' />
-            Đăng xuất
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   )
 }
