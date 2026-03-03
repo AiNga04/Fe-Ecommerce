@@ -260,7 +260,6 @@ export default function ProductDetailPage() {
 
           {/* Read-Only Gallery */}
           <Card className='border-slate-200 shadow-sm overflow-hidden'>
-            <div className='h-2 bg-gradient-to-r from-orange-400 to-red-400' />
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
               <div className='flex items-center gap-3'>
                 <div className='p-2 bg-orange-100 rounded-lg'>
