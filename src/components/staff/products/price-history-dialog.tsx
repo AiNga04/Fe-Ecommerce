@@ -15,7 +15,7 @@ import { productService } from '@/services/product'
 import { PriceHistory } from '@/types/product'
 import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
-import { Loader2, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Loader2, TrendingUp, TrendingDown, Minus, History as HistoryIcon } from 'lucide-react'
 
 interface PriceHistoryDialogProps {
   productId: number | null
@@ -70,19 +70,33 @@ export function PriceHistoryDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className='max-w-3xl'>
-        <DialogHeader>
-          <DialogTitle className='text-xl flex items-center gap-2'>
-            Lịch sử giá: <span className='text-blue-600'>{productName}</span>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className='sm:max-w-3xl max-h-[90vh] overflow-hidden p-0 gap-0 bg-white border-none shadow-2xl rounded-2xl'>
+        {/* Modern Dark Header */}
+        <div className='bg-slate-900 p-6 text-white relative overflow-hidden shrink-0'>
+          <div className='absolute top-0 right-0 p-4 opacity-10'>
+            <HistoryIcon className='h-32 w-32 -mr-8 -mt-8' />
+          </div>
+          <div className='relative z-10'>
+            <DialogTitle className='text-2xl font-bold flex items-center gap-2'>
+              Lịch sử giá
+            </DialogTitle>
+            <div className='flex items-center gap-2 mt-1'>
+              <span className='bg-blue-600 text-xs px-2 py-0.5 rounded text-white font-medium'>
+                {productName}
+              </span>
+              <span className='text-slate-300 text-sm'>
+                Theo dõi biến động và lịch sử giá sản phẩm
+              </span>
+            </div>
+          </div>
+        </div>
 
         {isLoading ? (
           <div className='h-[400px] flex items-center justify-center'>
             <Loader2 className='w-8 h-8 animate-spin text-blue-600' />
           </div>
         ) : data.length > 0 ? (
-          <div className='space-y-6'>
+          <div className='p-6 space-y-6'>
             {priceChange && (
               <div className='flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100'>
                 <div className='flex flex-col'>

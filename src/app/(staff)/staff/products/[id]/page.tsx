@@ -4,9 +4,8 @@ import React, { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { productService } from '@/services/product'
-import { UpdateProductDialog } from '../components/update-product-dialog'
+import { PriceHistoryDialog } from '@/components/staff/products/price-history-dialog'
 import { AdjustProductStockDialog } from '@/components/products/adjust-product-stock-dialog'
-import { GalleryManager } from '../components/gallery-manager'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,24 +21,23 @@ import { getImageUrl } from '@/lib/utils'
 import {
   Loader2,
   Package,
-  Calendar,
+  History,
   Tag,
   ImageIcon,
   Ruler,
   ArrowLeft,
-  Edit,
   Globe,
+  ImagePlus,
   Archive,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import Link from 'next/link'
 
 export default function ProductDetailPage() {
   const params = useParams()
   const router = useRouter()
   const id = params.id as string
-  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
+  const [isPriceHistoryOpen, setIsPriceHistoryOpen] = useState(false)
 
   const { data: productData, isLoading } = useQuery({
     queryKey: ['product', id],
@@ -72,13 +70,12 @@ export default function ProductDetailPage() {
 
   return (
     <div className='w-full mx-auto pb-10 space-y-6'>
-      {product && (
-        <UpdateProductDialog
-          product={product}
-          open={isUpdateDialogOpen}
-          onOpenChange={setIsUpdateDialogOpen}
-        />
-      )}
+      <PriceHistoryDialog
+        productId={product.id}
+        productName={product.name}
+        isOpen={isPriceHistoryOpen}
+        onClose={() => setIsPriceHistoryOpen(false)}
+      />
 
       {/* Header Actions */}
       <div className='flex items-center justify-between'>
@@ -103,10 +100,11 @@ export default function ProductDetailPage() {
         </div>
         <div className='flex gap-2'>
           <Button
-            onClick={() => setIsUpdateDialogOpen(true)}
-            className='bg-blue-600 hover:bg-blue-700 text-white shadow-sm gap-2'
+            onClick={() => setIsPriceHistoryOpen(true)}
+            variant='outline'
+            className='border-blue-200 text-blue-600 hover:bg-blue-50 shadow-sm gap-2'
           >
-            <Edit className='w-4 h-4' /> Chỉnh sửa
+            <History className='w-4 h-4' /> Lịch sử giá
           </Button>
         </div>
       </div>
@@ -116,16 +114,20 @@ export default function ProductDetailPage() {
         <div className='md:col-span-1 space-y-6'>
           <Card>
             <CardContent className='p-6'>
-              <div className='aspect-square rounded-lg border overflow-hidden bg-slate-50 relative mb-4'>
+              <div className='aspect-square rounded-lg border overflow-hidden bg-slate-50 relative mb-4 flex items-center justify-center'>
                 {product.imageUrl ? (
                   <img
                     src={getImageUrl(product.imageUrl)}
                     alt={product.name}
-                    className='w-full h-full object-cover'
+                    className='w-full h-full object-contain'
                   />
                 ) : (
-                  <div className='flex items-center justify-center h-full text-slate-300'>
-                    <ImageIcon className='w-12 h-12' />
+                  <div className='border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-12 text-slate-400 bg-slate-50/50 mt-2'>
+                    <ImageIcon className='w-12 h-12 mb-3 text-slate-300' />
+                    <p className='text-sm font-medium'>Chưa có ảnh nào trong thư viện.</p>
+                    <p className='text-xs mt-1 opacity-70'>
+                      Định dạng hỗ trợ: JPG, PNG, WEBP (Tối đa 5MB)
+                    </p>
                   </div>
                 )}
               </div>
@@ -155,7 +157,7 @@ export default function ProductDetailPage() {
                     <span className='text-muted-foreground flex items-center gap-2'>
                       <Package className='w-4 h-4' /> Tồn kho
                     </span>
-                    <span className='font-medium'>{product.stock}</span>
+                    <span className='font-medium'>{product.stock ?? 0}</span>
                   </div>
                   <div className='flex justify-between items-center py-2 border-b last:border-0'>
                     <span className='text-muted-foreground flex items-center gap-2'>
@@ -256,8 +258,61 @@ export default function ProductDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Gallery Manager */}
-          <GalleryManager productId={product.id} initialGallery={product.gallery} />
+          {/* Read-Only Gallery */}
+          <Card className='border-slate-200 shadow-sm overflow-hidden'>
+            <div className='h-2 bg-gradient-to-r from-orange-400 to-red-400' />
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
+              <div className='flex items-center gap-3'>
+                <div className='p-2 bg-orange-100 rounded-lg'>
+                  <ImagePlus className='h-5 w-5 text-orange-600' />
+                </div>
+                <div>
+                  <CardTitle className='text-md font-semibold text-slate-900'>
+                    Thư viện ảnh ({product?.gallery?.length || 0})
+                  </CardTitle>
+                  <p className='text-sm text-slate-500'>
+                    Quản lý và cập nhật hình ảnh chi tiết cho sản phẩm
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant='outline'
+                size='sm'
+                className='gap-2 text-slate-500 border-slate-200 cursor-not-allowed opacity-70'
+                disabled
+              >
+                <ImagePlus className='w-4 h-4' /> Thêm ảnh
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {product?.gallery && product.gallery.length > 0 ? (
+                <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4'>
+                  {product.gallery.map((img) => (
+                    <div
+                      key={img.id}
+                      className='relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-white'
+                    >
+                      <img
+                        src={getImageUrl(img.url)}
+                        alt='Gallery Img'
+                        className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-110'
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className='border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-12 text-slate-400 bg-slate-50 mt-2'>
+                  <div className='p-3 bg-white rounded-xl shadow-xs border border-slate-100 flex items-center justify-center mb-3'>
+                    <ImageIcon className='w-8 h-8 text-slate-300' />
+                  </div>
+                  <p className='text-sm font-medium'>Chưa có ảnh nào trong thư viện.</p>
+                  <p className='text-xs mt-1 text-slate-400 text-center max-w-[200px] leading-relaxed'>
+                    Định dạng hỗ trợ: JPG, PNG, WEBP (Tối đa 5MB)
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Size Guide */}
           {product.sizeGuide && (
@@ -271,11 +326,11 @@ export default function ProductDetailPage() {
               <CardContent>
                 <div className='flex gap-6 items-start'>
                   {product.sizeGuide.imageUrl && (
-                    <div className='w-40 h-40 shrink-0 bg-white rounded-lg border p-2'>
+                    <div className='w-40 h-40 shrink-0 bg-white rounded-lg border p-2 flex items-center justify-center'>
                       <img
                         src={getImageUrl(product.sizeGuide.imageUrl)}
                         alt={product.sizeGuide.name}
-                        className='w-full h-full object-contain'
+                        className='max-w-full max-h-full object-contain'
                       />
                     </div>
                   )}
