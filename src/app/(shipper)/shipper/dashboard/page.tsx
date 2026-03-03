@@ -48,18 +48,21 @@ export default function ShipperDashboardPage() {
             <Skeleton key={i} className='h-32 w-full' />
           ))}
         </div>
-        <Skeleton className='h-[400px] w-full' />
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <Skeleton className='h-[400px] w-full' />
+          <Skeleton className='h-[400px] w-full' />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-8 pb-10'>
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500'>
         <div>
-          <h2 className='text-2xl font-bold tracking-tight'>Thống kê của tôi</h2>
-          <p className='text-sm text-muted-foreground'>
-            Tổng quan hiệu suất giao hàng và thu nhập COD.
+          <h2 className='text-3xl font-bold tracking-tight text-slate-900'>Dashboard</h2>
+          <p className='text-sm text-slate-500 font-medium'>
+            Tổng quan hiệu suất giao hàng và thu nhập COD cá nhân.
           </p>
         </div>
         <DateRangeFilter date={dateRange} setDate={setDateRange} />
@@ -67,9 +70,9 @@ export default function ShipperDashboardPage() {
 
       {/* Hôm nay */}
       <section className='space-y-4'>
-        <h3 className='text-xs font-bold uppercase tracking-widest text-orange-600 flex items-center gap-2'>
+        <h3 className='text-xs font-bold uppercase tracking-widest text-orange-600 flex items-center gap-2 px-1'>
           <TrendingUp className='w-4 h-4' />
-          Hôm nay
+          Thống kê hôm nay
         </h3>
         <div className='grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 transition-all'>
           <StatsCard
@@ -77,72 +80,89 @@ export default function ShipperDashboardPage() {
             value={stats?.pendingPickups || 0}
             icon={Package}
             className='border-l-4 border-l-yellow-400'
-            iconClassName='text-yellow-600'
+            iconClassName='text-yellow-600 bg-yellow-50'
           />
           <StatsCard
             title='Đang giao'
             value={stats?.inProgress || 0}
             icon={Truck}
             className='border-l-4 border-l-blue-400'
-            iconClassName='text-blue-600'
+            iconClassName='text-blue-600 bg-blue-50'
           />
           <StatsCard
             title='Thành công'
             value={stats?.deliveredToday || 0}
             icon={CheckCircle2}
             className='border-l-4 border-l-green-400'
-            iconClassName='text-green-600'
+            iconClassName='text-green-600 bg-green-50'
           />
           <StatsCard
             title='Thất bại'
             value={stats?.failedToday || 0}
             icon={XCircle}
             className='border-l-4 border-l-red-400'
-            iconClassName='text-red-600'
+            iconClassName='text-red-600 bg-red-50'
           />
           <StatsCard
-            title='COD'
-            value={(stats?.codCollectedToday || 0).toLocaleString('vi-VN')}
+            title='COD Hôm nay'
+            value={(stats?.codCollectedToday || 0).toLocaleString('vi-VN') + ' đ'}
             icon={Banknote}
-            description='vùng tiền thu hộ'
+            description='Tiền thu hộ trong ngày'
             className='border-l-4 border-l-emerald-400 col-span-2 lg:col-span-1'
-            iconClassName='text-emerald-600'
+            iconClassName='text-emerald-600 bg-emerald-50'
           />
         </div>
       </section>
 
-      {/* Tổng quan & Biểu đồ */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-        <div className='lg:col-span-2'>
-          {stats?.chartData && <DashboardChart data={stats.chartData} />}
-        </div>
-
-        <div className='space-y-4'>
-          <h3 className='text-xs font-bold uppercase tracking-widest text-slate-500'>
-            Tổng từ trước đến nay
-          </h3>
-          <div className='grid grid-cols-1 gap-4'>
-            <StatsCard
-              title='Tổng thành công'
-              value={stats?.totalDelivered || 0}
-              icon={CheckCircle2}
-              iconClassName='text-green-600'
+      {/* Biểu đồ cá nhân */}
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+        {stats?.chartData && (
+          <>
+            <DashboardChart
+              title='Hiệu suất giao hàng'
+              data={stats.chartData}
+              type='bar'
+              series={[
+                { key: 'deliveredCount', name: 'Thành công', color: '#22c55e' },
+                { key: 'failedCount', name: 'Thất bại', color: '#ef4444' },
+                { key: 'returnedCount', name: 'Hoàn hàng', color: '#94a3b8' },
+              ]}
             />
-            <StatsCard
-              title='Tổng thất bại'
-              value={stats?.totalFailed || 0}
-              icon={XCircle}
-              iconClassName='text-red-600'
+            <DashboardChart
+              title='Tiền thu hộ (COD)'
+              data={stats.chartData}
+              type='area'
+              series={[{ key: 'codCollected', name: 'Số tiền thu hộ', color: '#f59e0b' }]}
+              valueFormatter={(val) => val.toLocaleString('vi-VN') + ' đ'}
             />
-            <StatsCard
-              title='Tổng hoàn hàng'
-              value={stats?.totalReturned || 0}
-              icon={RotateCcw}
-              iconClassName='text-slate-600'
-            />
-          </div>
-        </div>
+          </>
+        )}
       </div>
+
+      {/* Tổng quan dài hạn */}
+      <section className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+        <StatsCard
+          title='Tổng giao thành công'
+          value={stats?.totalDelivered || 0}
+          icon={CheckCircle2}
+          iconClassName='text-green-600 bg-green-50'
+          className='bg-slate-50/50'
+        />
+        <StatsCard
+          title='Tổng giao thất bại'
+          value={stats?.totalFailed || 0}
+          icon={XCircle}
+          iconClassName='text-red-600 bg-red-50'
+          className='bg-slate-50/50'
+        />
+        <StatsCard
+          title='Tổng đơn hoàn'
+          value={stats?.totalReturned || 0}
+          icon={RotateCcw}
+          iconClassName='text-slate-600 bg-slate-100'
+          className='bg-slate-50/50'
+        />
+      </section>
     </div>
   )
 }
