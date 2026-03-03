@@ -87,10 +87,12 @@ interface VoucherDialogProps {
   voucher?: Voucher | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  basePath: 'admin' | 'staff'
 }
 
-export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProps) {
+export function VoucherDialog({ voucher, open, onOpenChange, basePath }: VoucherDialogProps) {
   const isEditing = !!voucher
+  const isReadOnly = basePath === 'staff' // Staff can only view the form, not edit or submit it
   const queryClient = useQueryClient()
 
   const {
@@ -141,11 +143,6 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
 
   const mutation = useMutation({
     mutationFn: (data: FormValues) => {
-      // Backend expects ISO strings, usually input[datetime-local] gives something close but let's ensure
-      // Actually backend handles standard ISO.
-      // We might need to append ':00' if it's missing seconds or rely on backend parser.
-      // Let's assume input value is fine or convert to ISO.
-
       const formatIso = (val?: string) => (val ? new Date(val).toISOString() : undefined)
 
       if (isEditing && voucher) {
@@ -191,7 +188,9 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
     },
   })
 
+  // Prevent submit if readonly staff scope
   const onSubmit = (data: FormValues) => {
+    if (isReadOnly) return
     mutation.mutate(data)
   }
 
@@ -204,11 +203,17 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
           </div>
           <div className='relative z-10'>
             <DialogTitle className='text-xl font-bold flex items-center gap-2'>
-              {isEditing ? 'Cập Nhật Mã Giảm Giá' : 'Thêm Mã Giảm Giá Mới'}
+              {isEditing
+                ? isReadOnly
+                  ? 'Chi Tiết Mã Giảm Giá'
+                  : 'Cập Nhật Mã Giảm Giá'
+                : 'Thêm Mã Giảm Giá Mới'}
             </DialogTitle>
             <DialogDescription className='text-slate-300 mt-1'>
               {isEditing
-                ? `Chỉnh sửa thông tin voucher #${voucher?.code}`
+                ? isReadOnly
+                  ? `Xem chi tiết cài đặt của voucher #${voucher?.code}`
+                  : `Chỉnh sửa thông tin voucher #${voucher?.code}`
                 : 'Thiết lập các điều kiện và giá trị giảm giá cho voucher mới'}
             </DialogDescription>
           </div>
@@ -221,23 +226,29 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
               <h3 className='font-semibold border-b pb-2 text-slate-900'>Thông tin chung</h3>
               <div className='grid gap-2'>
                 <Label htmlFor='code' className='text-slate-700'>
-                  Mã Voucher <span className='text-red-500'>*</span>
+                  Mã Voucher {!isReadOnly && <span className='text-red-500'>*</span>}
                 </Label>
                 <Input
                   id='code'
                   placeholder='VD: SUMMER2024'
                   {...register('code')}
-                  disabled={isEditing}
-                  className={`font-mono ${isEditing ? 'bg-slate-100' : ''}`}
+                  disabled={isEditing || isReadOnly}
+                  className={`font-mono ${isEditing || isReadOnly ? 'bg-slate-100' : ''}`}
                 />
                 {errors.code && <span className='text-red-500 text-xs'>{errors.code.message}</span>}
               </div>
 
               <div className='grid gap-2'>
                 <Label htmlFor='name' className='text-slate-700'>
-                  Tên chương trình <span className='text-red-500'>*</span>
+                  Tên chương trình {!isReadOnly && <span className='text-red-500'>*</span>}
                 </Label>
-                <Input id='name' placeholder='VD: Giảm giá mùa hè' {...register('name')} />
+                <Input
+                  id='name'
+                  placeholder='VD: Giảm giá mùa hè'
+                  {...register('name')}
+                  disabled={isReadOnly}
+                  className={`${isReadOnly ? 'bg-slate-100' : ''}`}
+                />
                 {errors.name && <span className='text-red-500 text-xs'>{errors.name.message}</span>}
               </div>
 
@@ -249,7 +260,8 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                   id='description'
                   placeholder='Chi tiết về chương trình...'
                   {...register('description')}
-                  className='resize-none h-20'
+                  disabled={isReadOnly}
+                  className={`resize-none h-20 ${isReadOnly ? 'bg-slate-100' : ''}`}
                 />
               </div>
             </div>
@@ -262,11 +274,14 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                   Loại giảm giá
                 </Label>
                 <Select
+                  disabled={isReadOnly}
                   onValueChange={(val) => setValue('type', val as VoucherType)}
                   defaultValue={type}
                   value={watch('type')}
                 >
-                  <SelectTrigger className='w-full'>
+                  <SelectTrigger
+                    className={`w-full ${isReadOnly ? 'bg-slate-100 opacity-80' : ''}`}
+                  >
                     <SelectValue placeholder='Chọn loại giảm giá' />
                   </SelectTrigger>
                   <SelectContent>
@@ -282,7 +297,13 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                   <Label htmlFor='discountValue' className='text-slate-700'>
                     Giá trị giảm {type === VoucherType.PERCENTAGE ? '(%)' : '(VNĐ)'}
                   </Label>
-                  <Input id='discountValue' type='number' {...register('discountValue')} />
+                  <Input
+                    id='discountValue'
+                    type='number'
+                    {...register('discountValue')}
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100' : ''}`}
+                  />
                   {errors.discountValue && (
                     <span className='text-red-500 text-xs'>{errors.discountValue.message}</span>
                   )}
@@ -296,6 +317,8 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                     type='number'
                     {...register('minOrderValue')}
                     placeholder='0'
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100' : ''}`}
                   />
                 </div>
               </div>
@@ -310,10 +333,14 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                     type='number'
                     {...register('maxDiscountAmount')}
                     placeholder='Không giới hạn'
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100' : ''}`}
                   />
-                  <p className='text-xs text-muted-foreground'>
-                    Để trống nếu không giới hạn mức giảm tối đa
-                  </p>
+                  {!isReadOnly && (
+                    <p className='text-xs text-muted-foreground'>
+                      Để trống nếu không giới hạn mức giảm tối đa
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -339,6 +366,8 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                     type='number'
                     {...register('maxUsage')}
                     placeholder='Không giới hạn'
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100' : ''}`}
                   />
                 </div>
                 <div className='grid gap-2'>
@@ -350,6 +379,8 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                     type='number'
                     {...register('maxUsagePerUser')}
                     placeholder='Không giới hạn'
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100' : ''}`}
                   />
                 </div>
               </div>
@@ -363,13 +394,25 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
                   <Label htmlFor='startDate' className='text-slate-700'>
                     Bắt đầu
                   </Label>
-                  <Input id='startDate' type='datetime-local' {...register('startDate')} />
+                  <Input
+                    id='startDate'
+                    type='datetime-local'
+                    {...register('startDate')}
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100 overflow-hidden text-slate-500' : ''}`}
+                  />
                 </div>
                 <div className='grid gap-2'>
                   <Label htmlFor='endDate' className='text-slate-700'>
                     Kết thúc
                   </Label>
-                  <Input id='endDate' type='datetime-local' {...register('endDate')} />
+                  <Input
+                    id='endDate'
+                    type='datetime-local'
+                    {...register('endDate')}
+                    disabled={isReadOnly}
+                    className={`${isReadOnly ? 'bg-slate-100 overflow-hidden text-slate-500' : ''}`}
+                  />
                   {errors.endDate && (
                     <span className='text-red-500 text-xs'>{errors.endDate.message}</span>
                   )}
@@ -380,23 +423,25 @@ export function VoucherDialog({ voucher, open, onOpenChange }: VoucherDialogProp
 
           <DialogFooter className='pt-2 border-t mt-4'>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
-              Hủy
+              {isReadOnly ? 'Đóng' : 'Hủy'}
             </Button>
-            <Button
-              type='submit'
-              className='bg-slate-900 hover:bg-slate-800 text-white'
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang lưu
-                </>
-              ) : isEditing ? (
-                'Lưu thay đổi'
-              ) : (
-                'Tạo Voucher'
-              )}
-            </Button>
+            {!isReadOnly && (
+              <Button
+                type='submit'
+                className='bg-slate-900 hover:bg-slate-800 text-white'
+                disabled={mutation.isPending}
+              >
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang lưu
+                  </>
+                ) : isEditing ? (
+                  'Lưu thay đổi'
+                ) : (
+                  'Tạo Voucher'
+                )}
+              </Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>
