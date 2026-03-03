@@ -11,6 +11,10 @@ import { useQuery } from '@tanstack/react-query'
 import { authService } from '@/services/auth'
 import { getImageUrl } from '@/lib/utils'
 
+/**
+ * Header cho khu vực Admin
+ * @description Hiển thị Navbar trên cùng, chứa nút mở menu (mobile) và thông tin user đang đăng nhập
+ */
 export function AdminHeader() {
   const [open, setOpen] = useState(false)
 

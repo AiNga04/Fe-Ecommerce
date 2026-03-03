@@ -100,6 +100,13 @@ interface AdminSidebarProps {
   forceExpanded?: boolean
 }
 
+/**
+ * Sidebar điều hướng cho khu vực Admin
+ * @description Hiển thị danh sách các chức năng quản trị, hỗ trợ thu gọn/phóng to và đăng xuất
+ * @param {string} className CSS class bổ sung để tùy chỉnh giao diện
+ * @param {function} onNavigate Hàm callback chạy khi click vào link điều hướng (dùng cho điện thoại)
+ * @param {boolean} forceExpanded Ép buộc Sidebar luôn mở rộng (Ví dụ khi hiển thị trong Drawer/Sheet)
+ */
 export function AdminSidebar({ className, onNavigate, forceExpanded = false }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -135,7 +142,7 @@ export function AdminSidebar({ className, onNavigate, forceExpanded = false }: A
       >
         {!isCollapsed && (
           <h1 className='text-xl font-bold tracking-tight text-white whitespace-nowrap'>
-            ZYNA ADMIN
+            ZYNA <span className='text-purple-500'>ADMIN</span>
           </h1>
         )}
         <Button

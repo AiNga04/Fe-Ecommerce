@@ -19,8 +19,10 @@ export interface OrderStatResponse {
 export interface TopProductResponse {
   productId: number
   productName: string
+  name?: string
   imageUrl: string
   totalSold: number
+  soldQuantity?: number
   totalRevenue: number
 }
 
