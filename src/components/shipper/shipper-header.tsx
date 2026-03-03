@@ -47,9 +47,7 @@ export function ShipperHeader() {
         <div className='font-medium text-sm text-muted-foreground hidden md:block italic'>
           Khu vực giao hàng
         </div>
-        <div className='font-medium text-sm text-orange-600 md:hidden font-bold italic'>
-          ZYNA SHIPPER
-        </div>
+        <div className='text-sm text-orange-600 md:hidden font-bold italic'>ZYNA SHIPPER</div>
       </div>
 
       <div className='flex items-center gap-4'>
@@ -68,7 +66,7 @@ export function ShipperHeader() {
               <p className='text-sm font-bold text-slate-700'>
                 {user.lastName} {user.firstName}
               </p>
-              <p className='text-xs text-slate-500 font-medium'>{user.email}</p>
+              <span className='text-xs text-slate-400 font-bold'>{user?.email}</span>
             </div>
             <Avatar className='border-2 border-slate-100 h-9 w-9'>
               <AvatarImage src={getImageUrl(user.avatarUrl)} alt={user.firstName} />

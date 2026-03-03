@@ -9,35 +9,35 @@ interface ShipmentStatusBadgeProps {
 const statusConfig: Record<ShipmentStatus, { label: string; className: string }> = {
   [ShipmentStatus.PENDING_ASSIGN]: {
     label: 'Chờ gán',
-    className: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    className: 'bg-amber-50 text-amber-600 border-amber-100',
   },
   [ShipmentStatus.ASSIGNED]: {
     label: 'Đã gán',
-    className: 'bg-blue-100 text-blue-700 border-blue-200',
+    className: 'bg-blue-50 text-blue-600 border-blue-100',
   },
   [ShipmentStatus.PICKED_UP]: {
     label: 'Đã lấy hàng',
-    className: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    className: 'bg-indigo-50 text-indigo-600 border-indigo-100',
   },
   [ShipmentStatus.IN_DELIVERY]: {
     label: 'Đang giao',
-    className: 'bg-orange-100 text-orange-700 border-orange-200',
+    className: 'bg-orange-50 text-orange-600 border-orange-100',
   },
   [ShipmentStatus.DELIVERED]: {
     label: 'Thành công',
-    className: 'bg-green-100 text-green-700 border-green-200',
+    className: 'bg-emerald-50 text-emerald-600 border-emerald-100',
   },
   [ShipmentStatus.FAILED]: {
-    label: 'Thất bại',
-    className: 'bg-red-100 text-red-700 border-red-200',
+    label: 'Giao thất bại',
+    className: 'bg-rose-50 text-rose-600 border-rose-100',
   },
   [ShipmentStatus.RETURN_APPROVED]: {
     label: 'Duyệt trả hàng',
-    className: 'bg-purple-100 text-purple-700 border-purple-200',
+    className: 'bg-purple-50 text-purple-600 border-purple-100',
   },
   [ShipmentStatus.RETURNED]: {
     label: 'Đã hoàn trả',
-    className: 'bg-gray-100 text-gray-700 border-gray-200',
+    className: 'bg-slate-50 text-slate-600 border-slate-100',
   },
 }
 
