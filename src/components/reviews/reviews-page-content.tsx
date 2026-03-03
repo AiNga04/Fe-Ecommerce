@@ -24,11 +24,16 @@ import {
   ShieldAlert,
   Package,
   ShoppingBag,
+  ArrowLeft,
+  X,
+  Search,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +52,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { getImageUrl } from '@/lib/utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { getImageUrl, cn } from '@/lib/utils'
 
 interface ReviewsPageContentProps {
   basePath: 'admin' | 'staff'
@@ -57,8 +69,11 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
   const [reviews, setReviews] = useState<ReviewResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
 
   // Confirmation dialogs state
   const [hideConfirm, setHideConfirm] = useState<{
@@ -85,13 +100,13 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
       let res
       switch (activeTab) {
         case 'reported':
-          res = await reviewService.getReported(page, 10)
+          res = await reviewService.getReported(page, pageSize)
           break
         case 'hidden':
-          res = await reviewService.getHidden(page, 10)
+          res = await reviewService.getHidden(page, pageSize)
           break
         default:
-          res = await reviewService.getAll(page, 10)
+          res = await reviewService.getAll(page, pageSize)
       }
 
       if (res.data.success && res.data.data) {
@@ -99,8 +114,9 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
         const reviewsArray = Array.isArray(payloadData) ? payloadData : payloadData.content || []
         setReviews(reviewsArray)
 
-        const pagination = (res.data as any).pagination || payloadData
+        const pagination = res.data.pagination || (payloadData as any)
         setTotalPages(pagination?.totalPages || 0)
+        setTotalElements(pagination?.totalElements || 0)
       }
     } catch (error) {
       console.error('Fetch reviews error:', error)
@@ -112,7 +128,7 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
 
   useEffect(() => {
     fetchReviews()
-  }, [activeTab, page])
+  }, [activeTab, page, pageSize])
 
   const handleToggleHide = async () => {
     if (!hideConfirm.reviewId) return
@@ -161,239 +177,298 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
     <div className='space-y-6'>
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Quản lý Đánh giá</h1>
-          <p className='text-slate-500 text-sm'>
-            Theo dõi phản hồi từ khách hàng và kiểm duyệt nội dung
+          <h1 className='text-3xl font-bold tracking-tight'>
+            {activeTab === 'hidden' ? 'Đánh giá đang ẩn' : 'Quản lý đánh giá'}
+          </h1>
+          <p className='text-slate-500 text-sm mt-1'>
+            {activeTab === 'hidden'
+              ? 'Danh sách các phản hồi đã được tạm ẩn khỏi hệ thống'
+              : 'Theo dõi phản hồi từ khách hàng và kiểm duyệt nội dung'}
           </p>
+        </div>
+
+        <div className='flex items-center gap-2 flex-wrap'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => {
+              setActiveTab(activeTab === 'hidden' ? 'all' : 'hidden')
+              setPage(0)
+            }}
+            className={cn(
+              'gap-2 transition-all duration-200 border-dashed h-9',
+              activeTab === 'hidden'
+                ? 'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 hover:text-orange-700 hover:border-orange-300'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50',
+            )}
+          >
+            {activeTab === 'hidden' ? (
+              <>
+                <ArrowLeft className='h-4 w-4' /> Quay lại danh sách
+              </>
+            ) : (
+              <>
+                <EyeOff className='h-4 w-4' /> Đang ẩn
+              </>
+            )}
+          </Button>
+
+          {activeTab !== 'hidden' && (
+            <>
+              <div className='h-6 w-px bg-slate-200 hidden sm:block mx-1' />
+
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => {
+                  setActiveTab(activeTab === 'reported' ? 'all' : 'reported')
+                  setPage(0)
+                }}
+                className={cn(
+                  'gap-2 h-9 transition-colors',
+                  activeTab === 'reported'
+                    ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+                    : 'text-slate-500 hover:text-slate-900',
+                )}
+              >
+                <ShieldAlert className='h-4 w-4' />
+                Cần kiểm duyệt
+              </Button>
+
+              <Button
+                size='sm'
+                onClick={() => {
+                  setActiveTab('all')
+                  setPage(0)
+                }}
+                className={cn(
+                  'gap-2 h-9 shadow-sm transition-all',
+                  activeTab === 'all'
+                    ? 'bg-slate-900 text-white hover:bg-slate-800'
+                    : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50',
+                )}
+              >
+                <MessageSquare className='h-4 w-4' />
+                Tất cả
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-        <div className='flex items-center justify-between mb-4'>
-          <TabsList className='bg-slate-100 p-1'>
-            <TabsTrigger
-              value='all'
-              className='data-[state=active]:bg-white data-[state=active]:shadow-sm'
+      <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm'>
+        <div className='relative flex-1 group'>
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors' />
+          <Input
+            placeholder='Tìm kiếm đánh giá...'
+            className='pl-10 h-10 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-lg'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600'
             >
-              Tất cả
-            </TabsTrigger>
-            <TabsTrigger
-              value='reported'
-              className='data-[state=active]:bg-white data-[state=active]:shadow-sm'
-            >
-              Cần kiểm duyệt (
-              {reviews.length > 0 && activeTab === 'reported' ? reviews.length : '?'})
-            </TabsTrigger>
-            <TabsTrigger
-              value='hidden'
-              className='data-[state=active]:bg-white data-[state=active]:shadow-sm'
-            >
-              Đang ẩn
-            </TabsTrigger>
-          </TabsList>
+              <X className='w-4 h-4' />
+            </button>
+          )}
         </div>
+      </div>
 
-        <Card className='shadow-sm border-slate-200'>
-          <CardContent className='p-0'>
-            {isLoading && !reviews.length ? (
-              <div className='py-20 flex justify-center'>
-                <LoadingOverlay visible={true} />
-              </div>
-            ) : (
-              <>
-                <div className='rounded-md overflow-hidden flex overflow-x-auto'>
-                  <Table>
-                    <TableHeader className='bg-slate-50/50'>
-                      <TableRow>
-                        <TableHead className='font-bold min-w-[150px]'>
-                          Sản phẩm & Đơn hàng
-                        </TableHead>
-                        <TableHead className='font-bold min-w-[200px]'>Nội dung đánh giá</TableHead>
-                        <TableHead className='font-bold min-w-[150px]'>Khách hàng</TableHead>
-                        <TableHead className='font-bold min-w-[150px]'>Trạng thái</TableHead>
-                        <TableHead className='text-right font-bold min-w-[100px]'>
-                          Hành động
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {reviews.map((review) => (
-                        <TableRow
-                          key={review.id}
-                          className='hover:bg-slate-50/30 transition-colors'
-                        >
-                          <TableCell>
-                            <div className='flex flex-col gap-1.5'>
-                              <div className='flex items-center gap-1.5 text-xs font-bold text-blue-600'>
-                                <Package className='w-3 h-3' /> SP ID: #{review.productId}
-                              </div>
-                              <div className='flex items-center gap-1.5 text-xs text-slate-500 italic'>
-                                <ShoppingBag className='w-3 h-3' /> Đơn hàng: #{review.orderId}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className='space-y-2 py-2'>
-                              {renderRating(review.rating)}
-                              <p className='text-sm text-slate-700 line-clamp-3 leading-relaxed'>
-                                {review.content || (
-                                  <span className='text-slate-400 italic'>Không có nội dung</span>
-                                )}
-                              </p>
-                              {review.images && review.images.length > 0 && (
-                                <div className='flex gap-1'>
-                                  {review.images.map((img, i) => (
-                                    <div
-                                      key={i}
-                                      className='w-8 h-8 rounded border border-slate-100 overflow-hidden'
-                                    >
-                                      <img
-                                        src={getImageUrl(img)}
-                                        alt=''
-                                        className='w-full h-full object-cover'
-                                      />
-                                    </div>
-                                  ))}
+      <Card className='shadow-sm border-slate-200'>
+        <CardContent className='p-0'>
+          {isLoading && !reviews.length ? (
+            <div className='py-20 flex justify-center'>
+              <LoadingOverlay visible={true} />
+            </div>
+          ) : (
+            <div className='rounded-md overflow-hidden flex overflow-x-auto'>
+              <Table>
+                <TableHeader className='bg-slate-50/50'>
+                  <TableRow>
+                    <TableHead className='font-bold min-w-[150px]'>Sản phẩm & Đơn hàng</TableHead>
+                    <TableHead className='font-bold min-w-[200px]'>Nội dung đánh giá</TableHead>
+                    <TableHead className='font-bold min-w-[150px]'>Khách hàng</TableHead>
+                    <TableHead className='font-bold min-w-[150px]'>Trạng thái</TableHead>
+                    <TableHead className='text-right font-bold min-w-[100px]'>Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reviews.map((review) => (
+                    <TableRow key={review.id} className='hover:bg-slate-50/30 transition-colors'>
+                      <TableCell>
+                        <div className='flex flex-col gap-1.5'>
+                          <div className='flex items-center gap-1.5 text-xs font-bold text-blue-600'>
+                            <Package className='w-3 h-3' /> SP ID: #{review.productId}
+                          </div>
+                          <div className='flex items-center gap-1.5 text-xs text-slate-500 italic'>
+                            <ShoppingBag className='w-3 h-3' /> Đơn hàng: #{review.orderId}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className='space-y-2 py-2'>
+                          {renderRating(review.rating)}
+                          <p className='text-sm text-slate-700 line-clamp-3 leading-relaxed'>
+                            {review.content || (
+                              <span className='text-slate-400 italic'>Không có nội dung</span>
+                            )}
+                          </p>
+                          {review.images && review.images.length > 0 && (
+                            <div className='flex gap-1'>
+                              {review.images.map((img, i) => (
+                                <div
+                                  key={i}
+                                  className='w-8 h-8 rounded border border-slate-100 overflow-hidden'
+                                >
+                                  <img
+                                    src={getImageUrl(img)}
+                                    alt=''
+                                    className='w-full h-full object-cover'
+                                  />
                                 </div>
-                              )}
+                              ))}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className='flex flex-col'>
-                              <div className='text-sm font-bold text-slate-900'>
-                                {review.userName}
-                              </div>
-                              <div className='text-[10px] text-slate-400 font-medium'>
-                                {format(new Date(review.createdAt), 'dd/MM/yyyy HH:mm')}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className='flex flex-col gap-1.5'>
-                              {review.hidden ? (
-                                <Badge
-                                  variant='outline'
-                                  className='bg-slate-100 text-slate-500 border-none w-fit'
-                                >
-                                  Đã ẩn
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant='outline'
-                                  className='bg-emerald-50 text-emerald-600 border-none w-fit'
-                                >
-                                  Hiển thị
-                                </Badge>
-                              )}
-                              {review.reportCount > 0 && (
-                                <Badge className='bg-rose-100 text-rose-600 hover:bg-rose-100 border-none w-fit flex items-center gap-1'>
-                                  <ShieldAlert className='w-3 h-3' /> {review.reportCount} báo cáo
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className='text-right'>
-                            <div className='flex items-center justify-end gap-1'>
-                              <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
-                                title={review.hidden ? 'Bỏ ẩn' : 'Ẩn đánh giá'}
-                                onClick={() =>
-                                  setHideConfirm({
-                                    isOpen: true,
-                                    reviewId: review.id,
-                                    isHidden: review.hidden,
-                                  })
-                                }
-                              >
-                                {review.hidden ? (
-                                  <Eye className='w-4 h-4' />
-                                ) : (
-                                  <EyeOff className='w-4 h-4' />
-                                )}
-                              </Button>
-                              <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50'
-                                title='Xóa vĩnh viễn'
-                                onClick={() =>
-                                  setDeleteConfirm({
-                                    isOpen: true,
-                                    reviewId: review.id,
-                                  })
-                                }
-                              >
-                                <Trash2 className='w-4 h-4' />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {reviews.length === 0 && (
-                    <div className='py-20 text-center flex flex-col items-center justify-center text-slate-400 w-full col-span-5'>
-                      <MessageSquare className='w-12 h-12 mb-3 opacity-10' />
-                      <p className='italic'>Không có đánh giá nào phù hợp với bộ lọc này</p>
-                    </div>
-                  )}
-                </div>
-
-                {totalPages > 1 && (
-                  <div className='flex justify-center p-6 border-t'>
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            href='#'
-                            onClick={(e) => {
-                              e.preventDefault()
-                              if (page > 0) setPage(page - 1)
-                            }}
-                            // @ts-ignore
-                            disabled={page === 0}
-                            className={page === 0 ? 'pointer-events-none opacity-50' : ''}
-                          />
-                        </PaginationItem>
-                        {[...Array(totalPages)].map((_, i) => (
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              href='#'
-                              onClick={(e) => {
-                                e.preventDefault()
-                                setPage(i)
-                              }}
-                              isActive={page === i}
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className='flex flex-col'>
+                          <div className='text-sm font-bold text-slate-900'>{review.userName}</div>
+                          <div className='text-[10px] text-slate-400 font-medium'>
+                            {format(new Date(review.createdAt), 'dd/MM/yyyy HH:mm')}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className='flex flex-col gap-1.5'>
+                          {review.hidden ? (
+                            <Badge
+                              variant='outline'
+                              className='bg-slate-100 text-slate-500 border-none w-fit'
                             >
-                              {i + 1}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                          <PaginationNext
-                            href='#'
-                            onClick={(e) => {
-                              e.preventDefault()
-                              if (page < totalPages - 1) setPage(page + 1)
-                            }}
-                            // @ts-ignore
-                            disabled={page === totalPages - 1}
-                            className={
-                              page === totalPages - 1 ? 'pointer-events-none opacity-50' : ''
+                              Đã ẩn
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant='outline'
+                              className='bg-emerald-50 text-emerald-600 border-none w-fit'
+                            >
+                              Hiển thị
+                            </Badge>
+                          )}
+                          {review.reportCount > 0 && (
+                            <Badge className='bg-rose-100 text-rose-600 hover:bg-rose-100 border-none w-fit flex items-center gap-1'>
+                              <ShieldAlert className='w-3 h-3' /> {review.reportCount} báo cáo
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className='text-right'>
+                        <div className='flex items-center justify-end gap-1'>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
+                            title={review.hidden ? 'Bỏ ẩn' : 'Ẩn đánh giá'}
+                            onClick={() =>
+                              setHideConfirm({
+                                isOpen: true,
+                                reviewId: review.id,
+                                isHidden: review.hidden,
+                              })
                             }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </Tabs>
+                          >
+                            {review.hidden ? (
+                              <Eye className='w-4 h-4' />
+                            ) : (
+                              <EyeOff className='w-4 h-4' />
+                            )}
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50'
+                            title='Xóa vĩnh viễn'
+                            onClick={() =>
+                              setDeleteConfirm({
+                                isOpen: true,
+                                reviewId: review.id,
+                              })
+                            }
+                          >
+                            <Trash2 className='w-4 h-4' />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {reviews.length === 0 && (
+                <div className='py-20 text-center flex flex-col items-center justify-center text-slate-400 w-full col-span-5'>
+                  <MessageSquare className='w-12 h-12 mb-3 opacity-10' />
+                  <p className='italic'>Không có đánh giá nào phù hợp với bộ lọc này</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {totalPages > 0 && (
+        <div className='flex items-center justify-between px-2 pt-2 pb-6'>
+          <div className='flex items-center gap-2 text-sm text-slate-500 font-medium'>
+            <span>Hiển thị</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(value) => {
+                setPageSize(parseInt(value))
+                setPage(0)
+              }}
+            >
+              <SelectTrigger className='w-[70px] h-8 bg-white border-slate-200 font-bold text-xs shadow-none'>
+                <SelectValue placeholder='10' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='5'>5</SelectItem>
+                <SelectItem value='10'>10</SelectItem>
+                <SelectItem value='20'>20</SelectItem>
+                <SelectItem value='50'>50</SelectItem>
+              </SelectContent>
+            </Select>
+            <span>đánh giá mỗi trang</span>
+          </div>
+
+          <div className='flex items-center gap-6'>
+            <div className='text-sm text-slate-500 font-medium'>
+              Trang <span className='text-slate-900 font-bold'>{page + 1}</span> / {totalPages}
+            </div>
+
+            <div className='flex items-center gap-1'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-8 px-3 gap-1 text-slate-500 hover:text-blue-600 hover:bg-white transition-all disabled:opacity-30'
+                onClick={() => setPage(page - 1)}
+                disabled={page === 0}
+              >
+                <ChevronLeft className='w-4 h-4 text-slate-400' /> Trước
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-8 px-3 gap-1 content-center text-slate-500 hover:text-blue-600 hover:bg-white transition-all disabled:opacity-30'
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages - 1}
+              >
+                Sau <ChevronRight className='w-4 h-4 text-slate-400' />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Dialogs */}
       <AlertDialog
