@@ -52,11 +52,14 @@ export function AboutCTA() {
             <Button
               variant='outline'
               size='lg'
-              className='border border-white/20 bg-white/5 text-white hover:bg-white/70 hover:border-white/40 min-w-[220px] h-16 text-lg rounded-full backdrop-blur-sm'
+              className='border border-white/70 bg-transparent min-w-[220px] h-16 text-lg font-semibold rounded-full backdrop-blur-sm transition-all hover:bg-white hover:text-slate-900'
               asChild
             >
-              <Link href='/products' className='group flex items-center justify-center gap-2'>
-                Khám phá sản phẩm
+              <Link
+                href='/contact'
+                className='group flex items-center justify-center gap-2 text-white'
+              >
+                Tham gia cộng đồng Zyna
                 <ArrowRight className='w-5 h-5 transition-transform group-hover:translate-x-1' />
               </Link>
             </Button>

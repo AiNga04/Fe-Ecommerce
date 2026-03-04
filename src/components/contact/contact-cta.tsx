@@ -50,12 +50,12 @@ export function ContactCTA() {
             <Button
               variant='outline'
               size='lg'
-              className='border-white text-white hover:bg-white hover:text-slate-950 min-w-[220px] h-16 text-lg font-black rounded-full backdrop-blur-sm group transition-all'
+              className='border border-white/70 bg-transparent text-white hover:bg-white hover:text-slate-900 min-w-[220px] h-16 text-lg font-semibold rounded-full backdrop-blur-sm transition-all'
               asChild
             >
-              <Link href='/contact'>
+              <Link href='/contact' className='group flex items-center justify-center gap-2'>
                 Tham gia cộng đồng Zyna
-                <ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform' />
+                <ArrowRight className='w-5 h-5 transition-transform group-hover:translate-x-1' />
               </Link>
             </Button>
           </motion.div>
