@@ -116,11 +116,11 @@ export function TicketDetailView({ ticket, onBack }: TicketDetailViewProps) {
             <CardContent className='pt-6 space-y-5'>
               <div className='flex items-start gap-4'>
                 <div className='w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0'>
-                  <span className='font-bold'>{ticket.customerName.charAt(0)}</span>
+                  <span className='font-bold'>{ticket.name.charAt(0).toUpperCase()}</span>
                 </div>
                 <div>
-                  <p className='font-bold text-slate-900 leading-tight'>{ticket.customerName}</p>
-                  <p className='text-xs text-slate-400 font-medium italic'>Khách vãng lai</p>
+                  <p className='font-bold text-slate-900 leading-tight'>{ticket.name}</p>
+                  <p className='text-xs text-slate-400 font-medium italic'>Khách hàng</p>
                 </div>
               </div>
 
@@ -129,11 +129,11 @@ export function TicketDetailView({ ticket, onBack }: TicketDetailViewProps) {
               <div className='space-y-4'>
                 <div className='flex items-center gap-3 text-sm'>
                   <Mail className='h-4 w-4 text-slate-400' />
-                  <span className='text-slate-600 font-medium'>{ticket.customerEmail}</span>
+                  <span className='text-slate-600 font-medium'>{ticket.email}</span>
                 </div>
                 <div className='flex items-center gap-3 text-sm'>
                   <Phone className='h-4 w-4 text-slate-400' />
-                  <span className='text-slate-600 font-medium'>{ticket.customerPhone}</span>
+                  <span className='text-slate-600 font-medium'>{ticket.phone}</span>
                 </div>
                 <div className='flex items-center gap-3 text-sm'>
                   <Clock className='h-4 w-4 text-slate-400' />
@@ -164,10 +164,10 @@ export function TicketDetailView({ ticket, onBack }: TicketDetailViewProps) {
                   {ticket.processedByName || 'Đang chờ tiếp nhận'}
                 </div>
               </div>
-              {ticket.processedAt && (
+              {ticket.updatedAt && (
                 <div className='text-xs text-slate-400 font-medium italic'>
                   Lần cập nhật cuối:{' '}
-                  {format(new Date(ticket.processedAt), 'HH:mm dd/MM/yyyy', { locale: vi })}
+                  {format(new Date(ticket.updatedAt), 'HH:mm dd/MM/yyyy', { locale: vi })}
                 </div>
               )}
             </CardContent>

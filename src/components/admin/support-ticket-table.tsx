@@ -124,10 +124,18 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='ALL'>Tất cả chủ đề</SelectItem>
-              <SelectItem value='TUVAN font-medium text-blue-600'>Tư vấn</SelectItem>
-              <SelectItem value='DONHANG font-medium text-emerald-600'>Đơn hàng</SelectItem>
-              <SelectItem value='DOITRA font-medium text-orange-600'>Đổi trả</SelectItem>
-              <SelectItem value='KHAC font-medium text-slate-600'>Khác</SelectItem>
+              <SelectItem value='TUVAN'>
+                <span className='font-medium text-blue-600'>Tư vấn</span>
+              </SelectItem>
+              <SelectItem value='DONHANG'>
+                <span className='font-medium text-emerald-600'>Đơn hàng</span>
+              </SelectItem>
+              <SelectItem value='DOITRA'>
+                <span className='font-medium text-orange-600'>Đổi trả</span>
+              </SelectItem>
+              <SelectItem value='KHAC'>
+                <span className='font-medium text-slate-600'>Khác</span>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -179,15 +187,9 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
                 <TableRow key={ticket.id} className='hover:bg-slate-50/50 transition-colors group'>
                   <TableCell>
                     <div className='flex flex-col'>
-                      <span className='font-bold text-slate-900'>
-                        {ticket.customerName || ticket.name}
-                      </span>
-                      <span className='text-xs text-slate-500'>
-                        {ticket.customerEmail || ticket.email}
-                      </span>
-                      <span className='text-xs text-slate-400 font-medium'>
-                        {ticket.customerPhone || ticket.phone}
-                      </span>
+                      <span className='font-bold text-slate-900'>{ticket.name}</span>
+                      <span className='text-xs text-slate-500'>{ticket.email}</span>
+                      <span className='text-xs text-slate-400 font-medium'>{ticket.phone}</span>
                     </div>
                   </TableCell>
                   <TableCell>

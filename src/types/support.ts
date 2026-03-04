@@ -1,11 +1,12 @@
-export type SupportSubject = 'TUVAN' | 'KIEU_NAI' | 'DOITRA' | 'KHAC'
+export type SupportSubject = 'TUVAN' | 'DONHANG' | 'DOITRA' | 'HOPTAC' | 'KHAC'
 
 export type SupportStatus = 'PENDING' | 'RESOLVED'
 
 export const SUPPORT_SUBJECT_LABEL: Record<SupportSubject, string> = {
   TUVAN: 'Tư vấn sản phẩm',
-  KIEU_NAI: 'Khiếu nại dịch vụ',
+  DONHANG: 'Hỗ trợ đơn hàng',
   DOITRA: 'Đổi trả hàng',
+  HOPTAC: 'Hợp tác kinh doanh',
   KHAC: 'Vấn đề khác',
 }
 
@@ -16,24 +17,25 @@ export const SUPPORT_STATUS_LABEL: Record<SupportStatus, string> = {
 
 export interface SupportTicketResponse {
   id: number
-  customerName: string
-  customerPhone: string
-  customerEmail: string
+  name: string
+  phone: string
+  email: string
   subject: SupportSubject
   message: string
   status: SupportStatus
-  createdAt: string
   processedById: number | null
   processedByName: string | null
-  replyMessage: string | null
   internalNote: string | null
-  processedAt: string | null
+  replyMessage: string | null
+  resolvedAt: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SupportTicketRequest {
-  customerName: string
-  customerPhone: string
-  customerEmail: string
+  name: string
+  phone: string
+  email: string
   subject: SupportSubject
   message: string
 }

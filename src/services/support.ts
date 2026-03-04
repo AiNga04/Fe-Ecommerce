@@ -4,14 +4,16 @@ import {
   SupportTicketRequest,
   SupportTicketResponse,
   SupportTicketReplyRequest,
+  SupportStatus,
 } from '@/types/support'
 
-const SUPPORT_PATH = '/support/tickets'
+const PUBLIC_SUPPORT_PATH = '/support/tickets'
+const ADMIN_SUPPORT_PATH = '/admin/support/tickets'
 
 export const supportService = {
   // Public
   submitTicket: (payload: SupportTicketRequest) =>
-    http.post<IBackendRes<void>>(SUPPORT_PATH, payload),
+    http.post<IBackendRes<void>>(PUBLIC_SUPPORT_PATH, payload),
 
   // Management (Admin/Staff)
   getAllTickets: (params?: {
@@ -21,16 +23,21 @@ export const supportService = {
     processedById?: number
     page?: number
     size?: number
+    sortBy?: string
+    direction?: string
   }) =>
-    http.get<IBackendRes<SupportTicketResponse[]>>(`${SUPPORT_PATH}`, {
+    http.get<IBackendRes<SupportTicketResponse[]>>(ADMIN_SUPPORT_PATH, {
       params,
     }),
 
   getTicketById: (id: number) =>
-    http.get<IBackendRes<SupportTicketResponse>>(`${SUPPORT_PATH}/${id}`),
+    http.get<IBackendRes<SupportTicketResponse>>(`${ADMIN_SUPPORT_PATH}/${id}`),
+
+  updateTicketStatus: (id: number, status: SupportStatus) =>
+    http.put<IBackendRes<void>>(`${ADMIN_SUPPORT_PATH}/${id}/status`, null, {
+      params: { status },
+    }),
 
   replyTicket: (id: number, payload: SupportTicketReplyRequest) =>
-    http.put<IBackendRes<void>>(`${SUPPORT_PATH}/${id}/reply`, payload),
-
-  deleteTicket: (id: number) => http.delete<IBackendRes<void>>(`${SUPPORT_PATH}/${id}`),
+    http.put<IBackendRes<void>>(`${ADMIN_SUPPORT_PATH}/${id}/reply`, payload),
 }
