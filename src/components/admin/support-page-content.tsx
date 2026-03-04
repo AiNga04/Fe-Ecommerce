@@ -25,11 +25,7 @@ export function SupportPageContent({ isAdmin = false }: SupportPageContentProps)
   })
 
   if (selectedTicketId && ticket) {
-    return (
-      <div className='p-6 space-y-6'>
-        <TicketDetailView ticket={ticket} onBack={() => setSelectedTicketId(null)} />
-      </div>
-    )
+    return <TicketDetailView ticket={ticket} onBack={() => setSelectedTicketId(null)} />
   }
 
   return (

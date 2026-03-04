@@ -70,36 +70,42 @@ export function TicketDetailView({ ticket, onBack }: TicketDetailViewProps) {
 
   return (
     <div className='w-full space-y-6'>
-      {/* Header */}
-      <div className='flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm'>
+      {/* Header - matching product detail page style */}
+      <div className='flex items-center justify-between'>
         <div className='flex items-center gap-4'>
           <Button
             variant='outline'
             size='icon'
-            className='rounded-full h-10 w-10 border-slate-200'
             onClick={onBack}
+            className='rounded-full w-10 h-10 border-slate-200 hover:bg-slate-100 hover:text-slate-900 shadow-sm'
           >
-            <ChevronLeft className='h-5 w-5' />
+            <ChevronLeft className='w-5 h-5' />
           </Button>
           <div>
-            <h1 className='text-xl font-bold text-slate-900'>Chi tiết yêu cầu hỗ trợ</h1>
-            <p className='text-sm text-slate-400 font-medium'>
+            <h1 className='text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-3'>
+              Chi tiết yêu cầu hỗ trợ
+              <Badge
+                variant='outline'
+                className={`${
+                  ticket.status === 'PENDING'
+                    ? 'bg-amber-50 text-amber-600 border-amber-200'
+                    : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                } text-sm font-bold`}
+              >
+                {SUPPORT_STATUS_LABEL[ticket.status]}
+              </Badge>
+            </h1>
+            <p className='text-sm text-muted-foreground'>
               Mã yêu cầu: #{ticket.id.toString().padStart(5, '0')}
             </p>
           </div>
         </div>
-        <div className='flex items-center gap-3'>
-          <Badge
-            variant='outline'
-            className={`${
-              ticket.status === 'PENDING'
-                ? 'bg-amber-50 text-amber-600 border-amber-200'
-                : 'bg-emerald-50 text-emerald-600 border-emerald-200'
-            } px-4 py-1.5 rounded-full text-sm font-bold`}
-          >
-            {SUPPORT_STATUS_LABEL[ticket.status]}
-          </Badge>
-        </div>
+        <Badge
+          variant='outline'
+          className='bg-blue-50 text-blue-600 border-blue-200 px-4 py-1.5 text-sm font-bold'
+        >
+          {SUPPORT_SUBJECT_LABEL[ticket.subject]}
+        </Badge>
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
