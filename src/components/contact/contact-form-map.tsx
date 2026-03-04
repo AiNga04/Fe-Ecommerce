@@ -23,9 +23,12 @@ export function ContactFormMap() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const form = e.currentTarget
+    if (isSubmitting) return
+
     setIsSubmitting(true)
 
-    const formData = new FormData(e.currentTarget)
+    const formData = new FormData(form)
     const payload = {
       name: formData.get('name') as string,
       phone: formData.get('phone') as string,
@@ -37,13 +40,15 @@ export function ContactFormMap() {
     try {
       const res = await supportService.submitTicket(payload)
       const data = res.data
+
       if (data.success) {
         toast.success('Gửi tin nhắn thành công! Chúng tôi sẽ liên hệ lại với bạn sớm nhất.')
-        e.currentTarget.reset()
+        form.reset()
       } else {
         toast.error(data.message || 'Gửi tin nhắn thất bại. Vui lòng thử lại.')
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Submit ticket error:', error)
       toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.')
     } finally {
       setIsSubmitting(false)
@@ -120,7 +125,7 @@ export function ContactFormMap() {
                 <Select name='subject' required>
                   <SelectTrigger
                     id='subject'
-                    className='h-12 bg-slate-50 border-transparent rounded-xl focus:border-slate-300 focus:bg-white transition-all px-4'
+                    className='w-full h-12 bg-slate-50 border-transparent rounded-xl focus:border-slate-300 focus:bg-white transition-all px-4'
                   >
                     <SelectValue placeholder='Chọn nội dung bạn cần hỗ trợ' />
                   </SelectTrigger>

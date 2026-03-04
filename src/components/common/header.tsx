@@ -248,10 +248,6 @@ export function Header() {
                 <Search className='h-5 w-5' />
               </Button>
 
-              <Button variant='ghost' size='icon' className='hidden sm:flex hover:text-primary'>
-                <Heart className='h-5 w-5' />
-              </Button>
-
               {isAuthenticated ? (
                 <Button variant='ghost' size='icon' className='hover:text-primary' asChild>
                   <Link href={getProfileLink()}>
