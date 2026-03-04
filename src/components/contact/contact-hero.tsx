@@ -4,11 +4,16 @@ import { motion } from 'framer-motion'
 
 export function ContactHero() {
   return (
-    <section className='relative h-[40vh] min-h-[300px] w-full flex items-center justify-center overflow-hidden bg-linear-to-br from-slate-900 via-slate-950 to-black'>
-      {/* Subtle Background Pattern/Effect */}
-      <div className='absolute inset-0 opacity-20'>
-        <div className='absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,165,0,0.1),transparent_50%)]' />
-      </div>
+    <section className='relative h-[40vh] min-h-[300px] w-full flex items-center justify-center overflow-hidden'>
+      {/* Background Image */}
+      <div
+        className='absolute inset-0 bg-cover bg-center bg-no-repeat'
+        style={{ backgroundImage: "url('/images/contact-hero-bg.png')" }}
+      />
+      {/* Dark Overlay */}
+      <div className='absolute inset-0 bg-black/60' />
+      {/* Subtle Gradient Accent */}
+      <div className='absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,165,0,0.1),transparent_50%)]' />
 
       <div className='container mx-auto max-w-10xl px-4 relative z-10 text-center'>
         <motion.div
