@@ -7,9 +7,21 @@ import { formatCurrency, getImageUrl } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Star, MessageSquareOff, EyeOff, Eye, AlertTriangle } from 'lucide-react'
+import { Star, MessageSquareOff, EyeOff, Eye, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Order } from '@/types/order'
+import { cn } from '@/lib/utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface OrderReviewsDisplayProps {
   order: Order
@@ -19,13 +31,6 @@ interface OrderReviewsDisplayProps {
 export function OrderReviewsDisplay({ order, basePath }: OrderReviewsDisplayProps) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
-
-  // Only attempt to load reviews if order is COMPLETED
-  // Wait, reviews are linked by Product and optionally by Order (as implemented by Backend).
-  // The backend doesn't explicitly have a `listByOrder` endpoint, but it has `listAll` and `listByProduct`.
-  // Wait, review CREATE saves `orderId`. But does the Shopper view provide OrderID? Yes.
-  // The Admin page should ideally query reviews. Let's do a workaround map:
-  // Fetch review list by product for EACH item, and filter locally by orderId if needed.
 
   const fetchReviews = async () => {
     if (order.status !== 'COMPLETED') return
@@ -138,26 +143,58 @@ export function OrderReviewsDisplay({ order, basePath }: OrderReviewsDisplayProp
                       {review.hidden && (
                         <Badge
                           variant='outline'
-                          className='bg-slate-100 text-slate-600 border-slate-300'
+                          className='bg-slate-100 text-slate-600 border-slate-300 rounded-lg text-[10px] font-bold h-6'
                         >
                           <EyeOff className='w-3 h-3 mr-1' /> Đã ẩn
                         </Badge>
                       )}
 
-                      {basePath === 'admin' && (
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          className='h-7 text-xs'
-                          onClick={() => handleToggleHide(review.id, review.hidden)}
-                        >
-                          {review.hidden ? (
-                            <Eye className='w-3 h-3 mr-1' />
-                          ) : (
-                            <EyeOff className='w-3 h-3 mr-1' />
-                          )}
-                          {review.hidden ? 'Hiện' : 'Ẩn'}
-                        </Button>
+                      {(basePath === 'admin' || basePath === 'staff') && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size='sm'
+                              variant='outline'
+                              className='h-7 text-[11px] font-bold rounded-lg border-slate-200 gap-1.5'
+                            >
+                              {review.hidden ? (
+                                <Eye className='w-3.5 h-3.5' />
+                              ) : (
+                                <EyeOff className='w-3.5 h-3.5 text-slate-400' />
+                              )}
+                              {review.hidden ? 'Hiện' : 'Ẩn'}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className='flex items-center gap-2'>
+                                <AlertCircle
+                                  className={review.hidden ? 'text-blue-500' : 'text-amber-500'}
+                                />
+                                {review.hidden ? 'Hiển thị đánh giá?' : 'Xác nhận ẩn đánh giá?'}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {review.hidden
+                                  ? 'Đánh giá này sẽ được hiển thị công khai trên trang sản phẩm.'
+                                  : 'Đánh giá này sẽ bị ẩn và không hiển thị trên trang sản phẩm cho khách hàng thấy.'}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className='rounded-xl'>Hủy</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleToggleHide(review.id, review.hidden)}
+                                className={cn(
+                                  'rounded-xl',
+                                  review.hidden
+                                    ? 'bg-blue-600 hover:bg-blue-700'
+                                    : 'bg-slate-900 hover:bg-black',
+                                )}
+                              >
+                                Xác nhận
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </div>
                   </div>

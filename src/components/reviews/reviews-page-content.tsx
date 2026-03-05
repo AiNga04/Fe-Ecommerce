@@ -508,7 +508,7 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className='text-rose-600'>Xóa vĩnh viễn đánh giá?</AlertDialogTitle>
+            <AlertDialogTitle>Xóa vĩnh viễn đánh giá?</AlertDialogTitle>
             <AlertDialogDescription>
               Hành động này không thể hoàn tác. Đánh giá và các hình ảnh đi kèm sẽ bị xóa hoàn toàn
               khỏi hệ thống.

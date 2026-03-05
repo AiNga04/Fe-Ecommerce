@@ -78,7 +78,7 @@ export function ReplyTicketDialog({ ticket, isOpen, onClose, onSuccess }: ReplyT
               <div className='space-y-1'>
                 <Label className='text-[10px] uppercase text-slate-400 font-bold'>Khách hàng</Label>
                 <div className='flex items-center gap-2 text-sm font-medium text-slate-900'>
-                  <User className='w-3.5 h-3.5 text-slate-400' /> {ticket.customerName}
+                  <User className='w-3.5 h-3.5 text-slate-400' /> {ticket.name}
                 </div>
               </div>
               <div className='space-y-1'>
@@ -94,10 +94,10 @@ export function ReplyTicketDialog({ ticket, isOpen, onClose, onSuccess }: ReplyT
                 <Label className='text-[10px] uppercase text-slate-400 font-bold'>Liên hệ</Label>
                 <div className='flex flex-col gap-0.5'>
                   <div className='flex items-center gap-2 text-xs text-slate-600'>
-                    <Mail className='w-3 h-3' /> {ticket.customerEmail}
+                    <Mail className='w-3 h-3' /> {ticket.email}
                   </div>
                   <div className='flex items-center gap-2 text-xs text-slate-600'>
-                    <Phone className='w-3 h-3' /> {ticket.customerPhone}
+                    <Phone className='w-3 h-3' /> {ticket.phone}
                   </div>
                 </div>
               </div>

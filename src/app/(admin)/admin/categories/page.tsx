@@ -353,7 +353,7 @@ export default function CategoriesPage() {
             <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteCallback}
-              className='bg-red-600 hover:bg-red-700 text-white'
+              className='bg-red-600 hover:bg-red-700'
             >
               {deleteMutation.isPending ? 'Đang xóa...' : 'Xóa vĩnh viễn'}
             </AlertDialogAction>
@@ -372,10 +372,10 @@ export default function CategoriesPage() {
               <AlertTriangle className='h-5 w-5' />
               <AlertDialogTitle>Xác nhận ẩn danh mục</AlertDialogTitle>
             </div>
-            <AlertDialogDescription className='text-base'>
+            <AlertDialogDescription>
               Bạn có chắc muốn ẩn danh mục này khỏi website?
               <br />
-              <span className='text-sm text-muted-foreground mt-1 block'>
+              <span className='text-sm text-slate-500 mt-1 block'>
                 Việc này sẽ khiến khách hàng không tìm thấy danh mục và có thể ảnh hưởng đến SEO.
               </span>
             </AlertDialogDescription>
@@ -384,7 +384,7 @@ export default function CategoriesPage() {
             <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDisable}
-              className='bg-amber-600 hover:bg-amber-700 text-white'
+              className='bg-amber-600 hover:bg-amber-700'
             >
               Đồng ý ẩn
             </AlertDialogAction>

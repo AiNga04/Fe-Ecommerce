@@ -422,7 +422,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
               <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteCallback}
-                className='bg-red-600 hover:bg-red-700 text-white'
+                className='bg-red-600 hover:bg-red-700'
               >
                 {deleteMutation.isPending ? 'Đang xử lý...' : 'Xác nhận Ẩn'}
               </AlertDialogAction>
@@ -445,7 +445,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
             <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleActivateCallback}
-              className='bg-green-600 hover:bg-green-700 text-white'
+              className='bg-green-600 hover:bg-green-700'
             >
               {activateMutation.isPending ? 'Đang kích hoạt...' : 'Kích hoạt ngay'}
             </AlertDialogAction>

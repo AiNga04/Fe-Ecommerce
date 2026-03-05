@@ -329,17 +329,17 @@ export default function UsersPage() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className='text-xl'>
+                    <AlertDialogTitle>
                       Xóa vĩnh viễn {selectedIds.size} người dùng?
                     </AlertDialogTitle>
-                    <AlertDialogDescription className='text-slate-500'>
+                    <AlertDialogDescription>
                       Hành động này không thể hoàn tác. Dữ liệu sẽ bị mất hoàn toàn.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter className='gap-2 sm:gap-0 mt-2'>
+                  <AlertDialogFooter>
                     <AlertDialogCancel>Hủy</AlertDialogCancel>
                     <AlertDialogAction
-                      className='bg-red-600 hover:bg-red-700 font-medium'
+                      className='bg-red-600 hover:bg-red-700'
                       onClick={() => batchHardDeleteMutation.mutate(Array.from(selectedIds))}
                     >
                       Xóa vĩnh viễn
@@ -362,17 +362,17 @@ export default function UsersPage() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className='text-xl'>
+                  <AlertDialogTitle>
                     Chuyển {selectedIds.size} người dùng vào thùng rác?
                   </AlertDialogTitle>
-                  <AlertDialogDescription className='text-slate-500'>
+                  <AlertDialogDescription>
                     Họ sẽ không thể đăng nhập cho đến khi được khôi phục.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className='gap-2 sm:gap-0 mt-2'>
+                <AlertDialogFooter>
                   <AlertDialogCancel>Hủy</AlertDialogCancel>
                   <AlertDialogAction
-                    className='bg-red-600 hover:bg-red-700 font-medium'
+                    className='bg-red-600 hover:bg-red-700'
                     onClick={() => batchSoftDeleteMutation.mutate(Array.from(selectedIds))}
                   >
                     Xóa tạm

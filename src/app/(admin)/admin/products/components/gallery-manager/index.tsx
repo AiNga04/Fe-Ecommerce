@@ -190,17 +190,17 @@ export function GalleryManager({ productId, initialGallery = [] }: GalleryManage
 
       {/* Delete Single Confirm */}
       <AlertDialog open={!!imageToDelete} onOpenChange={(open) => !open && setImageToDelete(null)}>
-        <AlertDialogContent className='rounded-xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.12)]'>
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className='text-xl'>Bạn có chắc muốn xóa ảnh này?</AlertDialogTitle>
-            <AlertDialogDescription className='text-slate-500'>
+            <AlertDialogTitle>Bạn có chắc muốn xóa ảnh này?</AlertDialogTitle>
+            <AlertDialogDescription>
               Hành động này không thể hoàn tác. Ảnh sẽ bị xóa vĩnh viễn khỏi hệ thống.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className='gap-2 sm:gap-0 mt-4'>
-            <AlertDialogCancel className='rounded-md h-10 px-6 font-medium'>Hủy</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
-              className='bg-red-600 hover:bg-red-700 rounded-md h-10 px-6 font-medium shadow-sm'
+              className='bg-red-600 hover:bg-red-700'
               onClick={handleDeleteConfirm}
             >
               Xóa Ảnh
@@ -211,20 +211,18 @@ export function GalleryManager({ productId, initialGallery = [] }: GalleryManage
 
       {/* Delete All Confirm */}
       <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
-        <AlertDialogContent className='rounded-xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.12)]'>
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className='text-xl text-red-600'>
-              Xóa TOÀN BỘ thư viện ảnh?
-            </AlertDialogTitle>
-            <AlertDialogDescription className='text-slate-500'>
+            <AlertDialogTitle className='text-red-600'>Xóa TOÀN BỘ thư viện ảnh?</AlertDialogTitle>
+            <AlertDialogDescription>
               Bạn sắp xóa toàn bộ {gallery.length} ảnh của sản phẩm này. Hành động này không thể
               hoàn tác!
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className='gap-2 sm:gap-0 mt-4'>
-            <AlertDialogCancel className='rounded-md h-10 px-6 font-medium'>Hủy</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
-              className='bg-red-600 hover:bg-red-700 rounded-md h-10 px-6 font-medium shadow-sm'
+              className='bg-red-600 hover:bg-red-700'
               onClick={handleDeleteAllConfirm}
             >
               Tôi chắc chắn, Xóa tất cả

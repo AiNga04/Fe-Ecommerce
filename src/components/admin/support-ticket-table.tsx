@@ -277,14 +277,6 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
                           >
                             <Eye className='w-4 h-4' />
                           </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50'
-                            title='Xóa yêu cầu'
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
