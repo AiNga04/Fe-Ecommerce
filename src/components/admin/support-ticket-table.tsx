@@ -189,13 +189,13 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
               <Table>
                 <TableHeader className='bg-slate-50/50'>
                   <TableRow>
-                    <TableHead className='font-bold min-w-[150px]'>Khách hàng</TableHead>
-                    <TableHead className='font-bold min-w-[120px]'>Chủ đề</TableHead>
-                    <TableHead className='font-bold min-w-[200px]'>Nội dung</TableHead>
-                    <TableHead className='font-bold min-w-[130px]'>Trạng thái</TableHead>
-                    <TableHead className='font-bold min-w-[130px]'>Người xử lý</TableHead>
-                    <TableHead className='font-bold min-w-[120px]'>Ngày gửi</TableHead>
-                    <TableHead className='w-[80px]'></TableHead>
+                    <TableHead className='min-w-[150px]'>Khách hàng</TableHead>
+                    <TableHead className='min-w-[120px]'>Chủ đề</TableHead>
+                    <TableHead className='min-w-[200px]'>Nội dung</TableHead>
+                    <TableHead className='min-w-[130px]'>Trạng thái</TableHead>
+                    <TableHead className='min-w-[130px]'>Người xử lý</TableHead>
+                    <TableHead className='min-w-[120px]'>Ngày gửi</TableHead>
+                    <TableHead className='text-right min-w-[100px]'>Chi tiết</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -219,13 +219,13 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
               <Table>
                 <TableHeader className='bg-slate-50/50'>
                   <TableRow>
-                    <TableHead className='font-bold min-w-[150px]'>Khách hàng</TableHead>
-                    <TableHead className='font-bold min-w-[120px]'>Chủ đề</TableHead>
-                    <TableHead className='font-bold min-w-[200px]'>Nội dung</TableHead>
-                    <TableHead className='font-bold min-w-[130px]'>Trạng thái</TableHead>
-                    <TableHead className='font-bold min-w-[130px]'>Người xử lý</TableHead>
-                    <TableHead className='font-bold min-w-[120px]'>Ngày gửi</TableHead>
-                    <TableHead className='text-right font-bold min-w-[100px]'>Hành động</TableHead>
+                    <TableHead className='min-w-[150px]'>Khách hàng</TableHead>
+                    <TableHead className='min-w-[120px]'>Chủ đề</TableHead>
+                    <TableHead className='min-w-[200px]'>Nội dung</TableHead>
+                    <TableHead className='min-w-[130px]'>Trạng thái</TableHead>
+                    <TableHead className='min-w-[130px]'>Người xử lý</TableHead>
+                    <TableHead className='min-w-[120px]'>Ngày gửi</TableHead>
+                    <TableHead className='text-right min-w-[100px]'>Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

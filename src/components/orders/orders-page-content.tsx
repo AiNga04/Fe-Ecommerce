@@ -164,7 +164,7 @@ export function OrdersPageContent({ basePath }: OrdersPageContentProps) {
               <TableHead>Tổng tiền</TableHead>
               <TableHead>Thanh toán</TableHead>
               <TableHead className='text-center'>Trạng thái</TableHead>
-              <TableHead className='text-right'>Hành động</TableHead>
+              <TableHead className='text-right'>Chi tiết</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

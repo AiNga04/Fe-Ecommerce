@@ -310,7 +310,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
                           variant='ghost'
                           size='icon'
                           onClick={() => handleEdit(voucher)}
-                          className={`h-8 w-8 ${isReadOnly ? 'text-blue-500 hover:text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:text-blue-600'}`}
+                          className={`h-8 w-8 ${isReadOnly ? 'text-slate-500 hover:text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:text-blue-600'}`}
                           title={isReadOnly ? 'Xem chi tiết' : 'Chỉnh sửa'}
                         >
                           {isReadOnly ? (

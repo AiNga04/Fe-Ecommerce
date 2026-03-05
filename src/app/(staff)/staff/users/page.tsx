@@ -226,25 +226,19 @@ export default function StaffUsersPage() {
               <Table>
                 <TableHeader className='bg-slate-50/50 border-b border-slate-100'>
                   <TableRow className='hover:bg-transparent'>
-                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4 pl-6'>
+                    <TableHead className='text-slate-500 tracking-wider py-4 pl-6'>
                       Avatar
                     </TableHead>
-                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
-                      Thông tin
-                    </TableHead>
-                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
-                      Liên hệ
-                    </TableHead>
-                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
-                      Vai trò
-                    </TableHead>
-                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4 text-center'>
+                    <TableHead className='text-slate-500 tracking-wider py-4'>Thông tin</TableHead>
+                    <TableHead className='text-slate-500 tracking-wider py-4'>Liên hệ</TableHead>
+                    <TableHead className='text-slate-500 tracking-wider py-4'>Vai trò</TableHead>
+                    <TableHead className='text-slate-500 tracking-wider py-4 text-center'>
                       Trạng thái
                     </TableHead>
-                    <TableHead className='font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4'>
+                    <TableHead className='text-slate-500 tracking-wider py-4'>
                       Ngày tham gia
                     </TableHead>
-                    <TableHead className='text-right font-bold text-slate-500 uppercase text-[11px] tracking-wider py-4 pr-6'>
+                    <TableHead className='text-right text-slate-500 tracking-wider py-4 pr-6'>
                       Hành động
                     </TableHead>
                   </TableRow>

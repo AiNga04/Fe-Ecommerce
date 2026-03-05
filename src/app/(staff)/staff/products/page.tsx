@@ -202,7 +202,7 @@ export default function ProductsPage() {
                     <Button
                       variant='ghost'
                       size='icon'
-                      className='h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                      className='h-8 w-8 text-slate-500 hover:text-blue-700 hover:bg-blue-50'
                       onClick={() => router.push(`/staff/products/${product.id}`)}
                       title='Xem chi tiết'
                     >

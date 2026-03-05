@@ -324,7 +324,7 @@ export default function ProductsPage() {
                   className='shadow-sm font-medium'
                   disabled={batchSoftDeleteMutation.isPending}
                 >
-                  <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm ({selectedIds.size})
+                  <Trash2 className='mr-2 h-4 w-4' /> Xóa ({selectedIds.size})
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -342,7 +342,7 @@ export default function ProductsPage() {
                     className='bg-red-600 hover:bg-red-700'
                     onClick={() => batchSoftDeleteMutation.mutate(Array.from(selectedIds))}
                   >
-                    Xóa tạm
+                    Xóa
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -512,12 +512,12 @@ export default function ProductsPage() {
                                   className='text-red-600 focus:text-red-600 cursor-pointer'
                                   onSelect={(e) => e.preventDefault()}
                                 >
-                                  <Trash2 className='mr-2 h-4 w-4' /> Xóa tạm thời
+                                  <Trash2 className='mr-2 h-4 w-4' /> Xóa
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Xác nhận xóa tạm thời?</AlertDialogTitle>
+                                  <AlertDialogTitle>Xác nhận xóa?</AlertDialogTitle>
                                   <AlertDialogDescription>
                                     Sản phẩm này sẽ được chuyển vào thùng rác và có thể khôi phục
                                     sau.

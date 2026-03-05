@@ -287,11 +287,11 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
               <Table>
                 <TableHeader className='bg-slate-50/50'>
                   <TableRow>
-                    <TableHead className='font-bold min-w-[150px]'>Sản phẩm & Đơn hàng</TableHead>
-                    <TableHead className='font-bold min-w-[200px]'>Nội dung đánh giá</TableHead>
-                    <TableHead className='font-bold min-w-[150px]'>Khách hàng</TableHead>
-                    <TableHead className='font-bold min-w-[150px]'>Trạng thái</TableHead>
-                    <TableHead className='text-right font-bold min-w-[100px]'>Hành động</TableHead>
+                    <TableHead className='min-w-[150px]'>Sản phẩm & Đơn hàng</TableHead>
+                    <TableHead className='min-w-[200px]'>Nội dung đánh giá</TableHead>
+                    <TableHead className='min-w-[150px]'>Khách hàng</TableHead>
+                    <TableHead className='min-w-[150px]'>Trạng thái</TableHead>
+                    <TableHead className='text-right min-w-[100px]'>Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
