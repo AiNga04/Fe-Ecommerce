@@ -71,12 +71,9 @@ export default function ActiveShipmentsPage() {
       <div className='flex flex-col lg:flex-row lg:items-end justify-between gap-6'>
         <div className='space-y-1'>
           <h2 className='text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3'>
-            <div className='p-2 bg-orange-100 rounded-xl'>
-              <Box className='w-7 h-7 text-orange-600' />
-            </div>
             Đơn đang giao
           </h2>
-          <p className='text-sm text-slate-500 font-medium ml-12'>
+          <p className='text-sm text-slate-500 font-medium'>
             Quản lý các đơn hàng đang trong quá trình vận chuyển của bạn
           </p>
         </div>
@@ -111,24 +108,12 @@ export default function ActiveShipmentsPage() {
             <Table>
               <TableHeader className='bg-slate-50/80 border-b border-slate-100'>
                 <TableRow className='hover:bg-transparent'>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5 pl-8'>
-                    Đơn hàng
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5'>
-                    Người nhận
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5'>
-                    Địa chỉ
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5 text-center'>
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5'>
-                    Thời gian
-                  </TableHead>
-                  <TableHead className='text-right font-bold text-slate-500 uppercase text-xs tracking-wider py-5 pr-8'>
-                    Hành động
-                  </TableHead>
+                  <TableHead className='text-slate-500 py-5 pl-8'>Đơn hàng</TableHead>
+                  <TableHead className='text-slate-500 py-5'>Người nhận</TableHead>
+                  <TableHead className='text-slate-500 py-5'>Địa chỉ</TableHead>
+                  <TableHead className='text-slate-500 py-5 text-center'>Trạng thái</TableHead>
+                  <TableHead className='text-slate-500 py-5'>Thời gian</TableHead>
+                  <TableHead className='text-right text-slate-500 py-5 pr-8'>Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

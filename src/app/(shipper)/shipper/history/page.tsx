@@ -78,14 +78,14 @@ export default function ShipmentHistoryPage() {
     const isActive = statusTab === value
     return (
       <Button
-        variant='ghost'
+        variant={isActive ? 'default' : 'outline'}
         size='sm'
         onClick={() => handleTabChange(value)}
         className={cn(
-          'gap-2 h-9 px-4 transition-all duration-200 font-bold text-xs rounded-lg border shrink-0',
+          'gap-2 transition-all duration-200 text-xs shrink-0',
           isActive
-            ? 'bg-[#ff4d00] text-white border-[#ff4d00] shadow-md hover:bg-[#e64500]'
-            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300',
+            ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20'
+            : 'text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-300',
         )}
       >
         {icon}
@@ -125,12 +125,9 @@ export default function ShipmentHistoryPage() {
       <div className='flex flex-col lg:flex-row lg:items-end justify-between gap-6'>
         <div className='space-y-1'>
           <h2 className='text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3'>
-            <div className='p-2 bg-orange-100 rounded-xl'>
-              <History className='w-7 h-7 text-orange-600' />
-            </div>
             Lịch sử giao hàng
           </h2>
-          <p className='text-sm text-slate-500 font-medium ml-12'>
+          <p className='text-sm text-slate-500 font-medium'>
             Xem lại danh sách các đơn hàng đã xử lý trong quá khứ
           </p>
         </div>
@@ -171,24 +168,12 @@ export default function ShipmentHistoryPage() {
             <Table>
               <TableHeader className='bg-slate-50/80 border-b border-slate-100'>
                 <TableRow className='hover:bg-transparent'>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5 pl-8'>
-                    Mã đơn
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5'>
-                    Khách hàng
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5'>
-                    Địa chỉ giao hàng
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5 text-center'>
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className='font-bold text-slate-500 uppercase text-xs tracking-wider py-5'>
-                    Ngày gán
-                  </TableHead>
-                  <TableHead className='text-right font-bold text-slate-500 uppercase text-xs tracking-wider py-5 pr-8'>
-                    Chi tiết
-                  </TableHead>
+                  <TableHead className='text-slate-500 py-5 pl-8'>Mã đơn</TableHead>
+                  <TableHead className='text-slate-500 py-5'>Khách hàng</TableHead>
+                  <TableHead className='text-slate-500 py-5'>Địa chỉ giao hàng</TableHead>
+                  <TableHead className='text-slate-500 py-5 text-center'>Trạng thái</TableHead>
+                  <TableHead className='text-slate-500 py-5'>Ngày gán</TableHead>
+                  <TableHead className='text-right text-slate-500 py-5 pr-8'>Chi tiết</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
