@@ -215,9 +215,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
             ) : (
               vouchers.map((voucher: Voucher) => (
                 <TableRow key={voucher.id}>
-                  <TableCell className='font-mono font-medium text-blue-600'>
-                    {voucher.code}
-                  </TableCell>
+                  <TableCell className='font-bold text-blue-600'>{voucher.code}</TableCell>
                   <TableCell className='font-medium'>
                     <div className='flex flex-col'>
                       <span>{voucher.name}</span>
@@ -266,7 +264,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
                   <TableCell>{getStatusBadge(voucher.status)}</TableCell>
                   <TableCell>
                     <div className='flex flex-col gap-1 py-1'>
-                      <div className='flex items-center gap-1.5 text-[11px] text-slate-500 font-medium'>
+                      <div className='flex items-center gap-1.5 text-slate-500'>
                         <Clock className='h-3.5 w-3.5' />
                         <span>
                           {voucher.startDate
@@ -274,7 +272,7 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
                             : '--'}
                         </span>
                       </div>
-                      <div className='flex items-center gap-1.5 text-[11px] text-rose-500 font-bold'>
+                      <div className='flex items-center gap-1.5 text-rose-500'>
                         <CalendarIcon className='h-3.5 w-3.5' />
                         <span>
                           {voucher.endDate ? format(new Date(voucher.endDate), 'dd/MM/yy') : '--'}
