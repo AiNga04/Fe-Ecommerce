@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { cn } from '@/lib/utils'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface OrdersPageContentProps {
   basePath: 'admin' | 'staff'
@@ -235,16 +236,21 @@ export function OrdersPageContent({ basePath }: OrdersPageContentProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className='text-right'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      asChild
-                      className='h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50'
-                    >
-                      <Link href={`/${basePath}/orders/${order.id}`}>
-                        <Eye className='h-4 w-4' />
-                      </Link>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          asChild
+                          className='h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50'
+                        >
+                          <Link href={`/${basePath}/orders/${order.id}`}>
+                            <Eye className='h-4 w-4' />
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Xem chi tiết</TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))

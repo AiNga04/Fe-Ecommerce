@@ -34,6 +34,7 @@ import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
 import { Input } from '@/components/ui/input'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -367,39 +368,49 @@ export function ReviewsPageContent({ basePath }: ReviewsPageContentProps) {
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex items-center justify-end gap-1'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
-                            title={review.hidden ? 'Bỏ ẩn' : 'Ẩn đánh giá'}
-                            onClick={() =>
-                              setHideConfirm({
-                                isOpen: true,
-                                reviewId: review.id,
-                                isHidden: review.hidden,
-                              })
-                            }
-                          >
-                            {review.hidden ? (
-                              <Eye className='w-4 h-4' />
-                            ) : (
-                              <EyeOff className='w-4 h-4' />
-                            )}
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50'
-                            title='Xóa vĩnh viễn'
-                            onClick={() =>
-                              setDeleteConfirm({
-                                isOpen: true,
-                                reviewId: review.id,
-                              })
-                            }
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
+                                onClick={() =>
+                                  setHideConfirm({
+                                    isOpen: true,
+                                    reviewId: review.id,
+                                    isHidden: review.hidden,
+                                  })
+                                }
+                              >
+                                {review.hidden ? (
+                                  <Eye className='w-4 h-4' />
+                                ) : (
+                                  <EyeOff className='w-4 h-4' />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {review.hidden ? 'Bỏ ẩn' : 'Ẩn đánh giá'}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50'
+                                onClick={() =>
+                                  setDeleteConfirm({
+                                    isOpen: true,
+                                    reviewId: review.id,
+                                  })
+                                }
+                              >
+                                <Trash2 className='w-4 h-4' />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Xóa vĩnh viễn</TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -59,6 +59,7 @@ import { VoucherDialog } from './voucher-dialog'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface VouchersPageContentProps {
   basePath: 'admin' | 'staff'
@@ -293,45 +294,59 @@ export function VouchersPageContent({ basePath }: VouchersPageContentProps) {
                       {/* Activate: Admin OR Staff (VOUCHER_STATUS_MANAGE) */}
                       {(voucher.status === VoucherStatus.DRAFT ||
                         voucher.status === VoucherStatus.INACTIVE) && (
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          onClick={() => setActivateId(voucher.id)}
-                          className='h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50'
-                          title='Kích hoạt voucher'
-                        >
-                          <CheckCircle2 className='h-4 w-4' />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => setActivateId(voucher.id)}
+                              className='h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50'
+                            >
+                              <CheckCircle2 className='h-4 w-4' />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Kích hoạt voucher</TooltipContent>
+                        </Tooltip>
                       )}
 
                       {/* Edit or View Details */}
                       {voucher.status !== VoucherStatus.EXPIRED && (
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          onClick={() => handleEdit(voucher)}
-                          className={`h-8 w-8 ${isReadOnly ? 'text-slate-500 hover:text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:text-blue-600'}`}
-                          title={isReadOnly ? 'Xem chi tiết' : 'Chỉnh sửa'}
-                        >
-                          {isReadOnly ? (
-                            <Eye className='h-4 w-4' />
-                          ) : (
-                            <Pencil className='h-4 w-4' />
-                          )}
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => handleEdit(voucher)}
+                              className={`h-8 w-8 ${isReadOnly ? 'text-slate-500 hover:text-blue-700 hover:bg-blue-50' : 'text-slate-500 hover:text-blue-600'}`}
+                            >
+                              {isReadOnly ? (
+                                <Eye className='h-4 w-4' />
+                              ) : (
+                                <Pencil className='h-4 w-4' />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {isReadOnly ? 'Xem chi tiết' : 'Chỉnh sửa'}
+                          </TooltipContent>
+                        </Tooltip>
                       )}
 
                       {/* Deactivate/Delete: ADMIN ONLY */}
                       {!isReadOnly && voucher.status !== VoucherStatus.INACTIVE && (
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          onClick={() => setDeleteId(voucher.id)}
-                          className='h-8 w-8 text-slate-500 hover:text-red-600'
-                          title='Ẩn / Hủy kích hoạt'
-                        >
-                          <Trash2 className='h-4 w-4' />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => setDeleteId(voucher.id)}
+                              className='h-8 w-8 text-slate-500 hover:text-red-600'
+                            >
+                              <Trash2 className='h-4 w-4' />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Ẩn / Hủy kích hoạt</TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
                   </TableCell>

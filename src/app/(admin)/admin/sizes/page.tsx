@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { SizeDialog } from './components/size-dialog'
 import { toast } from 'sonner'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 export default function SizesPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -183,22 +184,32 @@ export default function SizesPage() {
                   <TableCell className='text-muted-foreground'>{size.description || '-'}</TableCell>
                   <TableCell className='text-right'>
                     <div className='flex justify-end gap-2'>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        onClick={() => handleEdit(size)}
-                        className='h-8 w-8 text-slate-500 hover:text-blue-600'
-                      >
-                        <Pencil className='h-4 w-4' />
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        onClick={() => setDeleteId(size.id)}
-                        className='h-8 w-8 text-slate-500 hover:text-red-600'
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            onClick={() => handleEdit(size)}
+                            className='h-8 w-8 text-slate-500 hover:text-blue-600'
+                          >
+                            <Pencil className='h-4 w-4' />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Chỉnh sửa</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            onClick={() => setDeleteId(size.id)}
+                            className='h-8 w-8 text-slate-500 hover:text-red-600'
+                          >
+                            <Trash2 className='h-4 w-4' />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Xóa</TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
                 </TableRow>

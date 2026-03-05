@@ -403,10 +403,18 @@ export default function UsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='ALL'>Tất cả vai trò</SelectItem>
-              <SelectItem value={Role.USER}>User</SelectItem>
-              <SelectItem value={Role.STAFF}>Staff</SelectItem>
-              <SelectItem value={Role.ADMIN}>Admin</SelectItem>
-              <SelectItem value={Role.SHIPPER}>Shipper</SelectItem>
+              <SelectItem value={Role.USER}>
+                <span className='font-medium text-blue-600'>User</span>
+              </SelectItem>
+              <SelectItem value={Role.STAFF}>
+                <span className='font-medium text-indigo-600'>Staff</span>
+              </SelectItem>
+              <SelectItem value={Role.ADMIN}>
+                <span className='font-medium text-purple-600'>Admin</span>
+              </SelectItem>
+              <SelectItem value={Role.SHIPPER}>
+                <span className='font-medium text-orange-600'>Shipper</span>
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -416,10 +424,18 @@ export default function UsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
-              <SelectItem value={UserStatus.ACTIVE}>Hoạt động</SelectItem>
-              <SelectItem value={UserStatus.PENDING}>Chờ xác minh</SelectItem>
-              <SelectItem value={UserStatus.DISABLED}>Bị khóa</SelectItem>
-              <SelectItem value={UserStatus.DELETED}>Đã xóa</SelectItem>
+              <SelectItem value={UserStatus.ACTIVE}>
+                <span className='font-medium text-emerald-600'>Hoạt động</span>
+              </SelectItem>
+              <SelectItem value={UserStatus.PENDING}>
+                <span className='font-medium text-amber-600'>Chờ xác minh</span>
+              </SelectItem>
+              <SelectItem value={UserStatus.DISABLED}>
+                <span className='font-medium text-red-600'>Bị khóa</span>
+              </SelectItem>
+              <SelectItem value={UserStatus.DELETED}>
+                <span className='font-medium text-slate-500'>Đã xóa</span>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

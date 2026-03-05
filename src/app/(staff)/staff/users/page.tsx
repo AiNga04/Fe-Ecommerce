@@ -33,6 +33,7 @@ import { Search, Activity, Eye, UserCog, User as UserIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { getImageUrl } from '@/lib/utils'
 import { UserAuditLogsDialog } from '@/components/staff/users/audit-logs-dialog'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 export default function StaffUsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -121,10 +122,18 @@ export default function StaffUsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='ALL'>Tất cả vai trò</SelectItem>
-              <SelectItem value='USER'>Khách hàng</SelectItem>
-              <SelectItem value='STAFF'>Nhân viên</SelectItem>
-              <SelectItem value='SHIPPER'>Giao hàng</SelectItem>
-              <SelectItem value='ADMIN'>Quản trị viên</SelectItem>
+              <SelectItem value='USER'>
+                <span className='font-medium text-blue-600'>Khách hàng</span>
+              </SelectItem>
+              <SelectItem value='STAFF'>
+                <span className='font-medium text-indigo-600'>Nhân viên</span>
+              </SelectItem>
+              <SelectItem value='SHIPPER'>
+                <span className='font-medium text-orange-600'>Giao hàng</span>
+              </SelectItem>
+              <SelectItem value='ADMIN'>
+                <span className='font-medium text-purple-600'>Quản trị viên</span>
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -134,9 +143,15 @@ export default function StaffUsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
-              <SelectItem value='ACTIVE'>Hoạt động</SelectItem>
-              <SelectItem value='PENDING'>Chờ xác minh</SelectItem>
-              <SelectItem value='DISABLED'>Bị khóa</SelectItem>
+              <SelectItem value='ACTIVE'>
+                <span className='font-medium text-emerald-600'>Hoạt động</span>
+              </SelectItem>
+              <SelectItem value='PENDING'>
+                <span className='font-medium text-amber-600'>Chờ xác minh</span>
+              </SelectItem>
+              <SelectItem value='DISABLED'>
+                <span className='font-medium text-red-600'>Bị khóa</span>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -249,30 +264,40 @@ export default function StaffUsersPage() {
                   </TableCell>
                   <TableCell className='text-right'>
                     <div className='flex items-center justify-end gap-1'>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        asChild
-                        className='h-8 px-3 text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-xs gap-1.5'
-                      >
-                        <Link href={`/staff/users/${user.id}`}>
-                          <Eye className='w-3.5 h-3.5' />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        className='h-8 px-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 text-xs gap-1.5'
-                        onClick={() =>
-                          setAuditDialog({
-                            isOpen: true,
-                            userId: user.id,
-                            userName: `${user.lastName} ${user.firstName}`,
-                          })
-                        }
-                      >
-                        <Activity className='w-3.5 h-3.5' />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            asChild
+                            className='h-8 px-3 text-slate-500 hover:text-blue-600 hover:bg-blue-50 text-xs gap-1.5'
+                          >
+                            <Link href={`/staff/users/${user.id}`}>
+                              <Eye className='w-3.5 h-3.5' />
+                            </Link>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Xem chi tiết</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='h-8 px-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 text-xs gap-1.5'
+                            onClick={() =>
+                              setAuditDialog({
+                                isOpen: true,
+                                userId: user.id,
+                                userName: `${user.lastName} ${user.firstName}`,
+                              })
+                            }
+                          >
+                            <Activity className='w-3.5 h-3.5' />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Nhật ký hoạt động</TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
                 </TableRow>

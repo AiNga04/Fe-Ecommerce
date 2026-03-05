@@ -32,6 +32,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { getImageUrl } from '@/lib/utils'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 export default function ProductsPage() {
   const router = useRouter()
@@ -199,15 +200,19 @@ export default function ProductsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className='text-center'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-8 w-8 text-slate-500 hover:text-blue-700 hover:bg-blue-50'
-                      onClick={() => router.push(`/staff/products/${product.id}`)}
-                      title='Xem chi tiết'
-                    >
-                      <Eye className='h-4 w-4' />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8 text-slate-500 hover:text-blue-700 hover:bg-blue-50'
+                          onClick={() => router.push(`/staff/products/${product.id}`)}
+                        >
+                          <Eye className='h-4 w-4' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Xem chi tiết</TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))

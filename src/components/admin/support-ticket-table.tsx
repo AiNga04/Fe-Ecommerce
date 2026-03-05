@@ -45,6 +45,7 @@ import {
   SUPPORT_SUBJECT_LABEL,
 } from '@/types/support'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface SupportTicketTableProps {
   isAdmin?: boolean
@@ -145,8 +146,12 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
-            <SelectItem value='PENDING'>Chờ xử lý</SelectItem>
-            <SelectItem value='RESOLVED'>Đã xử lý</SelectItem>
+            <SelectItem value='PENDING'>
+              <span className='font-medium text-amber-600'>Chờ xử lý</span>
+            </SelectItem>
+            <SelectItem value='RESOLVED'>
+              <span className='font-medium text-emerald-600'>Đã xử lý</span>
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -268,15 +273,19 @@ export function SupportTicketTable({ isAdmin = false, onSelectTicket }: SupportT
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex items-center justify-end gap-1'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
-                            title='Xem chi tiết'
-                            onClick={() => onSelectTicket?.(ticket.id)}
-                          >
-                            <Eye className='w-4 h-4' />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
+                                onClick={() => onSelectTicket?.(ticket.id)}
+                              >
+                                <Eye className='w-4 h-4' />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Xem chi tiết</TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>
