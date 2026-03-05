@@ -24,7 +24,7 @@ export function StatsCard({
         <CardTitle className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
           {title}
         </CardTitle>
-        <div className={cn('p-2 rounded-lg bg-gray-50', iconClassName)}>
+        <div className={cn('p-2 rounded-2xl bg-gray-50', iconClassName)}>
           <Icon className='w-4 h-4' />
         </div>
       </CardHeader>

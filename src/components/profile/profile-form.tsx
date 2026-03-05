@@ -99,7 +99,7 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
       {/* Header */}
       <div className='px-6 md:px-8 py-5 flex justify-between items-center border-b border-slate-100'>
         <div className='flex items-center gap-3'>
-          <div className='p-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100'>
+          <div className='p-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100'>
             <UserCircle className='w-5 h-5 text-blue-600' />
           </div>
           <div>
@@ -310,7 +310,7 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
           <div className='px-6 md:px-8 py-4 border-t border-slate-100 bg-slate-50/50 flex gap-3'>
             <Button
               type='submit'
-              className='bg-slate-900 hover:bg-slate-800 text-white font-medium px-6 h-10 rounded-lg gap-2 shadow-sm'
+              className='bg-slate-900 hover:bg-slate-800 text-white font-medium px-6 h-10 rounded-2xl gap-2 shadow-sm'
               disabled={isUpdating}
             >
               <Save className='w-4 h-4' />
@@ -320,7 +320,7 @@ export function ProfileForm({ user, onSubmit, isUpdating }: ProfileFormProps) {
               type='button'
               variant='ghost'
               onClick={toggleEdit}
-              className='h-10 rounded-lg text-slate-500'
+              className='h-10 rounded-2xl text-slate-500'
             >
               Hủy
             </Button>
