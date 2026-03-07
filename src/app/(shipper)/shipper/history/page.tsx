@@ -82,10 +82,10 @@ export default function ShipmentHistoryPage() {
         size='sm'
         onClick={() => handleTabChange(value)}
         className={cn(
-          'gap-2 transition-all duration-200 text-xs shrink-0',
+          'gap-2 transition-all duration-200 shrink-0 font-medium',
           isActive
-            ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20'
-            : 'text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-300',
+            ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 px-4'
+            : 'text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 px-4',
         )}
       >
         {icon}
@@ -141,12 +141,12 @@ export default function ShipmentHistoryPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm'>
+      <div className='flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-lg border border-slate-200 shadow-sm'>
         <div className='relative flex-1 group w-full'>
-          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-orange-500 transition-colors' />
+          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors' />
           <Input
             placeholder='Tìm kiếm theo mã đơn, tên khách hàng...'
-            className='pl-11 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl text-sm font-medium'
+            className='pl-10 h-10 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-md text-sm'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -154,15 +154,15 @@ export default function ShipmentHistoryPage() {
         <Button
           variant='outline'
           size='icon'
-          className='hidden md:flex h-12 w-12 rounded-xl border-slate-200 shrink-0 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-all'
+          className='hidden md:flex h-10 w-10 border-slate-200 shrink-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all'
           onClick={() => refetch()}
         >
-          <RefreshCcw className='w-5 h-5' />
+          <RefreshCcw className='w-4 h-4' />
         </Button>
       </div>
 
       {/* Data Table Content */}
-      <Card className='shadow-lg border-slate-200 overflow-hidden rounded-2xl bg-white'>
+      <Card className='shadow-sm border-slate-200 overflow-hidden rounded-lg bg-white'>
         <CardContent className='p-0'>
           <div className='overflow-x-auto overflow-y-visible'>
             <Table>
@@ -229,7 +229,7 @@ export default function ShipmentHistoryPage() {
                         variant='ghost'
                         size='icon'
                         asChild
-                        className='h-8 w-8 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors'
+                        className='h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-md'
                       >
                         <Link href={`/shipper/shipments/${shipment.shipmentId}`}>
                           <Eye className='w-4 h-4' />
@@ -292,7 +292,7 @@ export default function ShipmentHistoryPage() {
                 size='sm'
                 disabled={page === 0}
                 onClick={() => setPage(page - 1)}
-                className='h-9 px-4 rounded-xl border-slate-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100 transition-all font-bold gap-2'
+                className='px-4 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium gap-2'
               >
                 <ChevronLeft className='w-4 h-4' />
                 Trước
@@ -302,7 +302,7 @@ export default function ShipmentHistoryPage() {
                 size='sm'
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage(page + 1)}
-                className='h-9 px-4 rounded-xl border-slate-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100 transition-all font-bold gap-2'
+                className='px-4 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium gap-2'
               >
                 Sau
                 <ChevronRight className='w-4 h-4' />

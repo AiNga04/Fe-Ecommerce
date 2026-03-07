@@ -80,21 +80,21 @@ export default function ActiveShipmentsPage() {
 
         <Button
           variant='outline'
+          size='icon'
+          className='hidden md:flex h-10 w-10 border-slate-200 shrink-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all'
           onClick={() => refetch()}
-          className='h-11 px-6 rounded-xl border-slate-200 font-bold text-slate-600 hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50 transition-all gap-2'
         >
           <RefreshCcw className='w-4 h-4' />
-          Làm mới
         </Button>
       </div>
 
       {/* Search Bar */}
-      <div className='bg-white p-4 rounded-2xl border border-slate-200 shadow-sm'>
+      <div className='bg-white p-4 rounded-lg border border-slate-200 shadow-sm'>
         <div className='relative group w-full'>
-          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-orange-500 transition-colors' />
+          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors' />
           <Input
             placeholder='Tìm kiếm mã đơn, tên khách hàng...'
-            className='pl-11 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl text-sm font-medium'
+            className='pl-10 h-10 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-md text-sm'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -102,7 +102,7 @@ export default function ActiveShipmentsPage() {
       </div>
 
       {/* Data Table Content */}
-      <Card className='shadow-lg border-slate-200 overflow-hidden rounded-2xl bg-white'>
+      <Card className='shadow-sm border-slate-200 overflow-hidden rounded-lg bg-white'>
         <CardContent className='p-0'>
           <div className='overflow-x-auto'>
             <Table>
@@ -181,7 +181,7 @@ export default function ActiveShipmentsPage() {
                       <Button
                         size='sm'
                         asChild
-                        className='bg-orange-600 hover:bg-orange-700 text-white font-bold h-8 px-4 rounded-lg shadow-sm transition-colors gap-2 text-xs'
+                        className='bg-slate-900 hover:bg-slate-800 text-white h-8 px-4 shadow-sm transition-colors gap-2 text-xs'
                       >
                         <Link href={`/shipper/shipments/${shipment.shipmentId}`}>
                           <Eye className='w-3.5 h-3.5' />
@@ -209,8 +209,8 @@ export default function ActiveShipmentsPage() {
         </CardContent>
       </Card>
 
-      <div className='mt-8 p-6 bg-orange-50/50 border border-orange-100 rounded-2xl flex items-center gap-4'>
-        <div className='p-3 bg-orange-500 rounded-xl text-white'>
+      <div className='mt-8 p-6 bg-blue-50/50 border border-blue-100 rounded-lg flex items-center gap-4'>
+        <div className='p-3 bg-blue-600 rounded-md text-white'>
           <Box className='w-6 h-6' />
         </div>
         <div>
