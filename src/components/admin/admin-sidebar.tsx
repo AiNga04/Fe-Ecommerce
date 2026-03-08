@@ -98,11 +98,6 @@ const sidebarItems = [
     href: '/admin/profile',
     icon: Users,
   },
-  {
-    title: 'Cài đặt',
-    href: '/admin/settings',
-    icon: Settings,
-  },
 ]
 
 interface AdminSidebarProps {

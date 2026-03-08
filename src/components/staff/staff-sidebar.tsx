@@ -98,11 +98,6 @@ const sidebarItems = [
     href: '/staff/profile',
     icon: Users,
   },
-  {
-    title: 'Cài đặt',
-    href: '/staff/settings',
-    icon: Settings,
-  },
 ]
 
 interface StaffSidebarProps {
