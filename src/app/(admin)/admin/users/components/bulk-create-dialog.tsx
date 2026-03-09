@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Upload, FileUp, AlertCircle, CheckCircle2, X, FileJson, Loader2 } from 'lucide-react'
+import { Upload, FileUp, AlertCircle, CheckCircle2, X, FileJson, Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
 import { userService } from '@/services/user'
@@ -221,22 +221,25 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='sm:max-w-2xl bg-white p-6 gap-6 rounded-xl shadow-lg'>
-        <DialogHeader>
-          <div className='flex items-center gap-3'>
-            <div className='p-2 bg-slate-100 rounded-lg text-slate-600'>
-              <FileJson className='h-5 w-5' />
-            </div>
-            <div>
-              <DialogTitle className='text-lg font-semibold text-slate-900'>
-                Tạo Người Dùng Hàng Loạt
-              </DialogTitle>
-              <DialogDescription className='text-sm text-slate-500 mt-1'>
-                Nhập dữ liệu người dùng qua file Excel/CSV hoặc mã JSON.
-              </DialogDescription>
-            </div>
+      <DialogContent className='sm:max-w-2xl bg-white p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl border-none'>
+        <div className='bg-slate-900 p-8 text-white relative overflow-hidden'>
+          <div className='absolute top-0 right-0 p-4 opacity-10'>
+            <UserPlus className='h-40 w-40 -mr-8 -mt-8' />
           </div>
-        </DialogHeader>
+          <div className='relative z-10'>
+            <DialogTitle className='text-2xl font-bold flex items-center gap-3'>
+              <div className='p-2 bg-white/10 rounded-lg backdrop-blur-sm'>
+                <FileJson className='h-6 w-6 text-blue-400' />
+              </div>
+              Tạo Người Dùng Hàng Loạt
+            </DialogTitle>
+            <DialogDescription className='text-slate-300 mt-2 text-base max-w-md'>
+              Nhập dữ liệu người dùng qua file Excel/CSV hoặc mã JSON để thêm vào hệ thống cùng lúc.
+            </DialogDescription>
+          </div>
+        </div>
+
+        <div className='p-6'>
 
         <div>
           <Tabs
@@ -418,7 +421,8 @@ export function BulkCreateDialog({ trigger }: BulkCreateDialogProps) {
             </div>
           )}
         </div>
-      </DialogContent>
+      </div>
+    </DialogContent>
     </Dialog>
   )
 }
