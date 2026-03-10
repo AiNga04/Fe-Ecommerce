@@ -300,7 +300,7 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
             <div>
               <AlertTitle className='font-bold text-red-900'>Yêu cầu trả hàng từ khách hàng</AlertTitle>
               <AlertDescription className='text-red-700 mt-1'>
-                Lý do: <span className='font-semibold'>"{order.returnReason || 'Không có lý do cụ thể'}"</span>
+                Lý do: <span className='font-semibold'>"{order.returnRequestReason || 'Không có lý do cụ thể'}"</span>
               </AlertDescription>
             </div>
             <div className='flex items-center gap-2 shrink-0'>

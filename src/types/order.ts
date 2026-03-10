@@ -18,6 +18,8 @@ export interface Order {
   shipmentStatus: string | null
   returnRequested: boolean | null
   returnReason?: string
+  returnRequestReason: string | null
+  returnRequestStatus: string | null
   paymentMethod: string
   paymentStatus: string
   shippingFee: number
