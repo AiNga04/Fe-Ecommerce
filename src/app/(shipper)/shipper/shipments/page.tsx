@@ -66,7 +66,7 @@ export default function ActiveShipmentsPage() {
   }
 
   return (
-    <div className='space-y-6 max-w-[1600px] mx-auto'>
+    <div className='space-y-6 w-full mx-auto'>
       {/* Header Section */}
       <div className='flex flex-col lg:flex-row lg:items-end justify-between gap-6'>
         <div className='space-y-1'>

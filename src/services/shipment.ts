@@ -25,6 +25,8 @@ export interface ShipmentInfo {
   deliveredAt: string | null
   failedAt: string | null
   returnedAt: string | null
+  orderStatus: string | null
+  completedAt: string | null
 }
 
 export interface ShipperChartData {

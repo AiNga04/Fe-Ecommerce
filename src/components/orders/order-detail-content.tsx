@@ -286,7 +286,8 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
 
   // Determine timeline states
   const isCanceled = currentStatus === 'CANCELED' || currentStatus === 'cancelled'
-  const isDelivered = currentStatus === 'DELIVERED'
+  const isCompleted = currentStatus === 'COMPLETED'
+  const isDelivered = currentStatus === 'DELIVERED' || isCompleted
   const isShipping = currentStatus === 'SHIPPING' || isDelivered
   const isConfirmed = currentStatus === 'CONFIRMED' || isShipping
 
@@ -480,6 +481,13 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
                       date={order.deliveredAt}
                       isCompleted={isDelivered}
                       isCurrent={currentStatus === 'SHIPPING'}
+                    />
+                    <TimelineStep
+                      icon={CheckSquare}
+                      title='Hoàn thành'
+                      date={order.completedAt}
+                      isCompleted={isCompleted}
+                      isCurrent={currentStatus === 'DELIVERED'}
                       isLast={true}
                     />
                   </>

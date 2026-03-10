@@ -36,6 +36,7 @@ export interface Order {
   confirmedAt: string | null
   shippedAt: string | null
   deliveredAt: string | null
+  completedAt: string | null
   canceledAt: string | null
   items: OrderItem[]
 }

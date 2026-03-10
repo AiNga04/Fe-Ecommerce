@@ -79,17 +79,18 @@ export default function ShipmentDetailPage() {
     },
     {
       label: 'Giao hàng',
-      date: shipment.deliveredAt || shipment.failedAt,
-      isCompleted: shipment.status === ShipmentStatus.DELIVERED,
+      date: shipment.deliveredAt,
+      isCompleted:
+        shipment.status === ShipmentStatus.DELIVERED || shipment.orderStatus === 'COMPLETED',
       isCurrent:
         shipment.status === ShipmentStatus.IN_DELIVERY ||
         shipment.status === ShipmentStatus.PICKED_UP,
     },
     {
       label: 'Hoàn thành',
-      date: shipment.returnedAt,
-      isCompleted: shipment.status === ShipmentStatus.RETURNED,
-      isCurrent: shipment.status === ShipmentStatus.RETURN_APPROVED,
+      date: shipment.completedAt,
+      isCompleted: shipment.orderStatus === 'COMPLETED',
+      isCurrent: shipment.status === ShipmentStatus.DELIVERED,
     },
   ]
 
