@@ -17,13 +17,31 @@ import {
   XCircle,
   FileText,
   Loader2,
+  AlertTriangle,
+  CheckSquare,
+  RotateCcw,
 } from 'lucide-react'
 import { toast } from 'sonner'
+
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/ui/alert'
 
 import { orderService } from '@/services/order'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { OrderReviewsDisplay } from '@/components/reviews/order-reviews-display'
 import {
@@ -162,6 +180,8 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
 
   // State for Assign Shipper
   const [selectedShipperId, setSelectedShipperId] = useState<string>('')
+  const [rejectReason, setRejectReason] = useState<string>('')
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
   const [trackingCode, setTrackingCode] = useState<string>('')
 
   // Query for Shippers list (only fetch if order is unassigned)
@@ -198,6 +218,36 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
     if (!selectedShipperId) return
     assignShipperMutation.mutate()
   }
+
+  // Mutation for Approving Return
+  const approveReturnMutation = useMutation({
+    mutationFn: () => shipmentService.approveReturn(order?.shipmentId as number),
+    onSuccess: () => {
+      toast.success('Duyệt trả hàng thành công')
+      queryClient.invalidateQueries({ queryKey: ['order', orderId, basePath] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Duyệt trả hàng thất bại'
+      toast.error(message)
+    },
+  })
+
+  // Mutation for Rejecting Return
+  const rejectReturnMutation = useMutation({
+    mutationFn: (reason: string) => shipmentService.rejectReturn(order?.shipmentId as number, reason),
+    onSuccess: () => {
+      toast.success('Đã từ chối trả hàng')
+      setIsRejectDialogOpen(false)
+      setRejectReason('')
+      queryClient.invalidateQueries({ queryKey: ['order', orderId, basePath] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Từ chối trả hàng thất bại'
+      toast.error(message)
+    },
+  })
 
   if (isLoading) {
     return (
@@ -242,6 +292,98 @@ export function OrderDetailContent({ orderId, basePath }: OrderDetailContentProp
 
   return (
     <div className='flex flex-col gap-6 w-full mx-auto pb-10'>
+      {/* 0. RETURN REQUEST ALERT */}
+      {order.returnRequested && order.shipmentStatus !== 'RETURN_APPROVED' && order.shipmentStatus !== 'RETURNED' && (
+        <Alert variant='destructive' className='bg-red-50 border-red-200 text-red-900 animate-in fade-in slide-in-from-top-4 duration-500'>
+          <AlertTriangle className='h-5 w-5 text-red-600' />
+          <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 w-full'>
+            <div>
+              <AlertTitle className='font-bold text-red-900'>Yêu cầu trả hàng từ khách hàng</AlertTitle>
+              <AlertDescription className='text-red-700 mt-1'>
+                Lý do: <span className='font-semibold'>"{order.returnReason || 'Không có lý do cụ thể'}"</span>
+              </AlertDescription>
+            </div>
+            <div className='flex items-center gap-2 shrink-0'>
+              <Button 
+                variant='outline'
+                size='sm' 
+                className='bg-white border-red-200 text-red-700 hover:bg-red-50 font-bold'
+                onClick={() => setIsRejectDialogOpen(true)}
+                disabled={approveReturnMutation.isPending || rejectReturnMutation.isPending}
+              >
+                Từ chối
+              </Button>
+              <Button 
+                size='sm' 
+                className='bg-red-600 hover:bg-red-700 text-white shadow-sm font-bold'
+                onClick={() => approveReturnMutation.mutate()}
+                disabled={approveReturnMutation.isPending || rejectReturnMutation.isPending}
+              >
+                {approveReturnMutation.isPending ? (
+                  <Loader2 className='w-4 h-4 animate-spin mr-2' />
+                ) : (
+                  <CheckSquare className='w-4 h-4 mr-2' />
+                )}
+                Duyệt Trả Hàng
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      )}
+
+      {/* REJECT RETURN DIALOG */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Từ chối yêu cầu trả hàng</DialogTitle>
+            <DialogDescription>
+              Vui lòng nhập lý do từ chối yêu cầu trả hàng của khách hàng.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='py-4'>
+            <Textarea
+              placeholder='Nhập lý do từ chối...'
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className='min-h-[100px]'
+            />
+          </div>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setIsRejectDialogOpen(false)}>
+              Hủy
+            </Button>
+            <Button 
+              className='bg-red-600 hover:bg-red-700 text-white' 
+              onClick={() => rejectReturnMutation.mutate(rejectReason)}
+              disabled={rejectReturnMutation.isPending || !rejectReason.trim()}
+            >
+              {rejectReturnMutation.isPending && <Loader2 className='w-4 h-4 animate-spin mr-2' />}
+              Xác nhận từ chối
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {order.shipmentStatus === 'RETURN_APPROVED' && (
+        <Alert className='bg-purple-50 border-purple-200 text-purple-900'>
+          <RotateCcw className='h-5 w-5 text-purple-600' />
+          <AlertTitle className='font-bold'>Đang chờ Shipper lấy hàng hoàn</AlertTitle>
+          <AlertDescription className='text-purple-700'>
+            Đơn hàng đã được duyệt trả hàng. Shipper sẽ đến lấy hàng và trả về kho.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {order.shipmentStatus === 'RETURNED' && (
+        <Alert className='bg-slate-50 border-slate-200 text-slate-900'>
+          <CheckCircle2 className='h-5 w-5 text-slate-600' />
+          <AlertTitle className='font-bold'>Đã hoàn trả thành công</AlertTitle>
+          <AlertDescription className='text-slate-600'>
+            Đơn hàng đã được shipper trả về kho và cập nhật tồn kho.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* 1. HEADER */}
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
         <div className='flex items-center gap-4 flex-wrap'>

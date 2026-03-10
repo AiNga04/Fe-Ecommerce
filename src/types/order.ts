@@ -14,6 +14,10 @@ export interface Order {
   code: string
   totalPrice: number
   status: 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELED' | 'COMPLETED'
+  shipmentId: number
+  shipmentStatus: string | null
+  returnRequested: boolean | null
+  returnReason?: string
   paymentMethod: string
   paymentStatus: string
   shippingFee: number

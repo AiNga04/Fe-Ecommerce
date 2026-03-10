@@ -75,8 +75,16 @@ export function OrdersPageContent({ basePath }: OrdersPageContentProps) {
     }
   }
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
+  const getStatusLabel = (order: any) => {
+    if (order.returnRequested && order.shipmentStatus !== 'RETURN_APPROVED' && order.shipmentStatus !== 'RETURNED') {
+      return 'Yêu cầu trả hàng'
+    }
+
+    if (order.shipmentStatus === 'RETURN_APPROVED') return 'Duyệt trả hàng'
+    if (order.shipmentStatus === 'RETURNED') return 'Đã hoàn trả'
+    if (order.shipmentStatus === 'FAILED') return 'Giao thất bại'
+
+    switch (order.status) {
       case 'PENDING':
         return 'Chờ xác nhận'
       case 'CONFIRMED':
@@ -90,13 +98,24 @@ export function OrdersPageContent({ basePath }: OrdersPageContentProps) {
       case 'CANCELED':
         return 'Đã hủy'
       default:
-        return status
+        return order.status
     }
   }
 
   // Status Badge Styles manually for better control if badge variant isn't enough
-  const getBadgeClassName = (status: string) => {
-    switch (status) {
+  const getBadgeClassName = (order: any) => {
+    if (order.returnRequested && order.shipmentStatus !== 'RETURN_APPROVED' && order.shipmentStatus !== 'RETURNED') {
+      return 'bg-red-100 text-red-700 hover:bg-red-200 border-red-200'
+    }
+
+    if (order.shipmentStatus === 'RETURN_APPROVED') {
+      return 'bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200'
+    }
+    if (order.shipmentStatus === 'RETURNED') {
+      return 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
+    }
+
+    switch (order.status) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200'
       case 'CONFIRMED':
@@ -229,10 +248,10 @@ export function OrdersPageContent({ basePath }: OrdersPageContentProps) {
                       variant='secondary'
                       className={cn(
                         'font-medium shadow-none border',
-                        getBadgeClassName(order.status),
+                        getBadgeClassName(order),
                       )}
                     >
-                      {getStatusLabel(order.status)}
+                      {getStatusLabel(order)}
                     </Badge>
                   </TableCell>
                   <TableCell className='text-right'>

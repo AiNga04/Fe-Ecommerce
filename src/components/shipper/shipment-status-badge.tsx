@@ -32,7 +32,7 @@ const statusConfig: Record<ShipmentStatus, { label: string; className: string }>
     className: 'bg-rose-50 text-rose-600 border-rose-100',
   },
   [ShipmentStatus.RETURN_APPROVED]: {
-    label: 'Duyệt trả hàng',
+    label: 'Chờ lấy hàng hoàn',
     className: 'bg-purple-50 text-purple-600 border-purple-100',
   },
   [ShipmentStatus.RETURNED]: {

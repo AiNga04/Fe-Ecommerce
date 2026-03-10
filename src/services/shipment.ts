@@ -116,4 +116,21 @@ export const shipmentService = {
   markReturned: (shipmentId: number | string, data: ShipmentFailRequest) => {
     return http.patch<IBackendRes<ShipmentInfo>>(`${SHIPMENT_PATH}/${shipmentId}/returned`, data)
   },
+  userRequestReturn: (orderId: number | string, reason: string) => {
+    return http.post<IBackendRes<ShipmentInfo>>(`${SHIPMENT_PATH}/${orderId}/request-return`, {
+      reason,
+    })
+  },
+  approveReturn: (shipmentId: number | string) => {
+    return http.patch<IBackendRes<ShipmentInfo>>(
+      `${SHIPMENT_PATH}/${shipmentId}/approve-return`,
+      {},
+    )
+  },
+  rejectReturn: (shipmentId: number | string, reason: string) => {
+    return http.patch<IBackendRes<ShipmentInfo>>(
+      `${SHIPMENT_PATH}/${shipmentId}/reject-return`,
+      reason,
+    )
+  },
 }

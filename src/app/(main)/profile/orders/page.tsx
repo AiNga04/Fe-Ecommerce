@@ -11,6 +11,7 @@ import { User } from '@/types/user'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
 import { reviewService } from '@/services/review'
+import { shipmentService } from '@/services/shipment'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -42,13 +43,16 @@ import {
   Calendar,
   Package,
   CreditCard,
-  MapPin,
   Loader2,
   ShoppingBag,
   CheckCircle,
   MessageSquare,
+  RotateCcw,
+  AlertTriangle,
+  MapPin,
 } from 'lucide-react'
 import { OrderReviewDialog } from '@/components/reviews/order-review-dialog'
+import { Textarea } from '@/components/ui/textarea'
 
 const STATUS_TABS = [
   { label: 'Tất cả', value: 'ALL' },
@@ -79,7 +83,10 @@ export default function OrderHistoryPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [confirmId, setConfirmId] = useState<number | null>(null)
 
-  // Review Dialog State
+  // Return Request State
+  const [returnOrderId, setReturnOrderId] = useState<number | null>(null)
+  const [returnReason, setReturnReason] = useState('')
+
   const [reviewOrderInfo, setReviewOrderInfo] = useState<{
     orderId: number
     productId: number
@@ -227,8 +234,56 @@ export default function OrderHistoryPage() {
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const handleRequestReturn = async () => {
+    if (!returnOrderId || !returnReason.trim()) {
+      toast.error('Vui lòng nhập lý do trả hàng')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      const res = await shipmentService.userRequestReturn(returnOrderId, returnReason)
+      if (res.data.success) {
+        toast.success('Đã gửi yêu cầu trả hàng thành công')
+        setReturnOrderId(null)
+        setReturnReason('')
+        fetchData()
+      } else {
+        toast.error(res.data.message || 'Gửi yêu cầu thất bại')
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Có lỗi xảy ra khi gửi yêu cầu')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const getStatusBadge = (order: Order) => {
+    if (order.returnRequested) {
+      return (
+        <Badge variant='outline' className='bg-orange-50 text-orange-700 border-orange-200'>
+          Đang yêu cầu trả hàng
+        </Badge>
+      )
+    }
+
+    if (order.shipmentStatus === 'RETURN_APPROVED') {
+       return (
+        <Badge variant='outline' className='bg-purple-50 text-purple-700 border-purple-200'>
+          Chờ lấy hàng hoàn
+        </Badge>
+      )
+    }
+
+    if (order.shipmentStatus === 'RETURNED') {
+       return (
+        <Badge variant='outline' className='bg-red-50 text-red-700 border-red-200'>
+          Đã hoàn trả
+        </Badge>
+      )
+    }
+
+    switch (order.status) {
       case 'PENDING':
         return (
           <Badge variant='outline' className='bg-yellow-50 text-yellow-700 border-yellow-200'>
@@ -250,13 +305,19 @@ export default function OrderHistoryPage() {
       case 'DELIVERED':
         return (
           <Badge variant='outline' className='bg-green-50 text-green-700 border-green-200'>
+            Giao hàng thành công
+          </Badge>
+        )
+      case 'COMPLETED':
+        return (
+          <Badge variant='outline' className='bg-emerald-50 text-emerald-700 border-emerald-200 font-bold'>
             Hoàn thành
           </Badge>
         )
       case 'CANCELED':
         return <Badge variant='destructive'>Đã hủy</Badge>
       default:
-        return <Badge variant='secondary'>{status}</Badge>
+        return <Badge variant='secondary'>{order.status}</Badge>
     }
   }
 
@@ -364,7 +425,7 @@ export default function OrderHistoryPage() {
                         <div className='space-y-1'>
                           <div className='flex items-center gap-3'>
                             <span className='font-bold text-slate-900 text-sm'>#{order.code}</span>
-                            {getStatusBadge(order.status)}
+                            {getStatusBadge(order)}
                           </div>
                           <div className='flex items-center text-xs text-slate-500 gap-1.5'>
                             <Calendar className='w-3 h-3' />
@@ -375,20 +436,31 @@ export default function OrderHistoryPage() {
                             })}
                           </div>
                         </div>
-                        <div className='flex items-center gap-3'>
-                          {getPaymentBadge(order.paymentStatus)}
-                          {order.status === 'DELIVERED' && (
-                            <Button
-                              size='sm'
-                              variant='outline'
-                              className='bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 h-8'
-                              onClick={() => setConfirmId(order.id)}
-                            >
-                              <CheckCircle className='w-3.5 h-3.5 mr-1' />
-                              Đã nhận hàng
-                            </Button>
-                          )}
-                        </div>
+                          <div className='flex items-center gap-3'>
+                            {getPaymentBadge(order.paymentStatus)}
+                            {order.status === 'DELIVERED' && !order.returnRequested && (
+                              <div className='flex items-center gap-2'>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  className='bg-green-50 text-green-700 border-green-200 hover:bg-green-100 font-medium h-8'
+                                  onClick={() => setConfirmId(order.id)}
+                                >
+                                  <CheckCircle className='w-3.5 h-3.5 mr-1.5' />
+                                  Xác nhận đã nhận hàng
+                                </Button>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  className='bg-red-50 text-red-600 border-red-100 hover:bg-red-100 font-medium h-8'
+                                  onClick={() => setReturnOrderId(order.id)}
+                                >
+                                  <RotateCcw className='w-3.5 h-3.5 mr-1.5' />
+                                  Trả hàng
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                       </div>
 
                       {/* Order Items */}
@@ -524,6 +596,7 @@ export default function OrderHistoryPage() {
             </div>
 
             {/* Pagination Footer */}
+            {/* Pagination Footer */}
             <div className='px-6 md:px-8 py-4 border-t border-slate-100 bg-slate-50/50'>
               <div className='flex flex-col-reverse sm:flex-row items-center justify-between gap-4'>
                 <div className='flex items-center gap-2 text-sm text-muted-foreground'>
@@ -602,9 +675,62 @@ export default function OrderHistoryPage() {
                   <AlertDialogCancel>Chưa nhận được</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleConfirmReceived}
-                    className='bg-green-600 hover:bg-green-700 text-white'
+                    className='bg-green-600 hover:bg-green-700 text-white shadow-sm'
                   >
                     {isProcessing ? 'Đang xử lý...' : 'Đã nhận được hàng'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Return Request Dialog */}
+            <AlertDialog
+              open={!!returnOrderId}
+              onOpenChange={(open: boolean) => {
+                if (!open) {
+                  setReturnOrderId(null)
+                  setReturnReason('')
+                }
+              }}
+            >
+              <AlertDialogContent className='max-w-md'>
+                <AlertDialogHeader className='items-center text-center'>
+                  <div className='p-3 bg-red-100 text-red-600 rounded-full mb-2'>
+                    <AlertTriangle className='h-8 w-8' />
+                  </div>
+                  <AlertDialogTitle className='text-xl'>Yêu cầu trả hàng</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Bạn đang yêu cầu trả lại đơn hàng này. Vui lòng cung cấp lý do chi tiết để chúng
+                    tôi có thể xử lý yêu cầu sớm nhất.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <div className='py-4'>
+                  <Textarea
+                    placeholder='Nhập lý do trả hàng (ví dụ: Hàng bị lỗi, không đúng mô tả...)'
+                    className='min-h-[120px] focus:ring-red-200 border-slate-200'
+                    value={returnReason}
+                    onChange={(e) => setReturnReason(e.target.value)}
+                  />
+                  <p className='text-xs text-muted-foreground mt-2 italic'>
+                    * Yêu cầu trả hàng sẽ được Admin xét duyệt trước khi Shipper đến lấy hàng.
+                  </p>
+                </div>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleRequestReturn}
+                    disabled={isProcessing || !returnReason.trim()}
+                    className='bg-red-600 hover:bg-red-700 text-white shadow-sm'
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Đang gửi...
+                      </>
+                    ) : (
+                      'Gửi yêu cầu trả hàng'
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
