@@ -8,6 +8,7 @@ import { User, UserUpdateRequest, UserUpdateProfileRequest } from '@/types/user'
 import { ShipperProfileSidebar } from '@/components/shipper/shipper-profile-sidebar'
 import { ProfileForm } from '@/components/profile/profile-form'
 import { ChangePasswordForm } from '@/components/profile/change-password-form'
+import { ChangeEmailForm } from '@/components/profile/change-email-form'
 import { LoadingOverlay } from '@/components/common/loading-overlay'
 
 export default function ShipperProfilePage() {
@@ -114,6 +115,7 @@ export default function ShipperProfilePage() {
 
         <div className='md:col-span-8 lg:col-span-9 space-y-6'>
           <ProfileForm user={user} onSubmit={handleUpdateProfile} isUpdating={isUpdating} />
+          <ChangeEmailForm currentEmail={user?.email} />
           <ChangePasswordForm />
         </div>
       </div>

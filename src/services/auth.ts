@@ -3,7 +3,13 @@ import { type RegisterRequest } from '@/schemas/auth/register'
 import type { User } from '@/schemas/user/user'
 import { http, setIsLoggingOut } from '@/lib/http'
 import { type IBackendRes } from '@/types/glubal'
-import { ChangePasswordRequest } from '@/types/auth'
+import {
+  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangeEmailRequest,
+  ResendActivationRequest,
+} from '@/types/auth'
 import { removeRefreshTokenCookie } from '@/lib/refresh-token-client'
 import { useAuthStore } from '@/store/auth'
 
@@ -23,9 +29,17 @@ export const authService = {
     } finally {
       useAuthStore.getState().clear()
       await removeRefreshTokenCookie()
-      setIsLoggingOut(false) // Reset after done (though usually we redirect)
+      setIsLoggingOut(false)
     }
   },
   changePassword: (payload: ChangePasswordRequest) =>
     http.post<IBackendRes<unknown>>(`${AUTH_PATH}/change-password`, payload),
+  forgotPassword: (payload: ForgotPasswordRequest) =>
+    http.post<IBackendRes<unknown>>(`${AUTH_PATH}/forgot-password`, payload),
+  resetPassword: (payload: ResetPasswordRequest) =>
+    http.post<IBackendRes<unknown>>(`${AUTH_PATH}/reset-password`, payload),
+  changeEmail: (payload: ChangeEmailRequest) =>
+    http.post<IBackendRes<unknown>>(`${AUTH_PATH}/change-email`, payload),
+  resendActivation: (payload: ResendActivationRequest) =>
+    http.post<IBackendRes<unknown>>(`${AUTH_PATH}/activate/resend`, payload),
 }

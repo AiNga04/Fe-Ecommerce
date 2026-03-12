@@ -31,6 +31,8 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null)
+  const [isResendingActivation, setIsResendingActivation] = useState(false)
   const {
     register,
     handleSubmit,
@@ -45,7 +47,25 @@ export function LoginForm() {
   const queryClient = useQueryClient()
   const setAccessToken = useAuthStore((state) => state.setAccessToken)
 
+  const handleResendActivation = async () => {
+    if (!pendingEmail) return
+    setIsResendingActivation(true)
+    try {
+      const res = await authService.resendActivation({ email: pendingEmail })
+      if (res.data.success) {
+        toast.success('Email kích hoạt đã được gửi lại. Vui lòng kiểm tra hộp thư.')
+      } else {
+        toast.error(res.data.message || 'Không thể gửi lại email kích hoạt')
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra')
+    } finally {
+      setIsResendingActivation(false)
+    }
+  }
+
   const onSubmit = async (values: LoginFormValues) => {
+    setPendingEmail(null)
     try {
       const { data } = await authService.login(values)
       const payload = data.data as LoginResponse
@@ -75,12 +95,48 @@ export function LoginForm() {
     } catch (error: any) {
       const message =
         error?.response?.data?.message || error?.message || 'Đăng nhập thất bại, thử lại'
+      const statusCode = error?.response?.status
+
+      // Check for PENDING account (403 or message contains activation-related text)
+      if (
+        statusCode === 403 ||
+        message.toLowerCase().includes('chưa kích hoạt') ||
+        message.toLowerCase().includes('pending') ||
+        message.toLowerCase().includes('activate')
+      ) {
+        setPendingEmail(values.email)
+      }
+
       toast.error(message)
     }
   }
 
   return (
     <div className='w-full max-w-md mx-auto lg:mx-0'>
+      {/* Pending Activation Banner */}
+      {pendingEmail && (
+        <div className='mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl'>
+          <div className='flex items-start gap-3'>
+            <Mail className='w-5 h-5 text-amber-600 shrink-0 mt-0.5' />
+            <div className='flex-1'>
+              <p className='text-sm font-semibold text-amber-900'>
+                Tài khoản chưa được kích hoạt
+              </p>
+              <p className='text-xs text-amber-700 mt-1'>
+                Vui lòng kiểm tra email <span className='font-bold'>{pendingEmail}</span> để kích hoạt tài khoản.
+              </p>
+              <button
+                onClick={handleResendActivation}
+                disabled={isResendingActivation}
+                className='mt-2 text-sm font-bold text-amber-800 hover:text-amber-900 underline underline-offset-4 transition-colors disabled:opacity-50'
+              >
+                {isResendingActivation ? 'Đang gửi...' : 'Gửi lại email kích hoạt'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header for Mobile only */}
       <div className='lg:hidden space-y-4 mb-8 text-center'>
         <h1 className='text-4xl font-bold tracking-tight text-slate-900'>Chào Mừng Trở Lại</h1>
@@ -121,6 +177,15 @@ export function LoginForm() {
           {errors.password && (
             <p className='text-sm text-red-500 font-medium'>{errors.password.message}</p>
           )}
+        </div>
+
+        <div className='flex justify-end -mt-1'>
+          <Link
+            href={Routers.FORGOT_PASSWORD}
+            className='text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors'
+          >
+            Quên mật khẩu?
+          </Link>
         </div>
 
         <Button
