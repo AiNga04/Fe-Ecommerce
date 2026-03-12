@@ -14,7 +14,7 @@ export const revalidate = 3600 // Revalidate every hour
 export default async function Home() {
   const { data } = await productService.getProducts({
     page: 0,
-    size: 4,
+    size: 28,
     sort: 'createdAt,desc',
   })
   const latestProducts = data?.data || []
