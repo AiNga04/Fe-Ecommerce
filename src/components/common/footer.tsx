@@ -32,16 +32,15 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Mua sắm */}
+          {/* Column 2: Khám phá */}
           <div className='space-y-5'>
-            <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Mua sắm</h4>
+            <h4 className='font-bold text-sm uppercase tracking-wider text-white'>Khám phá</h4>
             <ul className='space-y-3 text-sm text-zinc-300'>
               {[
-                { label: 'Thời trang nữ', href: '/category/nu' },
-                { label: 'Thời trang nam', href: '/category/nam' },
-                { label: 'Phụ kiện nổi bật', href: '/category/phu-kien' },
-                { label: 'Sale Off', href: '/promotions' },
-                { label: 'Bộ sưu tập mới', href: '/products' },
+                { label: 'Trang chủ', href: '/' },
+                { label: 'Tất cả sản phẩm', href: '/products' },
+                { label: 'Về chúng tôi', href: '/about' },
+                { label: 'Tin tức thời trang', href: '/news' },
               ].map((item) => (
                 <li key={item.label}>
                   <Link
@@ -63,7 +62,6 @@ export function Footer() {
                 { label: 'Hướng dẫn mua hàng', href: '/guides' },
                 { label: 'Chính sách đổi trả', href: '/policies' },
                 { label: 'Liên hệ chúng tôi', href: '/contact' },
-                { label: 'Bảo mật thông tin', href: '/policies/privacy' },
                 { label: 'Câu hỏi thường gặp', href: '/faq' },
               ].map((item) => (
                 <li key={item.label}>
