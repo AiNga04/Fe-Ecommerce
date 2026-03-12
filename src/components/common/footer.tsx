@@ -40,7 +40,6 @@ export function Footer() {
                 { label: 'Trang chủ', href: '/' },
                 { label: 'Tất cả sản phẩm', href: '/products' },
                 { label: 'Về chúng tôi', href: '/about' },
-                { label: 'Tin tức thời trang', href: '/news' },
               ].map((item) => (
                 <li key={item.label}>
                   <Link

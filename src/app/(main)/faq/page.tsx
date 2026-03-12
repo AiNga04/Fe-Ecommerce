@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Metadata } from 'next'
-import { HelpCircle, ChevronDown, Search } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { HelpCircle, ChevronDown, Search, ArrowRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 const faqCategories = [
@@ -85,20 +86,24 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className='border border-slate-200 rounded-xl overflow-hidden transition-all hover:border-slate-300'>
+    <div
+      className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+        isOpen ? 'border-slate-300 shadow-md bg-white' : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm'
+      }`}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='w-full flex items-center justify-between gap-4 p-5 text-left'
+        className='w-full flex items-center justify-between gap-4 p-6 text-left'
       >
-        <span className='font-semibold text-slate-900'>{question}</span>
+        <span className='font-bold text-slate-900'>{question}</span>
         <ChevronDown
           className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-48 pb-5' : 'max-h-0'}`}
+        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-48 pb-6' : 'max-h-0'}`}
       >
-        <p className='px-5 text-sm text-slate-500 leading-relaxed'>{answer}</p>
+        <p className='px-6 text-sm text-slate-500 leading-relaxed'>{answer}</p>
       </div>
     </div>
   )
@@ -119,49 +124,76 @@ export default function FaqPage() {
     .filter((cat) => cat.questions.length > 0)
 
   return (
-    <div className='min-h-screen bg-white'>
+    <main className='flex flex-col w-full min-h-screen'>
       {/* Hero */}
-      <section className='bg-slate-950 text-white py-20'>
-        <div className='container max-w-10xl mx-auto px-4 text-center'>
-          <div className='inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6'>
-            <HelpCircle className='w-4 h-4' />
-            <span className='text-sm font-medium'>FAQ</span>
-          </div>
-          <h1 className='text-4xl md:text-5xl font-bold tracking-tight mb-4'>
-            Câu hỏi thường gặp
-          </h1>
-          <p className='text-lg text-slate-300 max-w-2xl mx-auto mb-8'>
+      <section className='relative w-full py-28 bg-slate-900 overflow-hidden'>
+        <div className='absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black' />
+        <div className='container mx-auto max-w-10xl relative z-10 px-4 md:px-6 text-center'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className='inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-5 py-2 mb-8'
+          >
+            <HelpCircle className='w-4 h-4 text-orange-400' />
+            <span className='text-sm font-medium text-white'>FAQ</span>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className='text-4xl md:text-6xl font-bold tracking-tighter text-white mb-6'
+          >
+            Câu hỏi <span className='text-orange-400'>thường gặp</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className='text-lg md:text-xl text-slate-300 font-light max-w-2xl mx-auto leading-relaxed mb-10'
+          >
             Tìm câu trả lời nhanh cho những thắc mắc phổ biến.
-          </p>
+          </motion.p>
 
           {/* Search */}
-          <div className='max-w-md mx-auto relative'>
-            <Search className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400' />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className='max-w-lg mx-auto relative'
+          >
+            <Search className='absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400' />
             <Input
               placeholder='Tìm kiếm câu hỏi...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='h-14 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-slate-400 pl-12 text-base backdrop-blur-sm focus-visible:ring-white/30'
+              className='h-14 bg-white/10 border-white/20 rounded-full text-white placeholder:text-slate-400 pl-14 text-base backdrop-blur-sm focus-visible:ring-white/30'
             />
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* FAQ Content */}
-      <section className='py-20'>
-        <div className='container max-w-3xl mx-auto px-4'>
+      <section className='py-24 bg-white'>
+        <div className='container mx-auto max-w-10xl px-4 md:px-6'>
           {filteredCategories.length === 0 ? (
-            <div className='text-center py-16'>
-              <HelpCircle className='w-12 h-12 text-slate-300 mx-auto mb-4' />
-              <p className='text-lg font-semibold text-slate-900'>Không tìm thấy kết quả</p>
-              <p className='text-slate-500 mt-1'>Thử tìm kiếm với từ khóa khác</p>
+            <div className='text-center py-20'>
+              <HelpCircle className='w-16 h-16 text-slate-200 mx-auto mb-6' />
+              <p className='text-2xl font-bold text-slate-900'>Không tìm thấy kết quả</p>
+              <p className='text-slate-500 mt-2 text-lg font-light'>Thử tìm kiếm với từ khóa khác</p>
             </div>
           ) : (
-            <div className='space-y-10'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-12'>
               {filteredCategories.map((category, catIndex) => (
-                <div key={catIndex}>
-                  <h2 className='text-xl font-bold text-slate-900 mb-4 flex items-center gap-2'>
-                    <span className='w-1.5 h-6 bg-slate-900 rounded-full' />
+                <motion.div
+                  key={catIndex}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: catIndex * 0.1 }}
+                >
+                  <h2 className='text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3'>
+                    <div className='h-8 w-1.5 bg-orange-500 rounded-full' />
                     {category.name}
                   </h2>
                   <div className='space-y-3'>
@@ -169,28 +201,39 @@ export default function FaqPage() {
                       <FaqItem key={qIndex} question={q.q} answer={q.a} />
                     ))}
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* Contact CTA */}
-      <section className='py-16 bg-slate-50'>
-        <div className='container max-w-10xl mx-auto px-4 text-center'>
-          <h2 className='text-2xl font-bold text-slate-900 mb-4'>Chưa tìm thấy câu trả lời?</h2>
-          <p className='text-slate-500 mb-8 max-w-lg mx-auto'>
+      {/* CTA */}
+      <section className='py-24 bg-slate-50'>
+        <div className='container mx-auto max-w-10xl px-4 md:px-6 text-center'>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className='text-3xl md:text-4xl font-bold text-slate-900 mb-4'
+          >
+            Chưa tìm thấy câu trả lời?
+          </motion.h2>
+          <p className='text-lg text-slate-500 mb-10 max-w-xl mx-auto font-light'>
             Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp bạn.
           </p>
-          <Link
-            href='/contact'
-            className='inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all active:scale-[0.98]'
+          <Button
+            size='lg'
+            className='bg-slate-900 hover:bg-black text-white min-w-[200px] h-14 text-base font-semibold rounded-full group'
+            asChild
           >
-            Liên hệ hỗ trợ
-          </Link>
+            <Link href='/contact' className='flex items-center gap-2'>
+              Liên hệ hỗ trợ
+              <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
+            </Link>
+          </Button>
         </div>
       </section>
-    </div>
+    </main>
   )
 }
