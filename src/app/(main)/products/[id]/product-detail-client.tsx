@@ -165,16 +165,16 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         </div>
         {/* Gallery Thumbnails */}
         {allImages.length > 1 && (
-          <div className='flex gap-4 overflow-x-auto pb-2 scrollbar-hide'>
+          <div className='flex gap-3 py-2 scrollbar-hide'>
             {allImages.map((img) => (
               <button
                 key={img.id}
                 onClick={() => setSelectedImage(img.url)}
                 className={cn(
-                  'relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border transition-all',
+                  'relative h-20 w-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200',
                   selectedImage === img.url
-                    ? 'border-primary ring-2 ring-primary ring-offset-2'
-                    : 'border-transparent hover:border-gray-300 opacity-70 hover:opacity-100',
+                    ? 'border-primary shadow-md shadow-primary/20 scale-105'
+                    : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-300',
                 )}
               >
                 <Image
